@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMMANUEL_TONTINE — Configuration</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Styles spécifiques à la page config ── */
+        .config-layout {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        @media (max-width: 800px) {
+            .config-layout {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .config-sidebar {
+                flex: none !important;
+                width: 100% !important;
+                margin-bottom: 1rem;
+            }
+            .config-tabs {
+                flex-direction: row !important;
+                overflow-x: auto;
+                scrollbar-width: none;
+                gap: 8px;
+                padding-bottom: 4px;
+            }
+            .config-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            .config-tab {
+                white-space: nowrap;
+                border-left: none !important;
+                border-bottom: 3px solid transparent;
+                padding: 8px 14px !important;
+            }
+            .config-tab.active {
+                border-bottom-color: #d4af37 !important;
+                background: rgba(212, 175, 55, 0.08) !important;
+            }
+        }
+        .config-sidebar {
+            flex: 0 0 240px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .config-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .config-tab {
+            padding: 12px 16px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: normal;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            text-align: left;
+        }
+        .config-tab:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        .config-tab.active {
+            background: rgba(212,175,55,0.1);
+            color: #d4af37;
+            border-left-color: #d4af37;
+            font-weight: bold;
+        }
+        .config-content {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
+        }
+        .config-panel { display: none; }
+        .config-panel.active { display: block; }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 1rem;
+        }
+        .form-row input,
+        .form-row select {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        .form-row select option { background: #1a1a1a; color: #fff; }
+        .form-row input:focus,
+        .form-row select:focus { border-color: #d4af37; outline: none; }
+
+        .btn-add {
+            padding: 10px 20px;
+            background: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .btn-add:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .item-list { margin-top: 1.2rem; }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+        .item-row:last-child { border-bottom: none; }
+        .item-info { flex: 1; }
+        .item-info strong { display: block; margin-bottom: 2px; }
+        .item-info small { color: rgba(255,255,255,0.45); }
+        .badge-nature {
+            background: rgba(243,156,18,0.15);
+            color: #f39c12;
+            border: 1px solid rgba(243,156,18,0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        .badge-financier {
+            background: rgba(46,204,113,0.12);
+            color: #2ecc71;
+            border: 1px solid rgba(46,204,113,0.25);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        /* Badge pour les caisses à parts */
+        .badge-parts {
+            background: rgba(155,89,182,0.15);
+            color: #9b59b6;
+            border: 1px solid rgba(155,89,182,0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        .btn-del {
+            background: rgba(214,48,49,0.15);
+            border: 1px solid rgba(214,48,49,0.3);
+            color: #e74c3c;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .btn-del:hover { background: rgba(214,48,49,0.3); }
+
+        /* Règlement - Éditeur Riche */
+        .editor-container {
+            margin-top: 1rem;
+            background: #111;
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .editor-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            align-items: center;
+        }
+        .editor-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding-right: 8px;
+            margin-right: 4px;
+        }
+        .editor-group:last-child {
+            border-right: none;
+            padding-right: 0;
+            margin-right: 0;
+        }
+        .editor-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #ccc;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .editor-btn:hover {
+            background: rgba(212,175,55,0.15);
+            border-color: #d4af37;
+            color: #fff;
+        }
+        .editor-select {
+            background: #222;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #eee;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+        .editor-select:focus {
+            border-color: #d4af37;
+        }
+        #reglement-editor {
+            width: 100%;
+            min-height: 400px;
+            padding: 30px;
+            font-size: 1.15rem;
+            line-height: 1.95;
+            color: rgba(255,255,255,0.95);
+            box-sizing: border-box;
+            outline: none;
+            overflow-y: auto;
+            background: #181818;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            letter-spacing: 0.3px;
+        }
+        #reglement-editor p {
+            margin-bottom: 1.2rem;
+        }
+        #reglement-editor h1, #reglement-editor h2, #reglement-editor h3 {
+            color: #d4af37;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+        #reglement-editor h1 { font-size: 1.6rem; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 8px; }
+        #reglement-editor h2 { font-size: 1.4rem; }
+        #reglement-editor h3 { font-size: 1.2rem; }
+        #reglement-editor ul { padding-left: 24px; margin: 1.2rem 0; list-style-type: disc; }
+        #reglement-editor ol { padding-left: 24px; margin: 1.2rem 0; list-style-type: decimal; }
+        #reglement-editor li { margin-bottom: 0.6rem; line-height: 1.85; }
+
+        .save-confirm {
+            display: inline-block;
+            margin-left: 12px;
+            color: #2ecc71;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .save-confirm.show { opacity: 1; }
+
+        /* Champ incrément conditionnel */
+        #ev-increment-group { display: none; }
+        /* Champ valeur de part conditionnel */
+        #parts-group { display: none; }
+
+        /* Modal Style Premium */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: #111;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" onclick="history.back(); return false;" class="back-link">⬅️ Dashboard</a>
+    <header>
+        <h1>Configuration — <span class="asso-name">ASSOCIATION</span> 🛠️</h1>
+        <p><strong>Pilotez l'intégralité de l'application sans toucher au code.</strong></p>
+    </header>
+
+    <nav class="menu-grid">
+        <a href="index.html"   class="menu-item"><span>🏠</span><span>Dashboard</span></a>
+        <a href="membres.html" class="menu-item"><span>👥</span><span>Membres</span></a>
+        <a href="session.html" class="menu-item"><span>⚖️</span><span>Session</span></a>
+        <a href="finances.html" class="menu-item"><span>💰</span><span>Finances</span></a>
+        <a href="config.html"  class="menu-item"><span>🛠️</span><span>Configuration</span></a>
+    </nav>
+
+    <main class="dashboard">
+
+        <!-- ── ONGLETS ── -->
+        <div class="config-layout">
+            <div class="config-sidebar">
+                <div class="config-tabs">
+                    <div class="config-tab active" onclick="switchTab('identite')">🏷️ Identité</div>
+                    <div class="config-tab" onclick="switchTab('validation-membres')">👥 Validation Membres</div>
+                    <div class="config-tab" onclick="switchTab('caisses')">🏦 Caisses</div>
+                    <div class="config-tab" onclick="switchTab('amendes')">⚖️ Infractions</div>
+                    <div class="config-tab" onclick="switchTab('reglement')">📜 Règlement</div>
+                    <div class="config-tab" onclick="switchTab('paiements')">✅ Paiements</div>
+                    <div class="config-tab" onclick="switchTab('depenses')">💸 Dépenses</div>
+                    <div class="config-tab" onclick="switchTab('session')">📆 Réunions</div>
+                    <div class="config-tab" onclick="switchTab('fin-session')">🏆 Fin de Session</div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="config-content">
+        <!-- ══════════════════════════════════════════
+             PANNEAU 6 — VALIDATION DES PAIEMENTS
+        ══════════════════════════════════════════ -->
+        <div id="panel-paiements" class="config-panel card">
+            <h3>✅ Validation des Paiements</h3>
+            <p><small>Validez les déclarations faites par les membres via Orange Money ou MTN.</small></p>
+            <div class="item-list" id="liste-paiements-admin" style="margin-top:1.5rem">
+                <!-- Injecté par JS -->
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 9 — GESTION DES DÉPENSES (ADMIN)
+        ══════════════════════════════════════════ -->
+        <div id="panel-depenses" class="config-panel card">
+            <h3>💸 Enregistrement des Dépenses</h3>
+            <p><small>Enregistrez les sorties de fonds de l'association en spécifiant le motif, le montant et la caisse d'origine.</small></p>
+            
+            <div class="form-row-multi" style="margin-top:1.5rem; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+                <div style="flex: 2; min-width: 200px;">
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">✍️ Raison / Motif de la Dépense :</label>
+                    <input type="text" id="depense-motif" placeholder="Ex: Achat de fournitures de bureau" style="width:100%; box-sizing:border-box;">
+                </div>
+                <div style="flex: 1; min-width: 130px;">
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">💸 Montant (FCFA) :</label>
+                    <input type="number" id="depense-montant" placeholder="Montant" style="width:100%; box-sizing:border-box;">
+                </div>
+                <div style="flex: 1.5; min-width: 180px;">
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">🏦 Caisse d'Origine :</label>
+                    <select id="depense-caisse" style="width:100%; box-sizing:border-box; height: 38px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 0 10px;">
+                        <option value="">Sélectionner une caisse...</option>
+                    </select>
+                </div>
+                <button class="btn-add" onclick="enregistrerDepense()" style="height: 38px;">Ajouter</button>
+            </div>
+
+            <h4 style="margin-top:2rem; color:#d4af37; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">📜 Historique des Dépenses de la Session</h4>
+            <div class="item-list" id="liste-depenses" style="margin-top:1rem; max-height: 350px; overflow-y: auto;">
+                <!-- Injecté par JS -->
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 7 — VALIDATION DES MEMBRES
+        ══════════════════════════════════════════ -->
+        <div id="panel-validation-membres" class="config-panel card">
+            <h3>👥 Membres à valider</h3>
+            <p><small>Approuvez les nouvelles inscriptions pour leur permettre l'accès à l'application.</small></p>
+            <div class="item-list" id="liste-membres-pending" style="margin-top:1.5rem">
+                <!-- Injecté par JS -->
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 1 — IDENTITÉ DE L'ASSOCIATION
+        ══════════════════════════════════════════ -->
+        <div id="panel-identite" class="config-panel active card">
+            <h3>🏷️ Identité de l'Association</h3>
+            <p><small>Ce nom et son explication s'affichent sur le tableau de bord.</small></p>
+            <div class="form-row" style="margin-top:1rem; display: flex; flex-direction: column; gap: 15px; align-items: stretch;">
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">🏷️ Nom de l'Association :</label>
+                    <input type="text" id="asso-nom" placeholder="Nom de l'association (ex: APBM)" style="width:100%; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">✍️ Explication / Description de l'Association (ex: Lignée Minking) :</label>
+                    <input type="text" id="asso-explication" placeholder="Explication de l'association" style="width:100%; box-sizing:border-box;">
+                </div>
+                <button class="btn-add" onclick="enregistrerNomAsso()" style="align-self: flex-start;">Enregistrer</button>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 2 — MODULE 1 : GESTION DES CAISSES
+        ══════════════════════════════════════════ -->
+        <div id="panel-caisses" class="config-panel card">
+            <h3>🏦 Gestion des Caisses</h3>
+            <p><small>Créez les caisses de l'association. Chaque caisse génère une dette par membre à chaque session.</small></p>
+
+            <div class="form-row" style="margin-top:1.2rem">
+                <input type="text" id="caisse-nom" placeholder="Nom de la caisse (ex: Caisse Mutuelle)">
+                <select id="caisse-type" onchange="toggleIncrement()">
+                    <option value="fixe">Montant fixe</option>
+                    <option value="evolutive">Montant évolutif (+incrément)</option>
+                    <option value="parts">Par parts (membre choisit son nombre)</option>
+                </select>
+            </div>
+            <!-- Choix d'icônes pour la caisse -->
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">🏦 Choisir une Icône de caisse :</label>
+                <input type="hidden" id="caisse-icone" value="🏦">
+                <div id="caisse-icon-picker" style="display:flex; flex-wrap:wrap; gap:8px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+                    <span onclick="selectCaisseIcon(this, '🏦')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid #d4af37; background:rgba(255,255,255,0.05); transition:0.15s;">🏦</span>
+                    <span onclick="selectCaisseIcon(this, '💰')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💰</span>
+                    <span onclick="selectCaisseIcon(this, '💳')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💳</span>
+                    <span onclick="selectCaisseIcon(this, '💵')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💵</span>
+                    <span onclick="selectCaisseIcon(this, '🪙')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🪙</span>
+                    <span onclick="selectCaisseIcon(this, '💼')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💼</span>
+                    <span onclick="selectCaisseIcon(this, '🐷')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🐷</span>
+                    <span onclick="selectCaisseIcon(this, '🤝')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🤝</span>
+                    <span onclick="selectCaisseIcon(this, '🌳')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🌳</span>
+                    <span onclick="selectCaisseIcon(this, '⛪')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">⛪</span>
+                    <span onclick="selectCaisseIcon(this, '❤️')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">❤️</span>
+                    <span onclick="selectCaisseIcon(this, '🏠')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🏠</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <input type="number" id="caisse-base" placeholder="Montant de base (FCFA)" min="0">
+                <div id="ev-increment-group" style="flex:1">
+                    <input type="number" id="caisse-increment" placeholder="Incrément / session" min="0" style="width:100%">
+                </div>
+                <div id="parts-group" style="flex:1">
+                    <input type="number" id="caisse-valeur-part" placeholder="Valeur d'une part (FCFA)" min="1" style="width:100%">
+                </div>
+                <button class="btn-add" onclick="ajouterCaisse()">+ Ajouter</button>
+            </div>
+            
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 0.85rem; color: rgba(255,255,255,0.85);">
+                    <input type="checkbox" id="caisse-non-comptabilisee" style="width: auto; margin: 0; cursor: pointer; accent-color: #d4af37;">
+                    🚫 Exclure de la comptabilité globale (caisse d'accueil / pastorale reversée à l'hôte)
+                </label>
+            </div>
+
+            <div style="margin-top: 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="font-size: 0.85rem; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 6px;">
+                    🔄 Périodicité
+                </span>
+                <select id="caisse-periodicite" style="width: auto; margin-top: 0; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; outline: none; cursor: pointer; height: 36px; display: flex; align-items: center;">
+                    <option value="session">📅 Par session (réunion)</option>
+                    <option value="mensuelle">🔄 Mensuelle</option>
+                </select>
+            </div>
+
+            <div class="item-list" id="liste-caisses">
+                <!-- Injecté par JS -->
+            </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 3 — MODULE 2 : INFRACTIONS HYBRIDES
+        ══════════════════════════════════════════ -->
+        <div id="panel-amendes" class="config-panel card">
+            <h3>⚖️ Infractions & Amendes</h3>
+            <p><small>Définissez les sanctions : financières (FCFA) ou en nature (matériel à fournir).</small></p>
+
+            <div class="form-row" style="margin-top:1.2rem">
+                <input type="text" id="amende-libelle" placeholder="Libellé (ex: Retard, Absence...)">
+                <select id="amende-type" onchange="toggleAmendeValeur()">
+                    <option value="financier">💸 Montant financier</option>
+                    <option value="nature">📦 Matériel / Nature</option>
+                </select>
+            </div>
+            <!-- Choix d'icônes pour les infractions -->
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">⚠️ Choisir une Icône d'infraction :</label>
+                <input type="hidden" id="amende-icone" value="⚠️">
+                <div id="amende-icon-picker" style="display:flex; flex-wrap:wrap; gap:8px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+                    <span onclick="selectAmendeIcon(this, '⚠️')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid #d4af37; background:rgba(255,255,255,0.05); transition:0.15s;">⚠️</span>
+                    <span onclick="selectAmendeIcon(this, '⏱️')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">⏱️</span>
+                    <span onclick="selectAmendeIcon(this, '🚫')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🚫</span>
+                    <span onclick="selectAmendeIcon(this, '📦')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">📦</span>
+                    <span onclick="selectAmendeIcon(this, '📢')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">📢</span>
+                    <span onclick="selectAmendeIcon(this, '🍷')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🍷</span>
+                    <span onclick="selectAmendeIcon(this, '🍺')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🍺</span>
+                    <span onclick="selectAmendeIcon(this, '⚖️')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">⚖️</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <input type="number" id="amende-valeur-montant" placeholder="Montant en FCFA" min="0">
+                <input type="text"   id="amende-valeur-nature"  placeholder="Ex: 2 casiers de bière" style="display:none">
+                <select id="amende-caisse-destination" style="flex:1; display:block; height:38px; background:rgba(0,0,0,0.5); color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:0 10px;">
+                    <option value="">🏦 Verser dans (caisse)...</option>
+                </select>
+                <button class="btn-add" onclick="ajouterAmende()">+ Ajouter</button>
+            </div>
+
+            <div class="item-list" id="liste-amendes">
+                <!-- Injecté par JS -->
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 4 — MODULE 3 : RÈGLEMENT INTÉRIEUR
+        ══════════════════════════════════════════ -->
+        <div id="panel-reglement" class="config-panel card">
+            <h3>📜 Règlement Intérieur</h3>
+            <p><small>Rédigez ou modifiez le règlement. Il sera affiché en lecture seule pour tous les membres.</small></p>
+            <div class="editor-container">
+                <div class="editor-toolbar">
+                    <div class="editor-group">
+                        <select class="editor-select" onchange="execCmd('formatBlock', this.value); this.value='';" title="Titre / Paragraphe">
+                            <option value="" disabled selected>Style texte</option>
+                            <option value="p">Paragraphe</option>
+                            <option value="h1">Titre 1</option>
+                            <option value="h2">Titre 2</option>
+                            <option value="h3">Titre 3</option>
+                        </select>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execCmd('bold')" title="Gras"><strong>B</strong></button>
+                        <button class="editor-btn" onclick="execCmd('italic')" title="Italique"><em>I</em></button>
+                        <button class="editor-btn" onclick="execCmd('underline')" title="Souligné"><ins>U</ins></button>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execCmd('insertUnorderedList')" title="Liste à puces">• Liste</button>
+                        <button class="editor-btn" onclick="execCmd('insertOrderedList')" title="Liste ordonnée">1. Liste</button>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execCmd('justifyLeft')" title="Aligner à gauche">Align. G</button>
+                        <button class="editor-btn" onclick="execCmd('justifyCenter')" title="Centrer">Centre</button>
+                        <button class="editor-btn" onclick="execCmd('justifyRight')" title="Aligner à droite">Align. D</button>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execCmd('insertHorizontalRule')" title="Séparateur">—</button>
+                        <button class="editor-btn" onclick="execCmd('insertText', '🤝')" title="Emoji 🤝">🤝</button>
+                        <button class="editor-btn" onclick="execCmd('insertText', '🙏')" title="Emoji 🙏">🙏</button>
+                    </div>
+                </div>
+                <div id="reglement-editor" contenteditable="true"></div>
+            </div>
+            <div style="margin-top:1rem; display:flex; align-items:center">
+                <button class="btn-add" onclick="enregistrerReglement()">💾 Sauvegarder le règlement</button>
+                <span class="save-confirm" id="reglement-confirm">✓ Sauvegardé</span>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 5 — NOUVELLE RÉUNION
+        ══════════════════════════════════════════ -->
+        <div id="panel-session" class="config-panel card">
+            <h3>📆 Gestion de la Réunion Mensuelle</h3>
+            <p><strong>Cycle Global (Session) : <span id="sess-actuelle" style="color:#d4af37"></span> | Réunion Mensuelle : <span id="reunion-actuelle" style="color:#d4af37"></span></strong></p>
+            <p style="margin-top:0.5rem"><small>Configurez les paramètres de la réunion à venir. La validation génère automatiquement les dettes de toutes les caisses pour chaque membre, sans modifier le cycle global de la Session.</small></p>
+            
+            <div class="form-row" style="margin-top:1.5rem">
+                <div style="flex:1">
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">👤 Membre d'Accueil / Reçu chez :</label>
+                    <select id="session-host" style="width:100%; padding:10px; background:#222; border:1px solid rgba(255,255,255,0.1); color:#eee; border-radius:6px; outline:none;">
+                        <option value="">Sélectionner le membre hôte...</option>
+                        <!-- Peuplé par JS -->
+                    </select>
+                </div>
+                <div style="flex:1">
+                    <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:rgba(255,255,255,0.7)">📅 Date de la Réunion :</label>
+                    <input type="date" id="session-date" style="width:100%; padding:9px; background:#222; border:1px solid rgba(255,255,255,0.1); color:#eee; border-radius:6px; outline:none; font-family:inherit;">
+                </div>
+            </div>
+
+            <div style="margin-top:1.5rem">
+                <label style="display:block; margin-bottom:10px; font-size:0.85rem; color:rgba(255,255,255,0.7)">📝 Gestion des Présences (Cochez les membres présents) :</label>
+                <div id="session-attendance-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:10px; background:rgba(255,255,255,0.02); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); max-height:200px; overflow-y:auto;">
+                    <!-- Injecté par JS -->
+                </div>
+            </div>
+
+            <div style="margin-top:1.5rem; display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
+                <button class="btn-add" style="background:#d4af37; color:#000; font-weight:bold; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;" onclick="enregistrerSessionMeta()">💾 Enregistrer la Réunion (Hôte & Présences)</button>
+                <span class="save-confirm" id="session-confirm">✓ Enregistré & Répercuté sur le PV</span>
+            </div>
+
+            <button id="btn-next-reunion" class="btn-add" style="margin-top:1.5rem; opacity:0.5; cursor:not-allowed;" disabled onclick="nouvelleReunion()">🔒 Verrouillé : Validez le Procès-Verbal d'abord</button>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANNEAU 6 — CLÔTURE DE LA SESSION GLOBALE
+        ══════════════════════════════════════════ -->
+        <div id="panel-fin-session" class="config-panel card">
+            <h3>🏆 Clôture de la Session Globale</h3>
+            <p><small>Clôturez définitivement la session en cours pour archiver ce cycle et démarrer une nouvelle session de tontine pastorale.</small></p>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); padding: 20px; border-radius: 12px; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Session Actuelle</span>
+                        <div id="cloture-sess-num" style="color: #d4af37; font-size: 2.2rem; font-weight: bold; margin-top: 5px;">1</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Réunions Tenues</span>
+                        <div id="cloture-reunions-count" style="color: #2ecc71; font-size: 2.2rem; font-weight: bold; margin-top: 5px;">0</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Dettes Actives</span>
+                        <div id="cloture-dettes-count" style="color: #e74c3c; font-size: 2.2rem; font-weight: bold; margin-top: 5px;">0</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; margin-top: 10px;">
+                    <strong style="color: #d4af37;">📜 Règles de transition de session :</strong>
+                    <ul style="padding-left: 20px; margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                        <li><strong>Dettes :</strong> Toutes les dettes non réglées de la Session actuelle sont automatiquement reportées et restent exigibles pour la nouvelle Session.</li>
+                        <li><strong>Caisses :</strong> Les soldes et avoirs cumulés des caisses de l'association sont conservés et reportés dans la nouvelle Session.</li>
+                        <li><strong>Cotisations Évolutives :</strong> La nouvelle Session calculera automatiquement les cotisations avec l'incrément défini (ex : Session 2 = Base + Incrément).</li>
+                        <li><strong>Cycle des Réunions :</strong> Le numéro de réunion sera réinitialisé à 1 pour le nouveau cycle.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+                <button class="btn-add" onclick="cloturerSessionActuelle()" style="background: linear-gradient(135deg, #d4af37 0%, #aa841a 100%); color: #000; font-size: 1.05rem; font-weight: bold; padding: 15px 30px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(212,175,55,0.2);">
+                    🏆 Clôturer la Session Actuelle et Ouvrir la Suivante
+                </button>
+                <div id="cloture-success-message" style="color: #2ecc71; font-size: 0.9rem; font-weight: bold; margin-top: 10px; display: none;">
+                    ✓ Session clôturée avec succès ! Bienvenue dans la Session suivante.
+                </div>
+            </div>
+        </div>
+
+            </div> <!-- Fin config-content -->
+        </div> <!-- Fin config-layout -->
+
+    </main>
+
+    <footer><small>EMMANUEL_TONTINE — administration de l'association.</small></footer>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        auth.checkAdmin();
+
+        // ── Navigation par onglets ──
+        function switchTab(name) {
+            document.querySelectorAll('.config-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.config-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            // Gestion des onglets spécifiques
+            if (name === 'fin-session') {
+                renderStatusCloture();
+            } else if (name === 'depenses') {
+                chargerDepensesConfig();
+            }
+        }
+
+        // ── Affichage conditionnel incrément / parts ──
+        function toggleIncrement() {
+            const type = document.getElementById('caisse-type').value;
+            document.getElementById('ev-increment-group').style.display =
+                type === 'evolutive' ? 'flex' : 'none';
+            document.getElementById('parts-group').style.display =
+                type === 'parts' ? 'flex' : 'none';
+            // Adapter le placeholder du champ base selon le type
+            const baseInput = document.getElementById('caisse-base');
+            if (type === 'parts') {
+                baseInput.placeholder = 'Valeur d\'une part (FCFA)';
+            } else {
+                baseInput.placeholder = 'Montant de base (FCFA)';
+            }
+        }
+
+        // ── Affichage conditionnel valeur amende ──
+        function toggleAmendeValeur() {
+            const type = document.getElementById('amende-type').value;
+            const isFinancier = type === 'financier';
+            document.getElementById('amende-valeur-montant').style.display =
+                isFinancier ? 'block' : 'none';
+            document.getElementById('amende-valeur-nature').style.display =
+                type === 'nature' ? 'block' : 'none';
+            const destSelect = document.getElementById('amende-caisse-destination');
+            if (destSelect) {
+                destSelect.style.display = isFinancier ? 'block' : 'none';
+            }
+        }
+
+        function peuplerSelectCaissesAmende() {
+            const select = document.getElementById('amende-caisse-destination');
+            if (select) {
+                select.innerHTML = '<option value="">🏦 Verser dans (caisse)...</option>';
+                configCaisses.forEach(c => {
+                    if (c.exclureCompta) return; // Exclure les caisses hors comptabilité globale
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nom;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        /**
+         * Charge la configuration initiale de l'association depuis les données persistées.
+         * Remplit les champs d'identité (nom, explication), de session et de caisses.
+         * @returns {void}
+         */
+        function loadConfig() {
+            appliquerNomAsso();
+            document.getElementById('asso-nom').value = associationData.nomAsso || '';
+            const explicationEl = document.getElementById('asso-explication');
+            if (explicationEl) {
+                explicationEl.value = associationData.explicationAsso || '';
+            }
+            document.getElementById('sess-actuelle').textContent = associationData.sessionActuelle || 1;
+            const reunionDisplay = document.getElementById('reunion-actuelle');
+            if (reunionDisplay) reunionDisplay.textContent = associationData.reunionActuelle || 1;
+            // Charger le règlement en HTML
+            document.getElementById('reglement-editor').innerHTML = reglementInterieur;
+            renderListeCaisses();
+            peuplerSelectCaissesAmende();
+            renderListeAmendes();
+            renderPaiements();
+            renderPendingUsers();
+
+            // Peupler le menu déroulant des hôtes avec la liste des membres actifs
+            const hostSelect = document.getElementById('session-host');
+            if (hostSelect) {
+                hostSelect.innerHTML = '<option value="">Sélectionner le membre hôte...</option>';
+                const allMembers = associationData.membres;
+                allMembers.forEach(m => {
+                    const option = document.createElement('option');
+                    option.value = m.nom;
+                    option.textContent = m.nom;
+                    hostSelect.appendChild(option);
+                });
+                
+                // Pré-sélection à partir des métadonnées
+                const metaKey = 'TONTINE_META_REUNION_' + (associationData.reunionActuelle || 1);
+                try {
+                    const savedMeta = JSON.parse(localStorage.getItem(metaKey));
+                    if (savedMeta && savedMeta.host) {
+                        hostSelect.value = savedMeta.host;
+                    }
+                } catch(e) {}
+            }
+            
+            // Peupler la liste des présences
+            const attendanceList = document.getElementById('session-attendance-list');
+            if (attendanceList) {
+                attendanceList.innerHTML = '';
+                
+                const metaKey = 'TONTINE_META_REUNION_' + (associationData.reunionActuelle || 1);
+                let savedAttendees = [];
+                try {
+                    const savedMeta = JSON.parse(localStorage.getItem(metaKey));
+                    if (savedMeta && savedMeta.attendees) {
+                        savedAttendees = savedMeta.attendees;
+                    }
+                } catch(e) {}
+
+                associationData.membres.forEach(m => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:0.9rem;';
+                    const isChecked = savedAttendees.includes(m.nom) ? 'checked' : '';
+                    div.innerHTML = '<input type="checkbox" id="att-' + m.id + '" ' + isChecked + '> <label for="att-' + m.id + '" style="cursor:pointer; color:#fff">' + m.nom + '</label>';
+                    attendanceList.appendChild(div);
+                });
+            }
+            
+            // Initialiser la date à aujourd'hui ou charger celle existante
+            const dateInput = document.getElementById('session-date');
+            if (dateInput) {
+                const metaKey = 'TONTINE_META_REUNION_' + (associationData.reunionActuelle || 1);
+                let savedDate = '';
+                try {
+                    const savedMeta = JSON.parse(localStorage.getItem(metaKey));
+                    if (savedMeta && savedMeta.date) {
+                        savedDate = savedMeta.date;
+                    }
+                } catch(e) {}
+
+                if (savedDate) {
+                    dateInput.value = savedDate;
+                } else if (associationData.lastSessionDate) {
+                    dateInput.value = associationData.lastSessionDate;
+                } else {
+                    dateInput.valueAsDate = new Date();
+                }
+            }
+
+            // Déverrouiller le bouton si le PV est déjà validé
+            const pvKey = 'TONTINE_PV_REUNION_' + (associationData.reunionActuelle || 1);
+            if (localStorage.getItem(pvKey)) {
+                const btnNext = document.getElementById('btn-next-reunion');
+                if (btnNext) {
+                    btnNext.disabled = false;
+                    btnNext.style.opacity = '1';
+                    btnNext.style.cursor = 'pointer';
+                    btnNext.innerHTML = '🚀 Valider et Passer à la Réunion Suivante';
+                }
+            }
+            renderStatusCloture();
+        }
+
+        // ── MODULE 7 : Validation des Membres ──
+        function renderPendingUsers() {
+            const list = document.getElementById('liste-membres-pending');
+            if (!list) return;
+            const pending = auth.getPendingUsers();
+
+            if (!pending.length) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.4); padding:1rem 0">Aucune inscription en attente.</p>';
+                return;
+            }
+
+            list.innerHTML = pending.map(u => 
+                '<div class="item-row">' +
+                    '<div class="item-info">' +
+                        '<strong>' + u.username + '</strong>' +
+                        '<small>Question de sécurité: ' + u.question + '</small>' +
+                    '</div>' +
+                    '<button class="btn-add" onclick="validerMembre(\'' + u.username + '\')">✅ Approuver / Valider</button>' +
+                '</div>'
+            ).join('');
+        }
+
+        function validerMembre(username) {
+            // 1. Approuver l'accès (Auth)
+            if (auth.approveUser(username)) {
+                // 2. Ajouter officiellement à la liste des membres si pas déjà présent (App)
+                if (typeof ajouterMembre === 'function') {
+                    ajouterMembre(username);
+                }
+                alert('Le compte de ' + username + ' a été activé avec succès !');
+                renderPendingUsers();
+            } else {
+                alert('Erreur lors de la validation.');
+            }
+        }
+
+        // ── MODULE 6 : Validation des Paiements ──
+        function renderPaiements() {
+            const list = document.getElementById('liste-paiements-admin');
+            if (!list) return;
+            const paiements = JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+            const pending = paiements.filter(p => p.status === 'pending');
+
+            if (!pending.length) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.4); padding:1rem 0">Aucune déclaration en attente.</p>';
+                return;
+            }
+
+            list.innerHTML = pending.map(p => 
+                '<div class="item-row">' +
+                    '<div class="item-info">' +
+                        '<strong>' + p.user + ' — ' + formatAmount(p.amount) + '</strong>' +
+                        '<small>' + p.operator + ' | Réf: ' + p.reference + ' | Motif: ' + p.motif + ' | Date: ' + p.date + '</small>' +
+                    '</div>' +
+                    '<button class="btn-add" onclick="validerPaiement(' + p.id + ')">✅ Approuver le Paiement</button>' +
+                '</div>'
+            ).join('');
+        }
+
+        function validerPaiement(id) {
+            let paiements = JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+            const index = paiements.findIndex(p => p.id === id);
+            if (index === -1) return;
+
+            const p = paiements[index];
+            p.status = 'validated';
+            localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(paiements));
+
+            // 2. NOTIFICATION PUBLIQUE SUR LE MUR (Transparence)
+            let wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            wallMessages.push({
+                user: 'SYSTÈME',
+                text: '✅ Transaction validée : Le versement de **' + p.user.toUpperCase() + '** a été approuvé par l\'Administrateur.',
+                date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            });
+            
+            if (wallMessages.length > 50) wallMessages.shift();
+            localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+
+            renderPaiements();
+            alert('Déclaration de paiement validée avec succès ! (Note : Veuillez enregistrer ce montant manuellement dans les cotisations du membre).');
+        }
+
+        // ── MODULE 1 : Rendu liste des caisses ──
+        function renderListeCaisses() {
+            const el = document.getElementById('liste-caisses');
+            if (!configCaisses.length) {
+                el.innerHTML = '<p style="color:rgba(255,255,255,0.4); padding:1rem 0">Aucune caisse configurée.</p>';
+                return;
+            }
+            el.innerHTML = configCaisses.map(c => {
+                let detail, badgeLabel, badgeClass;
+                if (c.type === 'evolutive') {
+                    detail     = 'Base : ' + formatAmount(c.base) + ' · +' + formatAmount(c.increment) + '/session';
+                    badgeLabel = 'Évolutive';
+                    badgeClass = 'badge-nature';
+                } else if (c.type === 'parts') {
+                    detail     = 'Valeur d\'une part : ' + formatAmount(c.valeurPart) + ' · membre choisit ses parts';
+                    badgeLabel = '🔢 Par parts';
+                    badgeClass = 'badge-parts';
+                } else {
+                    detail     = 'Cotisation fixe : ' + formatAmount(c.cotisation);
+                    badgeLabel = 'Fixe';
+                    badgeClass = 'badge-financier';
+                }
+                const montantSession = c.type === 'parts'
+                    ? formatAmount(c.valeurPart) + ' × parts'
+                    : formatAmount(calculerCotisationCaisse(c.id));
+
+                const perioLabel = c.periodicite === 'mensuelle'
+                    ? ' <span style="color:#d4af37; font-size:0.72rem; font-weight:bold; background:rgba(212,175,55,0.15); padding:2px 6px; border-radius:10px;">🔄 Mensuelle</span>'
+                    : ' <span style="color:#3498db; font-size:0.72rem; font-weight:bold; background:rgba(52,152,219,0.15); padding:2px 6px; border-radius:10px;">📅 Session</span>';
+
+                const comptaLabel = c.exclureCompta 
+                    ? ' <span style="color:#e67e22; font-size:0.72rem; font-weight:bold; background:rgba(230,126,34,0.15); padding:2px 6px; border-radius:10px;">🚫 Hors Compta</span>' 
+                    : '';
+
+                return '<div class="item-row">' +
+                    '<div class="item-info">' +
+                        '<strong>' + (c.icone || '🏦') + ' ' + c.nom + perioLabel + comptaLabel + '</strong>' +
+                        '<small>' + detail + ' — Session actuelle : <strong style="color:#d4af37">' + montantSession + '</strong></small>' +
+                    '</div>' +
+                    '<span class="' + badgeClass + '">' + badgeLabel + '</span>' +
+                    '<div style="display:flex; gap:8px;">' +
+                        '<button class="editor-btn" style="background:rgba(212,175,55,0.1); border-color:#d4af37; color:#fff; padding:6px 12px; font-size:0.8rem; border-radius:6px; cursor:pointer;" onclick="ouvrirModalModifierCaisse(' + c.id + ')">📝 Modifier</button>' +
+                        '<button class="btn-del" onclick="deleteCaisse(' + c.id + ')">Supprimer</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            // Garder le sélecteur d'infractions synchrone
+            if (typeof peuplerSelectCaissesAmende === 'function') {
+                peuplerSelectCaissesAmende();
+            }
+        }
+
+
+        function selectCaisseIcon(el, icon) {
+            document.getElementById('caisse-icone').value = icon;
+            document.querySelectorAll('#caisse-icon-picker span').forEach(s => s.style.borderColor = 'transparent');
+            el.style.borderColor = '#d4af37';
+        }
+        function selectAmendeIcon(el, icon) {
+            document.getElementById('amende-icone').value = icon;
+            document.querySelectorAll('#amende-icon-picker span').forEach(s => s.style.borderColor = 'transparent');
+            el.style.borderColor = '#d4af37';
+        }
+        window.selectEditCaisseIcon = function(el, icon) {
+            document.getElementById('edit-caisse-icone').value = icon;
+            document.querySelectorAll('#edit-caisse-icon-picker span').forEach(s => s.style.borderColor = 'transparent');
+            if (el) el.style.borderColor = '#d4af37';
+        };
+
+        function ajouterCaisse() {
+            const nom  = document.getElementById('caisse-nom').value.trim();
+            const type = document.getElementById('caisse-type').value;
+            const base = Number(document.getElementById('caisse-base').value);
+            const inc  = Number(document.getElementById('caisse-increment').value) || 0;
+            const exclure = document.getElementById('caisse-non-comptabilisee').checked;
+            const periodicite = document.getElementById('caisse-periodicite').value || 'session';
+            const icone = document.getElementById('caisse-icone').value || '🏦';
+            
+            if (!nom) return alert('Saisissez un nom pour la caisse.');
+            if (isNaN(base) || base < 0) return alert('Saisissez un montant valide.');
+            if (type === 'parts' && base <= 0) return alert('La valeur d\'une part doit être supérieure à 0.');
+            
+            creerCaisse(nom, type, base, inc, exclure, periodicite, icone);
+            document.getElementById('caisse-nom').value = '';
+            document.getElementById('caisse-base').value = '';
+            document.getElementById('caisse-increment').value = '';
+            document.getElementById('caisse-non-comptabilisee').checked = false;
+            document.getElementById('caisse-periodicite').value = 'session';
+            renderListeCaisses();
+        }
+
+        window.deleteCaisse = function(id) {
+            if (!confirm('Supprimer cette caisse ? Les dettes déjà générées ne seront pas effacées.')) return;
+            supprimerCaisse(id);
+            renderListeCaisses();
+        };
+
+
+        // ── MODULE 2 : Rendu liste des amendes ──
+        function renderListeAmendes() {
+            const el = document.getElementById('liste-amendes');
+            if (!configAmendes.length) {
+                el.innerHTML = '<p style="color:rgba(255,255,255,0.4); padding:1rem 0">Aucune infraction configurée.</p>';
+                return;
+            }
+            el.innerHTML = configAmendes.map(a => {
+                const valAff = a.typeAmende === 'financier'
+                    ? formatAmount(a.valeur)
+                    : '📦 ' + a.valeur;
+                const badgeClass = a.typeAmende === 'financier' ? 'badge-financier' : 'badge-nature';
+                const badgeLabel = a.typeAmende === 'financier' ? '💸 Financier' : '📦 Nature';
+                
+                let caisseLabel = '';
+                if (a.typeAmende === 'financier' && a.caisseId) {
+                    const caisse = configCaisses.find(c => c.id.toString() === a.caisseId.toString());
+                    if (caisse) {
+                        caisseLabel = ` <small style="color:#d4af37;">(Versé dans : ${caisse.nom})</small>`;
+                    }
+                }
+
+                return '<div class="item-row">' +
+                    '<div class="item-info">' +
+                        '<strong>' + (a.icone || '⚠️') + ' ' + a.libelle + caisseLabel + '</strong>' +
+                        '<small>Sanction : ' + valAff + '</small>' +
+                    '</div>' +
+                    '<span class="' + badgeClass + '">' + badgeLabel + '</span>' +
+                    '<button class="btn-del" onclick="deleteAmende(' + a.id + ')">Supprimer</button>' +
+                '</div>';
+            }).join('');
+        }
+
+        function ajouterAmende() {
+            const libelle = document.getElementById('amende-libelle').value.trim();
+            const type    = document.getElementById('amende-type').value;
+            const caisseId = document.getElementById('amende-caisse-destination').value;
+            const valeur  = type === 'financier'
+                ? document.getElementById('amende-valeur-montant').value
+                : document.getElementById('amende-valeur-nature').value.trim();
+            const icone = document.getElementById('amende-icone').value || '⚠️';
+
+            if (!libelle) return alert('Saisissez un libellé pour l\'infraction.');
+            if (!valeur && valeur !== 0) return alert('Saisissez la valeur de la sanction.');
+            if (type === 'financier' && !caisseId) return alert('Veuillez sélectionner la caisse de destination de l\'amende.');
+
+            creerAmende(libelle, type, valeur, caisseId, icone);
+            document.getElementById('amende-libelle').value = '';
+            document.getElementById('amende-valeur-montant').value = '';
+            document.getElementById('amende-valeur-nature').value = '';
+            document.getElementById('amende-caisse-destination').value = '';
+            renderListeAmendes();
+        }
+
+        window.deleteAmende = function(id) {
+            if (!confirm('Supprimer cette infraction ?')) return;
+            supprimerAmende(id);
+            renderListeAmendes();
+        };
+
+        // ── MODULE 3 : Règlement ──
+        window.execCmd = function(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('reglement-editor').focus();
+        };
+
+        function enregistrerReglement() {
+            // Sauvegarder le contenu HTML
+            const html = document.getElementById('reglement-editor').innerHTML;
+            sauvegarderReglement(html);
+            const confirm = document.getElementById('reglement-confirm');
+            confirm.classList.add('show');
+            setTimeout(() => confirm.classList.remove('show'), 2500);
+        }
+
+        // ── MODULE 6 : Clôture de Session ──
+        /**
+         * Affiche les statistiques globales pour la clôture de la session en cours.
+         * @returns {void}
+         */
+        function renderStatusCloture() {
+            const currentSession = associationData.sessionActuelle || 1;
+            let activeDettesCount = 0;
+            if (associationData.membres) {
+                associationData.membres.forEach(m => {
+                    if (m.operations) activeDettesCount += m.operations.filter(op => op.statut === 'du').length;
+                });
+            }
+            const reunionsCount = associationData.reunionsHistorique ? associationData.reunionsHistorique.length : 0;
+            
+            document.getElementById('cloture-sess-num').textContent = currentSession;
+            document.getElementById('cloture-reunions-count').textContent = reunionsCount;
+            document.getElementById('cloture-dettes-count').textContent = activeDettesCount;
+        }
+
+        /**
+         * Clôture la session, incrémente le compteur, et réinitialise les réunions.
+         * @returns {void}
+         */
+        function cloturerSessionActuelle() {
+            const cur = associationData.sessionActuelle || 1;
+            if (!confirm(`⚠️ Êtes-vous sûr de vouloir clôturer la Session ${cur} ?`)) return;
+            
+            const next = cur + 1;
+            associationData.sessionActuelle = next;
+            associationData.reunionActuelle = 1;
+            associationData.lastSessionHost = '';
+            associationData.lastSessionDate = '';
+            
+            let wall = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            wall.push({
+                user: 'SYSTÈME',
+                text: `🏆 **FIN DE SESSION ${cur}** 🏆<br>La Session ${cur} est close ! Les dettes sont reportées. ✨ **Ouverture de la SESSION ${next}** ✨`,
+                date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            });
+            localStorage.setItem('TONTINE_MUR', JSON.stringify(wall));
+            sauvegarder();
+            loadConfig();
+            alert(`🎉 La Session ${cur} a été clôturée.\nBienvenue dans la Session ${next} !`);
+        }
+
+        /**
+         * Enregistre les métadonnées de la séance (hôte, date, présences)
+         * et répercute automatiquement ces informations dans le PV en cours.
+         * @returns {void}
+         */
+        function enregistrerSessionMeta() {
+            const hostSelect = document.getElementById('session-host');
+            const host = hostSelect ? hostSelect.value : '';
+            
+            const dateInput = document.getElementById('session-date');
+            const rawDateVal = dateInput ? dateInput.value : '';
+            const dateVal = rawDateVal ? new Date(rawDateVal).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+            
+            const attendanceBoxes = document.querySelectorAll('#session-attendance-list input[type="checkbox"]:checked');
+            const attendees = Array.from(attendanceBoxes).map(cb => {
+                const label = cb.parentNode.querySelector('label');
+                return label ? label.textContent.trim() : '';
+            }).filter(Boolean);
+            
+            if (!host) {
+                alert("⚠️ Erreur : Vous devez obligatoirement choisir un Membre d'Accueil (Hôte).");
+                return;
+            }
+            if (attendees.length === 0) {
+                alert("⚠️ Erreur : Vous devez cocher au moins un membre présent dans la liste des présences.");
+                return;
+            }
+
+            const currentReunion = associationData.reunionActuelle || 1;
+            
+            // 1. Sauvegarder dans associationData et localStorage
+            associationData.lastSessionHost = host;
+            associationData.lastSessionDate = rawDateVal;
+            sauvegarder();
+            
+            const metaKey = 'TONTINE_META_REUNION_' + currentReunion;
+            localStorage.setItem(metaKey, JSON.stringify({ host: host, date: rawDateVal, attendees: attendees }));
+
+            // 2. Mettre à jour ou créer le PV
+            const pvKey = 'TONTINE_PV_REUNION_' + currentReunion;
+            const existingPv = localStorage.getItem(pvKey);
+            
+            let deliberations = "<p>Rédigez les points abordés ici...</p>";
+            if (existingPv) {
+                // Tenter d'extraire les délibérations existantes pour préserver le travail de l'utilisateur
+                const match = existingPv.match(/<strong>💬 Délibérations :<\/strong><\/p>([\s\S]*)$/i);
+                if (match && match[1]) {
+                    deliberations = match[1];
+                }
+            }
+            
+            const attendeesList = attendees.map(name => name.toUpperCase()).join(', ');
+            
+            const newPv = 
+                `<h3 style="color:#d4af37; margin-bottom:15px;">📜 Compte-rendu de la Réunion Mensuelle #${currentReunion}</h3>` +
+                `<p><strong>📅 Date :</strong> ${dateVal}</p>` +
+                `<p><strong>🏠 Hôte :</strong> ${host}</p>` +
+                `<p><strong>👥 Présences :</strong> ${attendeesList}</p>` +
+                `<p><strong>💬 Délibérations :</strong></p>` + deliberations;
+                
+            localStorage.setItem(pvKey, newPv);
+            
+            // Mettre à jour l'éditeur si chargé
+            const editor = document.getElementById('fin-session-editor');
+            if (editor) {
+                editor.innerHTML = newPv;
+            }
+
+            // Afficher le message de succès sous le nouveau bouton d'enregistrement
+            const confirmSpan = document.getElementById('session-confirm');
+            if (confirmSpan) {
+                confirmSpan.classList.add('show');
+                setTimeout(() => confirmSpan.classList.remove('show'), 3000);
+            }
+        }
+
+        // ── Identité ──
+        /**
+         * Enregistre le nom et l'explication/description de l'association dans les données persistées.
+         * Met à jour les éléments de l'affichage global.
+         * @returns {void}
+         */
+        function enregistrerNomAsso() {
+            const nom = document.getElementById('asso-nom').value.trim();
+            const explicationEl = document.getElementById('asso-explication');
+            const explication = explicationEl ? explicationEl.value.trim() : '';
+            if (!nom) return alert('Le nom ne peut pas être vide.');
+            associationData.nomAsso = nom;
+            associationData.explicationAsso = explication;
+            sauvegarder();
+            appliquerNomAsso();
+            alert('Identité de l\'association enregistrée avec succès !');
+        }
+
+        // ── Dépenses Module ──
+        /**
+         * Charge la liste des caisses dans le sélecteur de dépenses et rafraîchit l'affichage.
+         * @returns {void}
+         */
+        function chargerDepensesConfig() {
+            const select = document.getElementById('depense-caisse');
+            if (select) {
+                select.innerHTML = '<option value="">Sélectionner une caisse...</option>';
+                configCaisses.forEach(c => {
+                    const solde = associationData.comptabilite[c.id] || 0;
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = `${c.nom} (Solde: ${formatAmount(solde)})`;
+                    select.appendChild(opt);
+                });
+            }
+            renderListeDepenses();
+        }
+
+        /**
+         * Affiche l'historique des dépenses de la session.
+         * @returns {void}
+         */
+        function renderListeDepenses() {
+            const el = document.getElementById('liste-depenses');
+            if (!el) return;
+            const depenses = associationData.depenses || [];
+            if (!depenses.length) {
+                el.innerHTML = '<p style="color:rgba(255,255,255,0.4); padding:1rem 0; text-align:center;">Aucune dépense.</p>';
+                return;
+            }
+            el.innerHTML = depenses.slice().reverse().map(d => {
+                const caisse = configCaisses.find(c => c.id === d.caisseId);
+                const name = caisse ? caisse.nom : 'Caisse Inconnue';
+                return `<div class="item-row"><div class="item-info"><strong>${d.motif}</strong>` +
+                    `<small>${name} | ${new Date(d.date).toLocaleString('fr-FR')}</small></div>` +
+                    `<span style="color:#e74c3c; font-weight:bold;">-${formatAmount(d.montant)}</span>` +
+                    `<button class="btn-del" onclick="supprimerDepense('${d.id}')">Supprimer</button></div>`;
+            }).join('');
+        }
+
+        /**
+         * Enregistre une nouvelle dépense et déduit le montant de la caisse concernée.
+         * @returns {void}
+         */
+        function enregistrerDepense() {
+            const motif = document.getElementById('depense-motif').value.trim();
+            const montantVal = document.getElementById('depense-montant').value;
+            const caisseId = document.getElementById('depense-caisse').value;
+            if (!motif || !montantVal || Number(montantVal) <= 0 || !caisseId) return alert("Champs invalides.");
+            
+            const montant = Number(montantVal);
+            const soldeActuel = associationData.comptabilite[caisseId] || 0;
+            if (soldeActuel < montant && !confirm("⚠️ Solde insuffisant. Confirmer ?")) return;
+            
+            if (!associationData.depenses) associationData.depenses = [];
+            associationData.depenses.push({ id: 'dep_' + Date.now(), motif, montant, caisseId, date: new Date().toISOString() });
+            associationData.comptabilite[caisseId] = soldeActuel - montant;
+            
+            sauvegarder();
+            document.getElementById('depense-motif').value = '';
+            document.getElementById('depense-montant').value = '';
+            document.getElementById('depense-caisse').value = '';
+            chargerDepensesConfig();
+            alert("✓ Dépense enregistrée.");
+        }
+
+        /**
+         * Supprime une dépense existante et recrédite la caisse d'origine.
+         * @param {string} id - L'identifiant unique de la dépense
+         * @returns {void}
+         */
+        function supprimerDepense(id) {
+            if (!confirm("Annuler cette dépense et recréditer la caisse ?")) return;
+            if (!associationData.depenses) associationData.depenses = [];
+            const idx = associationData.depenses.findIndex(d => d.id === id);
+            if (idx === -1) return;
+            const dep = associationData.depenses[idx];
+            
+            associationData.comptabilite[dep.caisseId] = (associationData.comptabilite[dep.caisseId] || 0) + dep.montant;
+            associationData.depenses.splice(idx, 1);
+            sauvegarder();
+            chargerDepensesConfig();
+            alert("✓ Dépense annulée.");
+        }
+
+        // ── MODULE 1 : Édition de caisse ──
+        window.ouvrirModalModifierCaisse = function(id) {
+            const c = configCaisses.find(item => item.id === id);
+            if (!c) return alert("Caisse introuvable.");
+
+            document.getElementById('edit-caisse-id').value = c.id;
+            document.getElementById('edit-caisse-nom').value = c.nom;
+            document.getElementById('edit-caisse-type').value = c.type;
+            document.getElementById('edit-caisse-base').value = c.type === 'parts' ? c.valeurPart : c.base;
+            document.getElementById('edit-caisse-increment').value = c.increment || 0;
+            document.getElementById('edit-caisse-non-comptabilisee').checked = !!c.exclureCompta;
+            document.getElementById('edit-caisse-periodicite').value = c.periodicite || 'session';
+            document.getElementById('edit-caisse-icone').value = c.icone || '🏦';
+            
+            // Retrouver l'élément actif dans le picker d'édition
+            const targetSpan = document.querySelector(`#edit-caisse-icon-picker span[data-icon="${c.icone || '🏦'}"]`) || document.querySelector(`#edit-caisse-icon-picker span`);
+            selectEditCaisseIcon(targetSpan, c.icone || '🏦');
+
+            toggleEditIncrement();
+            document.getElementById('caisse-edit-modal').classList.add('active');
+        };
+
+        window.fermerModalModifierCaisse = function() {
+            document.getElementById('caisse-edit-modal').classList.remove('active');
+        };
+
+        window.toggleEditIncrement = function() {
+            const type = document.getElementById('edit-caisse-type').value;
+            const incGroup = document.getElementById('edit-ev-increment-group');
+            const lblBase = document.getElementById('lbl-edit-base');
+
+            if (type === 'evolutive') {
+                incGroup.style.display = 'block';
+                lblBase.textContent = "Montant de base (FCFA) :";
+            } else if (type === 'parts') {
+                incGroup.style.display = 'none';
+                lblBase.textContent = "Valeur d'une part (FCFA) :";
+            } else {
+                incGroup.style.display = 'none';
+                lblBase.textContent = "Cotisation fixe (FCFA) :";
+            }
+        };
+
+        window.sauvegarderModificationCaisse = function() {
+            const id = Number(document.getElementById('edit-caisse-id').value);
+            const nom = document.getElementById('edit-caisse-nom').value.trim();
+            const type = document.getElementById('edit-caisse-type').value;
+            const base = Number(document.getElementById('edit-caisse-base').value);
+            const inc = Number(document.getElementById('edit-caisse-increment').value) || 0;
+            const exclure = document.getElementById('edit-caisse-non-comptabilisee').checked;
+            const periodicite = document.getElementById('edit-caisse-periodicite').value || 'session';
+            const icone = document.getElementById('edit-caisse-icone').value || '🏦';
+
+            if (!nom) return alert("Le nom de la caisse ne peut pas être vide.");
+            if (isNaN(base) || base < 0) return alert("Saisissez un montant de base valide.");
+
+            const idx = configCaisses.findIndex(item => item.id === id);
+            if (idx === -1) return alert("Caisse introuvable.");
+
+            // Modifier les propriétés
+            configCaisses[idx].nom = nom;
+            configCaisses[idx].type = type;
+            configCaisses[idx].cotisation = type === 'parts' ? 0 : base;
+            configCaisses[idx].base = base;
+            configCaisses[idx].increment = type === 'evolutive' ? inc : 0;
+            configCaisses[idx].valeurPart = type === 'parts' ? base : 0;
+            configCaisses[idx].exclureCompta = exclure;
+            configCaisses[idx].periodicite = periodicite;
+            configCaisses[idx].icone = icone;
+
+            sauvegarderCaisses();
+            sauvegarder();
+            renderListeCaisses();
+            fermerModalModifierCaisse();
+            alert("✓ Caisse modifiée avec succès !");
+        };
+
+        window.onload = loadConfig;
+    </script>
+
+    <!-- ══════════════════════════════════════════
+         MODAL MODIFICATION CAISSE
+    ══════════════════════════════════════════ -->
+    <div id="caisse-edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fermerModalModifierCaisse()">×</button>
+            <h3 style="color:#d4af37; margin-bottom:1.5rem; text-align:left;">📝 Modifier les Paramètres de la Caisse</h3>
+            <input type="hidden" id="edit-caisse-id">
+            
+            <div style="margin-bottom:1.2rem; text-align:left;">
+                <label style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">Nom de la caisse :</label>
+                <input type="text" id="edit-caisse-nom" style="margin-top:0;">
+            </div>
+            
+            <!-- Choix d'icônes pour la caisse en modification -->
+            <div style="margin-bottom: 1.2rem; text-align:left;">
+                <label style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">🏦 Modifier l'Icône :</label>
+                <input type="hidden" id="edit-caisse-icone" value="🏦">
+                <div id="edit-caisse-icon-picker" style="display:flex; flex-wrap:wrap; gap:8px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+                    <span data-icon="🏦" onclick="selectEditCaisseIcon(this, '🏦')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🏦</span>
+                    <span data-icon="💰" onclick="selectEditCaisseIcon(this, '💰')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💰</span>
+                    <span data-icon="💳" onclick="selectEditCaisseIcon(this, '💳')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💳</span>
+                    <span data-icon="💵" onclick="selectEditCaisseIcon(this, '💵')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💵</span>
+                    <span data-icon="🪙" onclick="selectEditCaisseIcon(this, '🪙')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🪙</span>
+                    <span data-icon="💼" onclick="selectEditCaisseIcon(this, '💼')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">💼</span>
+                    <span data-icon="🐷" onclick="selectEditCaisseIcon(this, '🐷')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🐷</span>
+                    <span data-icon="🤝" onclick="selectEditCaisseIcon(this, '🤝')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🤝</span>
+                    <span data-icon="🌳" onclick="selectEditCaisseIcon(this, '🌳')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🌳</span>
+                    <span data-icon="⛪" onclick="selectEditCaisseIcon(this, '⛪')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">⛪</span>
+                    <span data-icon="❤️" onclick="selectEditCaisseIcon(this, '❤️')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">❤️</span>
+                    <span data-icon="🏠" onclick="selectEditCaisseIcon(this, '🏠')" style="cursor:pointer; font-size:1.3rem; padding:6px; border-radius:6px; border:2px solid transparent; background:rgba(255,255,255,0.02); transition:0.15s;">🏠</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom:1.2rem; text-align:left;">
+                <label style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">Type de cotisation :</label>
+                <select id="edit-caisse-type" onchange="toggleEditIncrement()" style="margin-top:0;">
+                    <option value="fixe">Montant fixe</option>
+                    <option value="evolutive">Montant évolutif (+incrément)</option>
+                    <option value="parts">Par parts (membre choisit son nombre)</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:1.2rem; text-align:left;">
+                <label id="lbl-edit-base" style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">Montant de base (FCFA) :</label>
+                <input type="number" id="edit-caisse-base" style="margin-top:0;">
+            </div>
+
+            <div id="edit-ev-increment-group" style="margin-bottom:1.2rem; text-align:left; display:none;">
+                <label style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">Incrément par session (FCFA) :</label>
+                <input type="number" id="edit-caisse-increment" style="margin-top:0;">
+            </div>
+
+            <div style="margin-bottom:1.2rem; display:flex; align-items:center; gap:8px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; font-size:0.85rem; color:rgba(255,255,255,0.85);">
+                    <input type="checkbox" id="edit-caisse-non-comptabilisee" style="width:auto; margin:0; cursor:pointer; accent-color:#d4af37;">
+                    🚫 Exclure de la comptabilité globale
+                </label>
+            </div>
+
+            <div style="margin-bottom:1.8rem; display:flex; align-items:center; gap:10px; flex-wrap:wrap; text-align:left;">
+                <span style="font-size:0.85rem; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px;">
+                    🔄 Périodicité
+                </span>
+                <select id="edit-caisse-periodicite" style="width:auto; margin-top:0; background:rgba(0,0,0,0.5); color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:6px 12px; font-size:0.85rem; outline:none; cursor:pointer; height:36px; display:flex; align-items:center;">
+                    <option value="session">📅 Par session (cycle complet)</option>
+                    <option value="mensuelle">🔄 Mensuelle (chaque réunion)</option>
+                </select>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px;">
+                <button class="editor-btn" style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.1); color:#fff; font-size:0.9rem;" onclick="fermerModalModifierCaisse()">Annuler</button>
+                <button class="btn-add" style="font-size:0.9rem; font-weight:700;" onclick="sauvegarderModificationCaisse()">💾 Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

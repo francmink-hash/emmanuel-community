@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | FINANCE</title>
+    <style>
+        .btn-retour {
+            position: fixed; top: 20px; left: 20px; z-index: 9999;
+            text-decoration: none; color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.03); padding: 8px 16px;
+            border-radius: 50px; font-size: 0.8rem; backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s;
+        }
+        .btn-retour:hover { color: #00b4d8; border-color: #00b4d8; }
+
+        :root { --bg: #0a0a0a; --card: #141414; --accent: #6366f1; --text: rgba(255, 255, 255, 0.9); --text-muted: rgba(255, 255, 255, 0.5); }
+        body { background-color: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .login-card { background: var(--card); padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        h2 { font-weight: 300; letter-spacing: 2px; margin-bottom: 2rem; color: var(--accent); }
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { flex: 1; padding: 0.8rem; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
+        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+        input, select { width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; outline: none; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+        /* Correction texte invisible dans le select question de sécurité */
+        select#s-quest { background: #1e1e1e; color: #f0f0f0; }
+        select#s-quest option { background: #1e1e1e; color: #f0f0f0; }
+        .btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 1rem; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .forgot { font-size: 0.8rem; margin-top: 1rem; display: block; color: var(--text-muted); text-decoration: none; cursor: pointer; }
+        .hidden { display: none; }
+        .error { color: #ff4d4d; font-size: 0.85rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour au Hub</a>
+<div class="login-card">
+    <h2 id="app-title">FINANCE</h2>
+    <div class="tabs" id="auth-tabs">
+        <div class="tab active" onclick="switchMode('login')">Connexion</div>
+        <div class="tab" onclick="switchMode('signup')">Inscription</div>
+    </div>
+    <div id="login-form">
+        <div class="form-group"><label>Identifiant</label><input type="text" id="l-user"></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="l-pass"></div>
+        <button class="btn" onclick="handleLogin()">SE CONNECTER</button>
+        <span class="forgot" onclick="switchMode('forgot')">Mot de passe oublié ?</span>
+    </div>
+    <div id="signup-form" class="hidden">
+        <div class="form-group"><label>Nom d'utilisateur</label><input type="text" id="s-user"></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="s-pass"></div>
+        <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="s-pass-confirm"></div>
+        <div class="form-group"><label>Question de sécurité</label>
+            <select id="s-quest">
+                <option>Quel est le nom de votre premier animal de compagnie ? 🐾</option>
+                <option>Quelle est votre ville de naissance ? 🏙️</option>
+                <option>Quel était le nom de votre première école ? 🏫</option>
+                <option>Quel est votre plat ou fruit préféré ? 🍏</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Réponse</label><input type="text" id="s-ans"></div>
+        <button class="btn" onclick="handleSignup()">CRÉER MON COMPTE</button>
+    </div>
+    <div id="forgot-form" class="hidden">
+        <div id="forgot-step-1"><div class="form-group"><label>Identifiant</label><input type="text" id="f-user"></div><button class="btn" onclick="handleForgotStep1()">VÉRIFIER</button></div>
+        <div id="forgot-step-2" class="hidden"><p id="f-question" style="color:var(--accent);"></p><div class="form-group"><label>Réponse</label><input type="text" id="f-ans"></div><div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="f-pass"></div><button class="btn" onclick="handleForgotStep2()">RÉINITIALISER</button></div>
+        <span class="forgot" onclick="switchMode('login')">Retour</span>
+    </div>
+    <div id="error-msg" class="error"></div>
+</div>
+<script src="auth.js"></script>
+<script>
+    function switchMode(mode) {
+        document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('signup-form').classList.toggle('hidden', mode !== 'signup');
+        document.getElementById('forgot-form').classList.toggle('hidden', mode !== 'forgot');
+        document.getElementById('auth-tabs').classList.toggle('hidden', mode === 'forgot');
+        document.getElementById('error-msg').innerText = '';
+    }
+    function handleLogin() {
+        const res = auth.login(document.getElementById('l-user').value, document.getElementById('l-pass').value);
+        if (res.success) window.location.href = 'index.html';
+        else document.getElementById('error-msg').innerText = res.msg;
+    }
+    function handleSignup() {
+        const pass = document.getElementById('s-pass').value;
+        const confirmPass = document.getElementById('s-pass-confirm').value;
+        if (pass !== confirmPass) {
+            document.getElementById('error-msg').innerText = "Les mots de passe ne correspondent pas.";
+            return;
+        }
+        const res = auth.signup(document.getElementById('s-user').value, pass, document.getElementById('s-quest').value, document.getElementById('s-ans').value);
+        if (res.success) { alert("Compte créé !"); switchMode('login'); }
+        else document.getElementById('error-msg').innerText = res.msg;
+    }
+    let forgotUser = "";
+    function handleForgotStep1() {
+        forgotUser = document.getElementById('f-user').value;
+        const q = auth.getQuestion(forgotUser);
+        if (q) { document.getElementById('f-question').innerText = q; document.getElementById('forgot-step-1').classList.add('hidden'); document.getElementById('forgot-step-2').classList.remove('hidden'); }
+        else document.getElementById('error-msg').innerText = "Utilisateur inconnu.";
+    }
+    function handleForgotStep2() {
+        if (auth.resetPassword(forgotUser, document.getElementById('f-ans').value, document.getElementById('f-pass').value)) { alert("Succès !"); switchMode('login'); }
+        else document.getElementById('error-msg').innerText = "Mauvaise réponse.";
+    }
+</script>
+</body>
+</html>

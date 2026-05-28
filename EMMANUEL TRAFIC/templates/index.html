@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Emmanuel Trafic — Douala</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+  <a href="../../index.html" class="btn-float left">↩ Hub</a>
+  <button type="button" class="btn-float right" onclick="auth.logout()">Déconnexion</button>
+
+  <header class="app-header">
+    <h1>🚦 Emmanuel Trafic</h1>
+    <p>Itinéraires, lieux utiles et circulation — Douala &amp; au-delà</p>
+    <span class="badge-provider">OpenStreetMap · OSRM · gratuit</span>
+  </header>
+
+  <motion.div class="container">
+    <motion.div class="tabs">
+      <button type="button" class="tab active" data-tab="trafic" onclick="switchTab('trafic')">🚗 Trafic</button>
+      <button type="button" class="tab" data-tab="lieux" onclick="switchTab('lieux')">📍 Lieux</button>
+    </motion.div>
+
+    <div class="panel active" id="panel-trafic">
+      <div class="card">
+        <label for="depart">Lieu de départ</label>
+        <input type="text" id="depart" placeholder="Ex: Akwa, Bonanjo, Douala" autocomplete="off" />
+        <label for="arrivee">Lieu d'arrivée</label>
+        <input type="text" id="arrivee" placeholder="Ex: Ndokoti, Makepe" autocomplete="off" />
+        <button type="button" class="btn-primary" onclick="consulterTrafic()" id="btn-trafic">Analyser le trajet</button>
+      </motion.div>
+      <div class="result" id="result-trafic"></motion.div>
+    </motion.div>
+
+    <div class="panel" id="panel-lieux">
+      <div class="card">
+        <label for="quartier-poi">Ville ou quartier</label>
+        <input type="text" id="quartier-poi" placeholder="Ex: Bonanjo, Douala" autocomplete="off" />
+        <label for="categorie-poi">Type de lieu</label>
+        <select id="categorie-poi">
+          <option value="Pharmacie">Pharmacie</option>
+          <option value="Hôpital">Hôpital</option>
+          <option value="Banque">Banque</option>
+          <option value="Supermarché">Supermarché</option>
+          <option value="Restaurant">Restaurant</option>
+          <option value="Station essence">Station essence</option>
+          <option value="Hôtel">Hôtel</option>
+        </select>
+        <button type="button" class="btn-primary" onclick="rechercherLieux()" id="btn-lieux">Rechercher</button>
+      </motion.div>
+      <motion.div class="result" id="result-lieux"></motion.div>
+    </motion.div>
+
+    <div id="admin-section" class="card" style="margin-top:1.5rem; display:none;">
+      <h3 style="margin-bottom:1rem;font-size:1.1rem;">⚙️ Administration</h3>
+      <div id="admin-user-list"></motion.div>
+    </motion.div>
+  </motion.div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3 id="modal-title">Titre</h3>
+      <p id="modal-text"></p>
+      <input type="text" id="modal-input" class="hidden" />
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal()">Annuler</button>
+        <button type="button" class="btn-primary" id="modal-confirm">Confirmer</button>
+      </motion.div>
+    </motion.div>
+  </motion.div>
+
+  <script src="auth.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app-page.js"></script>
+</body>
+</html>

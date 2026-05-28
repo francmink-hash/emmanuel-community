@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMMANUEL_TONTINE - Séance</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles Premium pour l'éditeur de PV Word-like */
+        .editor-container {
+            margin-top: 1rem;
+            background: #111;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .editor-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            align-items: center;
+        }
+        .editor-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding-right: 8px;
+            margin-right: 4px;
+        }
+        .editor-group:last-child {
+            border-right: none;
+            padding-right: 0;
+            margin-right: 0;
+        }
+        .editor-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .editor-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+            color: #fff;
+        }
+        #pv-editor {
+            width: 100%;
+            min-height: 380px;
+            padding: 30px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.9);
+            box-sizing: border-box;
+            outline: none;
+            overflow-y: auto;
+            background: #181818;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        /* Tableaux et listes dans l'éditeur de PV */
+        #pv-editor table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.02);
+            font-size: 0.9rem;
+        }
+        #pv-editor th, #pv-editor td {
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 10px;
+            text-align: left;
+            min-width: 50px;
+        }
+        #pv-editor th {
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+        }
+        #pv-editor ul { padding-left: 20px; margin: 10px 0; list-style-type: disc; }
+        #pv-editor ol { padding-left: 20px; margin: 10px 0; list-style-type: decimal; }
+        #pv-editor li { margin-bottom: 5px; }
+
+        .save-confirm {
+            display: inline-block;
+            margin-left: 12px;
+            color: #2ecc71;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .save-confirm.show { opacity: 1; }
+        /* ── Layout finances (Copie) ── */
+        .finances-wrapper { display: flex; flex-direction: column; max-width: 820px; margin: 0 auto; gap: 24px; align-items: stretch; width: 100%; }
+        .table-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 14px; gap: 16px; flex-wrap: wrap; }
+        .table-header-left h3 { margin: 0 0 4px; color: var(--gold); }
+        .table-header-left p { font-size: 0.78rem; margin: 0; color: var(--muted); }
+        .argent-table-block { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 200px; }
+        .argent-table-block label { font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+        #input-argent-table { width: 200px; padding: 10px 14px; margin-top: 0; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); border-radius: 10px; color: var(--gold); font-weight: 800; font-size: 1rem; text-align: right; }
+        #input-argent-table:focus { outline: none; background: rgba(212, 175, 55, 0.18); }
+        #reste-table { font-size: 0.85rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; background: rgba(212, 175, 55, 0.06); color: var(--gold); text-align: right; transition: color 0.2s; }
+        .membre-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 4px; }
+        .membre-row > div { flex: 1; }
+        .membre-row label { font-size: 0.78rem; color: var(--muted); display: block; margin-bottom: 4px; }
+        .membre-row select { margin-top: 0; padding: 10px 14px; border-radius: 10px; }
+        .btn-suivant { padding: 0 !important; margin-bottom: 0; border-radius: 50% !important; width: 42px !important; height: 42px !important; min-width: 42px; display: flex !important; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--gold) !important; background: transparent !important; color: var(--gold) !important; cursor: pointer; transition: background 0.2s, transform 0.2s; flex-shrink: 0; }
+        .btn-suivant:hover { background: rgba(212, 175, 55, 0.15) !important; transform: translateY(-1px); box-shadow: none; }
+        .ventilation-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); gap: 12px; }
+        .ventilation-row:last-child { border-bottom: none; }
+        .ventilation-row-info { flex: 1; }
+        .ventilation-row-info strong { display: block; font-size: 0.92rem; }
+        .ventilation-row-info small { font-size: 0.7rem; color: var(--muted); text-transform: capitalize; }
+        .ventilation-input { width: 130px !important; padding: 8px 12px !important; margin-top: 0 !important; text-align: right; border-radius: 8px !important; font-size: 0.9rem; }
+        .amende-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); gap: 12px; }
+        .amende-row:last-child { border-bottom: none; }
+        .amende-row-info { flex: 1; }
+        .amende-row-info strong { display: block; font-size: 0.92rem; }
+        .amende-row-info small { font-size: 0.7rem; color: var(--muted); }
+        .amende-controls { display: flex; align-items: center; gap: 8px; }
+        .nature-toggle-wrap { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--muted); cursor: pointer; user-select: none; }
+        .nature-toggle-wrap input[type="checkbox"] { width: auto; margin: 0; padding: 0; accent-color: #f39c12; cursor: pointer; }
+        .nature-badge { display: none; font-size: 0.72rem; background: rgba(243,156,18,0.15); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+        .section-label { font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 10px 4px 4px; border-top: 1px solid var(--border); margin-top: 8px; }
+        .table-footer { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+        .empty-state { text-align: center; padding: 28px 16px; color: var(--muted); font-size: 0.88rem; }
+        .empty-state span { display: block; font-size: 2rem; margin-bottom: 8px; }
+        .btn-valider { padding: 11px 28px; background: var(--gold); color: #000; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: opacity 0.2s, transform 0.2s; }
+        .btn-valider:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        /* ── Bilan Membre Dynamique ── */
+        #membre-status-panel {
+            margin-top: 15px;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            border-left: 4px solid var(--gold);
+            display: none;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-panel-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .status-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .status-col.historique {
+            grid-column: 1 / -1;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 10px;
+        }
+        .status-col h4 { margin: 0; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px;}
+        .status-item { font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; justify-content: space-between; align-items: center;}
+        .status-item:last-child { border-bottom: none; }
+        .text-danger { color: var(--danger); font-weight: bold; }
+        .text-success { color: #2ecc71; font-weight: bold; }
+        .text-info { color: #3498db; }
+        .historique-list { font-size: 0.8rem; }
+        .historique-item { color: #bdc3c7; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: rgba(255,255,255,0.02); border-radius: 4px;}
+
+        /* ── Layout Dynamique (Flexbox) ── */
+        @media (min-width: 900px) {
+            main.dashboard {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                align-items: stretch;
+            }
+            main.dashboard > .card {
+                flex: 1 1 auto;
+                margin-top: 0 !important;
+                min-width: 200px; /* Évite qu'une fenêtre ne disparaisse complètement */
+            }
+            #ventilation-card, #sanctions-card {
+                width: 300px; /* Largeur de base */
+                resize: horizontal;
+                overflow: auto;
+            }
+            .card:has(#pv-editor) {
+                width: 500px; /* L'éditeur de PV prend plus de place par défaut */
+                resize: horizontal;
+                overflow: auto;
+            }
+        }
+
+        @media (max-width: 899px) {
+            /* ── Cartes Redimensionnables (Vertical pour Mobile/Tablette) ── */
+            #ventilation-card, #sanctions-card {
+                resize: vertical;
+                overflow: auto;
+                min-height: 200px;
+            }
+            .card:has(#pv-editor) {
+                resize: vertical;
+                overflow: auto;
+                min-height: 300px;
+            }
+        }
+
+        /* ── Responsive Tablette ── */
+        @media (max-width: 768px) {
+            .table-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .argent-table-block {
+                width: 100%;
+            }
+            .argent-table-block input {
+                width: 100%;
+            }
+            .membre-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .membre-row select {
+                width: 100%;
+            }
+            .btn-suivant {
+                width: 100%;
+            }
+            .status-panel-grid {
+                grid-template-columns: 1fr;
+            }
+            .editor-toolbar {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* ── Responsive Smartphone ── */
+        @media (max-width: 480px) {
+            .ventilation-row, .amende-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .ventilation-input, .table-ventilation-input {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .amende-controls {
+                flex-wrap: wrap;
+            }
+            .table-footer {
+                justify-content: stretch;
+            }
+            .table-footer .btn-valider {
+                width: 100%;
+            }
+            #sanctions-buttons-container {
+                flex-direction: column !important;
+            }
+            #sanctions-buttons-container button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" onclick="history.back(); return false;" class="back-link">⬅️ Dashboard</a>
+    <header>
+        <h1><span class="asso-name">APBM</span> - Séance du Dimanche 🕒</h1>
+        <p><strong>La discipline garantit la paix entre les frères.</strong></p>
+    </header>
+    <nav class="menu-grid">
+        <a href="index.html" class="menu-item"><span>🏠</span><span>Dashboard</span></a>
+        <a href="membres.html" class="menu-item"><span>👥</span><span>Membres</span></a>
+        <a href="session.html" class="menu-item"><span>⚖️</span><span>Session</span></a>
+        <a href="finances.html" class="menu-item"><span>💰</span><span>Finances</span></a>
+        <a href="config.html" class="menu-item"><span>🛠️</span><span>Configuration</span></a>
+    </nav>
+
+    <main class="dashboard">
+        <section class="card" id="ventilation-card">
+            <div class="table-header">
+                <div class="table-header-left">
+                    <h3>⚖️ Session en cours</h3>
+                    <p>Visualisez toutes les dettes et régularisez-les sans quitter la séance.</p>
+                </div>
+                <div class="argent-table-block">
+                    <label>💵 ARGENT SUR LA TABLE</label>
+                    <input type="number" id="input-argent-table" placeholder="0 FCFA" min="0" oninput="updateCalculsTable()">
+                    <div id="reste-table">Reste à répartir : 0 FCFA</div>
+                </div>
+            </div>
+
+            <div class="membre-row">
+                <div>
+                    <label>Membre bénéficiaire</label>
+                    <select id="select-membre-table" onchange="onMembreChange()">
+                        <option value="">— Sélectionner le membre —</option>
+                    </select>
+                </div>
+                <button class="btn-suivant" onclick="membreSuivant()" title="Membre suivant (Suivant ➡️)">➡️</button>
+            </div>
+
+            <div id="membre-status-panel"></div>
+
+            <div id="table-ventilation-rows" style="margin-top:20px;">
+                <!-- Injecté par JS -->
+            </div>
+
+            <div class="table-footer">
+                <button class="btn-valider" onclick="validerTouteLaTable()">✅ Valider et Ventiler toute la table</button>
+            </div>
+        </section>
+
+        <!-- NOUVELLE SECTION PV DE SÉANCE -->
+        <section class="card" style="margin-top: 24px;">
+            <h2>📝 Procès-Verbal de la Séance (PV)</h2>
+            <p><small>Rédigez le compte-rendu officiel de la séance en cours. Le PV est publié en temps réel sur le Dashboard public.</small></p>
+            
+            <div class="editor-container">
+                <div class="editor-toolbar">
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execPvCmd('bold')" title="Gras"><strong>B</strong></button>
+                        <button class="editor-btn" onclick="execPvCmd('italic')" title="Italique"><em>I</em></button>
+                        <button class="editor-btn" onclick="execPvCmd('underline')" title="Souligné"><ins>U</ins></button>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execPvCmd('insertUnorderedList')" title="Liste à puces">• Liste</button>
+                        <button class="editor-btn" onclick="execPvCmd('insertOrderedList')" title="Liste ordonnée">1. Liste</button>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="insererTableauPv()" title="Insérer un tableau de décisions" style="color:#d4af37; font-weight: bold;">📊 Insérer Tableau</button>
+                    </div>
+                    <div class="editor-group">
+                        <button class="editor-btn" onclick="execPvCmd('insertHorizontalRule')" title="Séparateur">—</button>
+                    </div>
+                </div>
+                <div id="pv-editor" contenteditable="true"></div>
+            </div>
+            
+            <div style="margin-top:1.2rem; display:flex; align-items:center;">
+                <button class="btn-add" onclick="enregistrerPV()" style="background:#d4af37; color:#000; padding:10px 20px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">💾 Enregistrer et Publier le PV</button>
+                <span class="save-confirm" id="pv-confirm">✓ PV Enregistré et Publié</span>
+            </div>
+        </section>
+
+        <!-- NOUVELLE SECTION: APPLICATION DES SANCTIONS -->
+        <section class="card" id="sanctions-card" style="margin-top: 24px; border-top: 3px solid #e74c3c;">
+            <div class="table-header">
+                <div class="table-header-left">
+                    <h3 style="color:#e74c3c;">⚠️ Application des Sanctions</h3>
+                    <p>Déclarez immédiatement une faute (retard, bruit, absence). La pénalité s'ajoutera aux dettes du membre.</p>
+                </div>
+            </div>
+            
+            <div class="membre-row" style="background: rgba(231, 76, 60, 0.1); padding: 15px; border-radius: 8px;">
+                <div>
+                    <label style="color:#e74c3c; font-weight:bold;">Membre Fautif</label>
+                    <select id="select-membre-sanction" onchange="onSanctionMembreChange()" style="border-color: rgba(231,76,60,0.5);">
+                        <option value="">— Sélectionner le membre —</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="sanctions-buttons-container" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; display:none;">
+                <!-- Injecté par JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer><small>EMMANUEL_TONTINE — gestion pastorale apaisée.</small></footer>
+
+    <script src="app.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        auth.checkAdmin();
+        
+        // ── Commandes PV ──
+        function execPvCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('pv-editor').focus();
+        }
+
+        // ── Insérer un Tableau de Décisions ──
+        function insererTableauPv() {
+            const tableHtml = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Décision / Résolution Communautaire</th>
+                            <th>Membres Concernés</th>
+                            <th>Statut / Échéance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[Décision prise]</td>
+                            <td>[Tous / Nom]</td>
+                            <td>[Immédiat / Date]</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table><p></p>
+            `;
+            document.getElementById('pv-editor').focus();
+            document.execCommand('insertHTML', false, tableHtml);
+        }
+
+        // ── Charger le PV existant ──
+        function chargerPV() {
+            const currentReunion = associationData.reunionActuelle || 1;
+            const currentSession = associationData.sessionActuelle || 1;
+            const pvKey = 'TONTINE_PV_REUNION_' + currentReunion;
+            const host = associationData.lastSessionHost || '[Non renseigné]';
+            const meetingDate = associationData.lastSessionDate ? new Date(associationData.lastSessionDate).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+            
+            // Récupérer les membres présents depuis les métadonnées de la réunion
+            const metaKey = 'TONTINE_META_REUNION_' + currentReunion;
+            let presentsStr = '[Renseigner les membres]';
+            try {
+                const meta = JSON.parse(localStorage.getItem(metaKey));
+                if (meta && meta.attendees) {
+                    const formatAttendees = (attendees) => {
+                        if (!attendees) return '';
+                        if (typeof attendees === 'string') {
+                            try { return formatAttendees(JSON.parse(attendees)); } catch (e) { return attendees.toUpperCase(); }
+                        }
+                        if (Array.isArray(attendees)) {
+                            return attendees.map(item => {
+                                if (!item) return '';
+                                if (typeof item === 'string') return item.toUpperCase();
+                                if (typeof item === 'object') {
+                                    return (item.name || item.nom || item.username || item.id || '').toUpperCase();
+                                }
+                                return String(item).toUpperCase();
+                            }).filter(Boolean).join(', ');
+                        }
+                        if (typeof attendees === 'object') {
+                            if (attendees.name || attendees.nom || attendees.username || attendees.id) {
+                                return (attendees.name || attendees.nom || attendees.username || attendees.id).toUpperCase();
+                            }
+                            return Object.keys(attendees).filter(k => attendees[k] === true || attendees[k] === 'true' || attendees[k] === 1).map(k => k.toUpperCase()).join(', ');
+                        }
+                        return String(attendees).toUpperCase();
+                    };
+                    const formatted = formatAttendees(meta.attendees);
+                    if (formatted) presentsStr = formatted;
+                }
+            } catch(e) {}
+            
+            let savedPv = localStorage.getItem(pvKey) || 
+                `<h2 style="color:#d4af37;">Procès-verbal de la Réunion Mensuelle #${currentReunion} (Session #${currentSession})</h2>` +
+                `<p><strong>📅 Date de la Réunion :</strong> ${meetingDate}</p>` +
+                `<p><strong>🏠 Membre d'Accueil (Hôte) :</strong> ${host}</p>` +
+                `<ul><li><strong>Ordre du jour :</strong> Bilan financier de la séance & résolutions communautaires.</li>` +
+                `<li><strong>Présents :</strong> [Renseigner les membres]</li></ul>` +
+                `<p>Saisissez les notes et résolutions ci-dessous :</p>`;
+            
+            // Remplacement dynamique ultra-robuste avec RegExp pour contrer les balises ou &nbsp;
+            const robustPlaceholderRegex = /\[\s*Renseigner(?:\s|&nbsp;)+les(?:\s|&nbsp;)+membres\s*\]/gi;
+            if (presentsStr !== '[Renseigner les membres]') {
+                savedPv = savedPv.replace(robustPlaceholderRegex, presentsStr);
+            }
+            
+            document.getElementById('pv-editor').innerHTML = savedPv;
+        }
+
+        // ── Enregistrer le PV ──
+        function enregistrerPV() {
+            const currentReunion = associationData.reunionActuelle || 1;
+            const pvKey = 'TONTINE_PV_REUNION_' + currentReunion;
+            const htmlContent = document.getElementById('pv-editor').innerHTML;
+            localStorage.setItem(pvKey, htmlContent);
+            
+            // Mettre à jour l'historique des réunions avec le PV
+            const reunionIndex = associationData.reunionsHistorique.findIndex(r => r.reunionId === currentReunion);
+            if (reunionIndex !== -1) {
+                associationData.reunionsHistorique[reunionIndex].pv = htmlContent;
+                sauvegarder();
+            }
+            
+            // Également publier sur le Mur pour info
+            let wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            wallMessages.push({
+                user: 'SYSTÈME',
+                text: `📝 **Le Procès-Verbal de la Réunion Mensuelle #${currentReunion}** a été rédigé et validé par l'Administrateur. Vous pouvez le consulter dans la section Comptes-rendus.`,
+                date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            });
+            localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+            
+            // Afficher confirmation
+            const confirm = document.getElementById('pv-confirm');
+            confirm.classList.add('show');
+            setTimeout(() => confirm.classList.remove('show'), 3000);
+        }
+
+        function initSessionPage() {
+            appliquerNomAsso();
+            chargerFinances();
+            chargerPV();
+            if (typeof chargerSanctionsUI === 'function') chargerSanctionsUI();
+        }
+
+        window.onload = initSessionPage;
+    </script>
+</body>
+</html>

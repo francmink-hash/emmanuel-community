@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projets — Emmanuel Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .btn-retour {
+        position: fixed; top: 130px; left: 20px; z-index: 9999;
+        text-decoration: none; color: rgba(255, 255, 255, 0.7);
+        background: rgba(0, 0, 0, 0.3); padding: 8px 16px;
+        border-radius: 50px; font-size: 0.8rem; backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease;
+    }
+    .btn-retour:hover { color: #fff; background: rgba(255, 255, 255, 0.1); transform: translateX(-3px); }
+    body { background: #0a0a0a !important; color: rgba(255, 255, 255, 0.9) !important; min-height: 100vh; overflow-y: auto; padding-bottom: 100px; }
+    .bg-white { background-color: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.85) !important; }
+    header.bg-white { background-color: rgba(10, 10, 10, 0.8) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; }
+    .text-gray-900, .text-gray-800, .text-gray-600 { color: rgba(255, 255, 255, 0.9) !important; }
+    .text-gray-500, .text-gray-400 { color: rgba(255, 255, 255, 0.5) !important; }
+    input, select { background: rgba(255, 255, 255, 0.05) !important; border-color: rgba(255, 255, 255, 0.1) !important; color: white !important; }
+    input:focus, select:focus { border-color: #6366f1 !important; }
+    .bg-slate-50, .bg-slate-100 { background-color: rgba(255, 255, 255, 0.02) !important; }
+    .border-slate-100, .border-gray-100 { border-color: rgba(255, 255, 255, 0.07) !important; }
+    .shadow-sm { box-shadow: none !important; }
+    @media (max-width: 768px) { header.bg-white { padding-top: 4.5rem !important; } .btn-retour { top: 15px; left: 15px; } }
+  </style>
+</head>
+<body data-page="projects" class="min-h-screen font-sans text-gray-800 antialiased">
+  <a href="index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour Dashboard</a>
+  <header class="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-indigo-600 tracking-tight">🚀 Projets d'épargne</h1>
+      <p class="text-sm text-gray-500 mt-1">Suivi intelligent de tes objectifs et de ta progression.</p>
+      <p id="current-profile-name" class="text-xs text-gray-400 mt-2">Profil actif</p>
+    </div>
+    <nav class="flex flex-wrap gap-2 items-center">
+      <a href="index.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Tableau de bord</a>
+      <a href="transactions.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Transactions</a>
+      <a href="comptes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Comptes</a>
+      <a href="dettes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Dettes</a>
+      <a href="aide.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Aide</a>
+      <button type="button" onclick="auth.logout()" class="px-3 py-2 rounded-xl border border-red-500 bg-red-500 text-sm text-white hover:bg-red-600 transition">Déconnexion</button>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <section class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <!-- Liste des projets -->
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">Objectifs en cours</h2>
+            <p class="text-sm text-gray-500">Suivi des montants et échéances.</p>
+          </div>
+          <span id="projects-count" class="text-xs uppercase tracking-widest text-indigo-500"></span>
+        </div>
+        <div id="projects-list" class="space-y-4">
+          <p class="text-gray-400">Aucun projet pour le moment.</p>
+        </div>
+      </div>
+
+      <!-- Formulaire création — accessible à tous -->
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-5">Créer un nouveau projet</h2>
+        <form onsubmit="createProject(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Nom du projet</label>
+            <input id="p-name" type="text" required placeholder="Ex: Achat moto"
+              class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Montant cible (FCFA)</label>
+            <input id="p-target" type="number" min="1" required placeholder="Ex: 450000"
+              class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Date limite</label>
+            <input id="p-deadline" type="date" required
+              class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Compte lié</label>
+            <select id="p-account" class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+          </div>
+          <button type="submit" class="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-semibold transition">Lancer le projet</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    Les projets sont enregistrés dans votre espace personnel — aucune donnée partagée avec d'autres utilisateurs.
+  </footer>
+
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+  <script>
+    auth.checkAccess();
+  </script>
+</body>
+</html>

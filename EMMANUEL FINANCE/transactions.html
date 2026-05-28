@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transactions — Emmanuel Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .btn-retour {
+        position: fixed; top: 130px; left: 20px; z-index: 9999;
+        text-decoration: none; color: rgba(255, 255, 255, 0.7);
+        background: rgba(0, 0, 0, 0.3); padding: 8px 16px;
+        border-radius: 50px; font-size: 0.8rem; backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease;
+    }
+    .btn-retour:hover { color: #fff; background: rgba(255, 255, 255, 0.1); transform: translateX(-3px); }
+    body { background: #0a0a0a !important; color: rgba(255, 255, 255, 0.9) !important; min-height: 100vh; overflow-y: auto; padding-bottom: 100px; }
+    .bg-white { background-color: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.85) !important; }
+    header.bg-white { background-color: rgba(10, 10, 10, 0.8) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; }
+    .text-gray-900, .text-gray-800, .text-gray-600 { color: rgba(255, 255, 255, 0.9) !important; }
+    .text-gray-500, .text-gray-400 { color: rgba(255, 255, 255, 0.5) !important; }
+    input, select { background: rgba(255, 255, 255, 0.05) !important; border-color: rgba(255, 255, 255, 0.1) !important; color: white !important; }
+    input:focus, select:focus { border-color: #6366f1 !important; }
+    .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.1) !important; }
+    .text-indigo-600 { color: #6366f1 !important; }
+    .border-indigo-300 { border-color: rgba(99, 102, 241, 0.3) !important; }
+    /* Neutralisation des fonds blancs Tailwind sur les lignes de tableau injectées */
+    .bg-slate-50, .bg-slate-100 { background-color: rgba(255, 255, 255, 0.02) !important; }
+    .border-slate-100, .border-gray-100 { border-color: rgba(255, 255, 255, 0.07) !important; }
+    .shadow-sm { box-shadow: none !important; }
+    /* Lignes de tableau injectées par app.js */
+    tr.bg-white { background-color: rgba(255, 255, 255, 0.03) !important; }
+    @media (max-width: 768px) { header.bg-white { padding-top: 4.5rem !important; } .btn-retour { top: 15px; left: 15px; } }
+  </style>
+</head>
+<body data-page="transactions" class="min-h-screen font-sans text-gray-800 antialiased">
+  <a href="index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour Dashboard</a>
+  <header class="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-indigo-600 tracking-tight">📄 Transactions récentes</h1>
+      <p class="text-sm text-gray-500 mt-1">Filtre, recherche et analyse de vos flux financiers.</p>
+      <p id="current-profile-name" class="text-xs text-gray-400 mt-2">Profil actif</p>
+    </div>
+    <nav class="flex flex-wrap gap-2 items-center">
+      <a href="index.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Tableau de bord</a>
+      <a href="comptes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Comptes</a>
+      <a href="projets.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Projets</a>
+      <a href="dettes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Dettes</a>
+      <a href="aide.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Aide</a>
+      <button type="button" onclick="auth.logout()" class="px-3 py-2 rounded-xl border border-red-500 bg-red-500 text-sm text-white hover:bg-red-600 transition">Déconnexion</button>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
+        <h2 class="text-sm uppercase tracking-widest text-gray-400 mb-3">Rechercher</h2>
+        <input id="filter-text" type="text" placeholder="🔍 Rechercher un libellé ou un compte..."
+          class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+      </div>
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
+        <h2 class="text-sm uppercase tracking-widest text-gray-400 mb-3">Période</h2>
+        <div class="flex flex-col gap-3">
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" onclick="setFilterPeriod('month')" id="fp-month"
+              class="period-btn text-xs rounded-2xl border px-3 py-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Ce mois</button>
+            <button type="button" onclick="setFilterPeriod('last')" id="fp-last"
+              class="period-btn text-xs rounded-2xl border px-3 py-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Mois dernier</button>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" onclick="setFilterPeriod('year')" id="fp-year"
+              class="period-btn text-xs rounded-2xl border px-3 py-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Cette année</button>
+            <button type="button" onclick="setFilterPeriod('all')" id="fp-all"
+              class="period-btn text-xs rounded-2xl border border-indigo-300 bg-indigo-50 px-3 py-2 text-indigo-600 font-semibold transition">Tout</button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
+        <h2 class="text-sm uppercase tracking-widest text-gray-400 mb-3">Filtres</h2>
+        <div class="space-y-3">
+          <select id="filter-account" class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+          <select id="filter-type" class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">Tous les types</option>
+            <option value="income">➕ Entrées</option>
+            <option value="expense">➖ Sorties</option>
+          </select>
+          <select id="filter-category" class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-5">
+        <div>
+          <p class="text-xs uppercase tracking-widest text-indigo-500 font-semibold">➕ Nouvelle transaction</p>
+          <h2 class="text-xl font-bold text-gray-900">Entrée / Sortie</h2>
+        </div>
+      </div>
+      <form id="transaction-form" class="grid gap-4 lg:grid-cols-5">
+        <input id="transaction-label" type="text" placeholder="Libellé" class="lg:col-span-2 rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        <input id="transaction-amount" type="number" min="0" step="0.01" placeholder="Montant" class="rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        <input id="transaction-date" type="date" class="rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        <select id="transaction-account" class="rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">Choisir un compte</option>
+        </select>
+        <select id="transaction-category" class="rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">Choisir une catégorie</option>
+        </select>
+        <div class="lg:col-span-5 flex flex-wrap gap-3 pt-1">
+          <button type="button" onclick="createTransaction('income')" class="rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-600 transition">Entrée</button>
+          <button type="button" onclick="createTransaction('expense')" class="rounded-2xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-600 transition">Sortie</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-5">
+        <div>
+          <p class="text-xs uppercase tracking-widest text-indigo-500 font-semibold">💸 Flux récents</p>
+          <h2 class="text-xl font-bold text-gray-900">Toutes les transactions</h2>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="comptes.html" class="text-sm px-4 py-2 rounded-2xl border border-gray-200 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition">Ajouter un compte</a>
+          <a href="comptes.html" class="text-sm px-4 py-2 rounded-2xl border border-gray-200 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition">Ajouter une catégorie</a>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left border-separate border-spacing-y-2">
+          <thead>
+            <tr class="text-xs uppercase text-gray-400 tracking-wider">
+              <th class="px-4 py-3">Date</th>
+              <th class="px-4 py-3">Description</th>
+              <th class="px-4 py-3">Compte</th>
+              <th class="px-4 py-3">Catégorie</th>
+              <th class="px-4 py-3 text-right">Montant</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-body">
+            <tr><td colspan="5" class="px-4 py-10 text-center text-gray-400">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="transactions-footer" class="mt-5 hidden bg-slate-50 rounded-3xl border border-slate-100 p-4 text-sm text-gray-600"></div>
+    </section>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    Emmanuel Finance — données stockées localement dans votre navigateur.
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    auth.checkAccess();
+  </script>
+</body>
+</html>

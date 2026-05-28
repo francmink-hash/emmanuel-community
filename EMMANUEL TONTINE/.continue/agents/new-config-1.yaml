@@ -1,0 +1,28 @@
+name: Emmanuel Config
+version: 1.0.0
+schema: v1
+
+models:
+  - name: DeepSeek Coder 1.3B
+    provider: ollama
+    model: deepseek-coder:1.3b
+  - name: Llama 3.2 1B
+    provider: ollama
+    model: llama3.2:1b
+  - name: Phi-3.5 LM
+    provider: ollama
+    model: phi35-lm:latest
+
+tabAutocompleteModel:
+  name: Qwen 2.5 Coder 0.5B
+  provider: ollama
+  model: qwen2.5-coder:0.5b
+
+embeddingsProvider:
+  provider: ollama
+  model: nomic-embed-text:latest
+
+contextProviders:
+  - name: code
+  - name: folder
+  - name: terminal

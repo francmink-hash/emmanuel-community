@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | TONTINE</title>
+    <style>
+        /* Style Premium pour le bouton Retour */
+        .btn-retour {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .btn-retour:hover {
+            color: #d4af37;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #d4af37;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --card: #141414;
+            --accent: #d4af37;
+            --text: rgba(255, 255, 255, 0.9);
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background: var(--card);
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        h2 { font-weight: 300; letter-spacing: 2px; margin-bottom: 2rem; color: var(--accent); }
+
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { flex: 1; padding: 0.8rem; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
+        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.06); }
+
+        /* Correction texte invisible dans le select de question de sécurité */
+        select#s-quest {
+            background: #1e1e1e;
+            color: #f0f0f0;
+        }
+        select#s-quest option {
+            background: #1e1e1e;
+            color: #f0f0f0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: black;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+
+        .forgot { font-size: 0.8rem; margin-top: 1rem; display: block; color: var(--text-muted); text-decoration: none; cursor: pointer; }
+        .forgot:hover { color: var(--accent); }
+
+        .hidden { display: none; }
+        .error { color: #ff4d4d; font-size: 0.85rem; margin-top: 1rem; }
+
+        /* Tooltip Style */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 5px;
+            color: var(--accent);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 260px;
+            background-color: #1a1a1a;
+            color: rgba(255,255,255,0.9);
+            text-align: left;
+            border-radius: 10px;
+            padding: 15px;
+            position: absolute;
+            z-index: 100;
+            bottom: 150%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            border: 1px solid var(--accent);
+            font-size: 0.75rem;
+            line-height: 1.5;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--accent) transparent transparent transparent;
+        }
+
+        /* Force Uppercase visual hint */
+        #s-user { text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour au Hub</a>
+<div class="login-card">
+    <h2 id="app-title"><span class="asso-name">TONTINE</span></h2>
+    
+    <div class="tabs" id="auth-tabs">
+        <div class="tab active" onclick="switchMode('login')">Connexion</div>
+        <div class="tab" onclick="switchMode('signup')">Inscription</div>
+    </div>
+
+    <!-- FORMULAIRE CONNEXION -->
+    <div id="login-form">
+        <div class="form-group">
+            <label>Identifiant</label>
+            <input type="text" id="l-user" placeholder="Votre nom">
+        </div>
+        <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="l-pass" placeholder="••••••••">
+        </div>
+        <button class="btn" onclick="handleLogin()">SE CONNECTER</button>
+        <span class="forgot" onclick="switchMode('forgot')">Mot de passe oublié ?</span>
+    </div>
+
+    <div id="signup-form" class="hidden">
+        <div class="form-group">
+            <label>
+                Vrai Nom & Prénom (Identifiant Officiel)
+                <div class="tooltip">ⓘ
+                    <span class="tooltiptext">
+                        <strong>Transparence & Sécurité</strong><br>
+                        L'utilisation de votre nom légal garantit une traçabilité absolue des flux financiers. 
+                        Cela élimine tout risque d'anonymat ou de confusion d'identité lors des votes et des cotisations, 
+                        assurant que chaque transaction est liée juridiquement à la bonne personne.
+                    </span>
+                </div>
+            </label>
+            <input type="text" id="s-user" placeholder="NOM PRÉNOM" list="membres-list" oninput="this.value = this.value.toUpperCase()">
+            <datalist id="membres-list">
+                <!-- Suggestion dynamiques injectées par JS -->
+            </datalist>
+        </div>
+        <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="s-pass" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label>Confirmer le mot de passe</label>
+            <input type="password" id="s-pass-confirm" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label>Question de sécurité</label>
+            <select id="s-quest">
+                <option value="Quel est le nom de votre premier animal de compagnie ? 🐾">Quel est le nom de votre premier animal de compagnie ? 🐾</option>
+                <option value="Quelle est votre ville de naissance ? 🏙️">Quelle est votre ville de naissance ? 🏙️</option>
+                <option value="Quel était le nom de votre première école ? 🏫">Quel était le nom de votre première école ? 🏫</option>
+                <option value="Quel est votre plat ou fruit préféré ? 🍏">Quel est votre plat ou fruit préféré ? 🍏</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Réponse</label>
+            <input type="text" id="s-ans" placeholder="Votre réponse">
+        </div>
+        <button class="btn" onclick="handleSignup()">CRÉER MON COMPTE</button>
+    </div>
+
+    <!-- MOT DE PASSE OUBLIÉ -->
+    <div id="forgot-form" class="hidden">
+        <div id="forgot-step-1">
+            <div class="form-group">
+                <label>Entrez votre identifiant</label>
+                <input type="text" id="f-user" placeholder="Votre nom">
+            </div>
+            <button class="btn" onclick="handleForgotStep1()">VÉRIFIER</button>
+        </div>
+        <div id="forgot-step-2" class="hidden">
+            <p id="f-question" style="font-size: 0.9rem; margin-bottom: 1rem; color: var(--accent);"></p>
+            <div class="form-group">
+                <label>Votre réponse</label>
+                <input type="text" id="f-ans" placeholder="Réponse">
+            </div>
+            <div class="form-group">
+                <label>Nouveau mot de passe</label>
+                <input type="password" id="f-pass" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="handleForgotStep2()">RÉINITIALISER</button>
+        </div>
+        <span class="forgot" onclick="switchMode('login')">Retour à la connexion</span>
+    </div>
+
+    <div id="error-msg" class="error"></div>
+</div>
+
+<script src="app.js"></script>
+<script src="auth.js"></script>
+<script>
+    // ============================================================
+    // DYNAMISATION DES SUGGESTIONS (LIAISON PARAMÈTRES)
+    // ============================================================
+    function populateSuggestions() {
+        const list = document.getElementById('membres-list');
+        if (!list || !associationData.membres) return;
+        
+        list.innerHTML = '';
+        associationData.membres.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.nom.toUpperCase();
+            list.appendChild(opt);
+        });
+    }
+
+    // Initialisation
+    window.addEventListener('load', populateSuggestions);
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'apbmData') populateSuggestions();
+    });
+
+    function switchMode(mode) {
+        document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('signup-form').classList.toggle('hidden', mode !== 'signup');
+        document.getElementById('forgot-form').classList.toggle('hidden', mode !== 'forgot');
+        document.getElementById('auth-tabs').classList.toggle('hidden', mode === 'forgot');
+        
+        const tabs = document.querySelectorAll('.tab');
+        tabs[0].classList.toggle('active', mode === 'login');
+        tabs[1].classList.toggle('active', mode === 'signup');
+        document.getElementById('error-msg').innerText = '';
+        if (mode === 'signup') populateSuggestions();
+    }
+
+    let loginFailures = {};
+
+    function handleLogin() {
+        const user = document.getElementById('l-user').value.trim().toUpperCase();
+        const pass = document.getElementById('l-pass').value;
+        const res = auth.login(user, pass);
+        
+        if (res.success) {
+            delete loginFailures[user];
+            window.location.href = 'index.html';
+        } else {
+            const errorEl = document.getElementById('error-msg');
+            errorEl.innerText = res.msg;
+            
+            // Gestion du compteur d'échecs uniquement pour mot de passe incorrect
+            if (user && res.msg === "❌ Mot de passe incorrect.") {
+                loginFailures[user] = (loginFailures[user] || 0) + 1;
+                
+                if (loginFailures[user] >= 3) {
+                    errorEl.innerHTML += `<br><span class="forgot" style="color:var(--accent); font-weight:bold; margin-top:8px;" onclick="triggerRecovery('${user}')">🔑 Réinitialiser via la question de sécurité</span>`;
+                }
+            }
+        }
+    }
+
+    function triggerRecovery(user) {
+        switchMode('forgot');
+        document.getElementById('f-user').value = user;
+        handleForgotStep1();
+    }
+
+    function handleSignup() {
+        // Force uppercase and trim for unique ID mapping
+        const user = document.getElementById('s-user').value.trim().toUpperCase();
+        const pass = document.getElementById('s-pass').value;
+        const confirmPass = document.getElementById('s-pass-confirm').value;
+        const quest = document.getElementById('s-quest').value;
+        const ans = document.getElementById('s-ans').value;
+        
+        if (!user || !pass || !ans) {
+            document.getElementById('error-msg').innerText = "Tous les champs sont requis.";
+            return;
+        }
+
+        if (pass !== confirmPass) {
+            document.getElementById('error-msg').innerText = "Les mots de passe ne correspondent pas.";
+            return;
+        }
+
+        const res = auth.signup(user, pass, quest, ans);
+        if (res.success) {
+            alert("✨ Inscription réussie ! Votre compte est en attente de validation par l'Administrateur.");
+            switchMode('login');
+            document.getElementById('l-user').value = user;
+        } else {
+            document.getElementById('error-msg').innerText = res.msg;
+        }
+    }
+
+    let forgotUser = "";
+    function handleForgotStep1() {
+        forgotUser = document.getElementById('f-user').value.trim().toUpperCase();
+        const q = auth.getQuestion(forgotUser);
+        if (q) {
+            document.getElementById('f-question').innerText = q;
+            document.getElementById('forgot-step-1').classList.add('hidden');
+            document.getElementById('forgot-step-2').classList.remove('hidden');
+            document.getElementById('error-msg').innerText = '';
+        } else {
+            document.getElementById('error-msg').innerText = "Utilisateur inconnu.";
+        }
+    }
+
+    function handleForgotStep2() {
+        const ans = document.getElementById('f-ans').value;
+        const pass = document.getElementById('f-pass').value;
+        const errorEl = document.getElementById('error-msg');
+        
+        if (!ans || !pass) {
+            errorEl.innerText = "Veuillez remplir tous les champs.";
+            return;
+        }
+
+        const userObj = auth.resetPassword(forgotUser, ans, pass);
+        if (userObj) {
+            // 1. Vider COMPLÈTEMENT les messages d'erreur/attente
+            errorEl.innerText = "";
+            if (loginFailures[forgotUser]) delete loginFailures[forgotUser];
+            
+            // 2. ACTIVATION IMMÉDIATE DE LA SESSION (Bypass total)
+            auth.forceLogin(userObj);
+            
+            // 3. REDIRECTION FORCÉE INSTANTANÉE
+            alert("✅ Sécurité validée. Accès immédiat accordé.");
+            window.location.href = 'index.html'; 
+        } else {
+            errorEl.innerText = "❌ Réponse incorrecte.";
+        }
+    }
+</script>
+
+</body>
+</html>

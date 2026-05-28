@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emmanuel Finance — Tableau de bord</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* Style Premium pour le bouton Retour */
+    .btn-retour {
+        position: fixed;
+        top: 130px; /* Descendu plus bas pour éviter tout conflit avec le header et les menus */
+        left: 20px;
+        z-index: 9999;
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.7);
+        background: rgba(0, 0, 0, 0.3);
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        font-family: sans-serif;
+    }
+
+    .btn-retour:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(-3px);
+    }
+
+    body {
+        background: #0a0a0a !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        min-height: 100vh;
+        overflow-y: auto;
+        padding-bottom: 100px;
+    }
+    main {
+        padding: 2rem;
+    }
+    section { max-height: 100%; }
+
+    /* Adoucissement des cartes (Casser le blanc pur) */
+    .bg-white {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    header.bg-white {
+        background-color: rgba(10, 10, 10, 0.8) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .text-gray-900, .text-gray-800, .text-gray-600 {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .text-gray-500, .text-gray-400 {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Neutralisation des fonds blancs Tailwind */
+    .bg-slate-50, .bg-slate-100 { background-color: rgba(255, 255, 255, 0.02) !important; }
+    .border-slate-100, .border-gray-100 { border-color: rgba(255, 255, 255, 0.07) !important; }
+    .shadow-sm { box-shadow: none !important; }
+
+    /* Responsivité Mobile */
+    @media (max-width: 768px) {
+        header.bg-white {
+            padding-left: 1rem !important;
+            padding-top: 4.5rem !important; /* Place pour le bouton retour au dessus */
+        }
+        .btn-retour {
+            top: 15px;
+            left: 15px;
+        }
+        .text-4xl { font-size: 2rem !important; }
+        .grid { gap: 1rem !important; }
+    }
+  </style>
+</head>
+<body data-page="dashboard" class="min-h-screen font-sans text-gray-800 antialiased">
+  <a href="../index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour à l'accueil</a>
+  <header class="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-indigo-600 tracking-tight">💰 Emmanuel Finance</h1>
+      <p class="text-sm text-gray-500 mt-1">Tableau de bord clair pour piloter vos finances.</p>
+      <p id="current-profile-name" class="text-xs text-gray-400 mt-2">Profil actif</p>
+    </div>
+    <nav class="flex flex-wrap gap-2 items-center">
+      <a href="transactions.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Transactions</a>
+      <a href="comptes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Comptes</a>
+      <a href="projets.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Projets</a>
+      <a href="dettes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Dettes</a>
+      <a href="aide.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Aide</a>
+      <button onclick="auth.logout()" class="px-3 py-2 rounded-xl border border-red-500 bg-red-500 text-sm text-white hover:bg-red-600 transition">Déconnexion</button>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Patrimoine total</p>
+        <p id="dashboard-total-balance" class="text-4xl font-extrabold text-indigo-600">0 FCFA</p>
+        <p class="text-sm text-gray-500 mt-2">Solde consolidé de tous vos comptes.</p>
+      </div>
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Comptes</p>
+        <p id="dashboard-accounts-count" class="text-3xl font-bold text-gray-900">0</p>
+        <p class="text-sm text-gray-500 mt-2">Nombre de caisses et comptes suivis.</p>
+      </div>
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Catégories</p>
+        <p id="dashboard-categories-count" class="text-3xl font-bold text-gray-900">0</p>
+        <p class="text-sm text-gray-500 mt-2">Groupes et catégories de dépenses.</p>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Projets</p>
+        <p id="dashboard-projects-count" class="text-3xl font-bold text-gray-900">0</p>
+        <p class="text-sm text-gray-500 mt-2">Objectifs d’épargne en cours.</p>
+      </div>
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+        <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Prêts & Emprunts</p>
+        <p id="dashboard-debts-count" class="text-3xl font-bold text-gray-900">0</p>
+        <p class="text-sm text-gray-500 mt-2">Suivi des dettes et remboursements.</p>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div>
+          <p class="text-xs uppercase tracking-widest text-indigo-500 font-semibold mb-2">Tableaux de bord</p>
+          <h2 class="text-xl font-bold text-gray-900">Vue synthétique</h2>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div class="rounded-3xl border border-slate-100 p-4">
+          <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Entrées vs Sorties</p>
+          <div class="h-48"><canvas id="chart-flux"></canvas></div>
+        </div>
+        <div class="rounded-3xl border border-slate-100 p-4">
+          <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Répartition par catégorie</p>
+          <div class="h-48"><canvas id="chart-cat"></canvas></div>
+        </div>
+        <div class="rounded-3xl border border-slate-100 p-4">
+          <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Solde par compte</p>
+          <div class="h-48"><canvas id="chart-accounts"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <a href="transactions.html" class="block rounded-3xl bg-white border border-gray-100 shadow-sm p-6 text-center hover:border-indigo-300 hover:shadow-md transition">
+        <p class="text-sm text-gray-400 uppercase tracking-widest mb-3">Transactions</p>
+        <h3 class="text-lg font-semibold text-gray-900">Explorer les flux</h3>
+      </a>
+      <a href="comptes.html" class="block rounded-3xl bg-white border border-gray-100 shadow-sm p-6 text-center hover:border-indigo-300 hover:shadow-md transition">
+        <p class="text-sm text-gray-400 uppercase tracking-widest mb-3">Comptes</p>
+        <h3 class="text-lg font-semibold text-gray-900">Gérer comptes & catégories</h3>
+      </a>
+      <a href="projets.html" class="block rounded-3xl bg-white border border-gray-100 shadow-sm p-6 text-center hover:border-indigo-300 hover:shadow-md transition">
+        <p class="text-sm text-gray-400 uppercase tracking-widest mb-3">Projets</p>
+        <h3 class="text-lg font-semibold text-gray-900">Piloter tes objectifs</h3>
+      </a>
+    </section>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    Emmanuel Finance — toutes les données sont stockées localement dans votre navigateur.
+  </footer>
+
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Vérification de session — chaque utilisateur accède à son propre espace
+    auth.checkAccess();
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMMANUEL_TONTINE - Membres</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="index.html" onclick="history.back(); return false;" class="back-link">⬅️ Dashboard</a>
+    <header>
+        <h1><span class="asso-name">APBM</span> - Gestion Administrative</h1>
+        <p><strong>Gérez les membres et l'historique des opérations en un seul écran.</strong></p>
+    </header>
+
+    <nav class="menu-grid">
+        <a href="index.html" class="menu-item"><span>🏠</span><span>Dashboard</span></a>
+        <a href="membres.html" class="menu-item"><span>👥</span><span>Membres</span></a>
+        <a href="session.html" class="menu-item"><span>⚖️</span><span>Session</span></a>
+        <a href="finances.html" class="menu-item"><span>💰</span><span>Finances</span></a>
+        <a href="config.html" class="menu-item"><span>🛠️</span><span>Configuration</span></a>
+    </nav>
+
+    <main class="dashboard">
+        <section class="card">
+            <h2>👤 Inscrire un nouveau membre</h2>
+            <p><strong>Ajoutez un frère à la lignée pour suivre ses dettes et ses règlements.</strong></p>
+            <input type="text" id="nouveau-membre" placeholder="NOM PRÉNOM (Majuscules)" oninput="this.value = this.value.toUpperCase()" />
+            <button onclick="inscrireMembre()">Inscrire</button>
+        </section>
+
+        <section class="card">
+            <h2>📋 Liste des membres <span id="total-members"></span></h2>
+            <ul id="liste-membres" class="member-list"></ul>
+        </section>
+
+        <section class="card">
+            <h2>📜 Historique & Bilan</h2>
+            <p><strong>Consultez les dettes, les paiements et l'état moral du membre sélectionné.</strong></p>
+            <select id="select-membre" onchange="afficherBilan()">
+                <option value="">Sélectionner un membre...</option>
+            </select>
+            <div id="bilan"><p>Sélectionnez un membre pour afficher son bilan détaillé.</p></div>
+            <button class="secondary" onclick="window.print()">Imprimer le Bilan</button>
+        </section>
+    </main>
+
+    <footer><small>EMMANUEL_TONTINE — gestion pastorale pour la famille.</small></footer>
+
+    <script src="app.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        auth.checkAdmin();
+        window.onload = function() {
+            appliquerNomAsso();
+            updateMembresUI();
+        };
+    </script>
+</body>
+</html>

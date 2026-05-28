@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emmanuel Finance 💰 — v1.0.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-gray-800 antialiased">
+
+  <!-- Toast -->
+  <div id="toast" class="fixed top-6 right-6 z-50 hidden transition-all">
+    <div id="toast-inner" class="flex items-center gap-2 bg-white border border-gray-100 shadow-xl rounded-xl px-5 py-3 text-sm font-medium text-gray-700"></div>
+  </div>
+
+  <!-- Modale -->
+  <div id="modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center justify-center sm:p-4">
+      <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md p-5 sm:p-7 relative overflow-y-auto max-h-[92vh] sm:max-h-[85vh]">
+        <button onclick="closeModal()" class="absolute top-3 right-4 sm:top-4 sm:right-5 text-gray-300 hover:text-gray-500 text-lg leading-none z-10">✕</button>
+        <h3 id="modal-title" class="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-6"></h3>
+        <form id="op-form" onsubmit="submitOp(event)" class="space-y-3 sm:space-y-4">
+
+          <div>
+            <label for="f-amount" class="block text-xs text-gray-400 mb-1">Montant (FCFA)</label>
+            <input id="f-amount" type="number" min="1" required placeholder="Ex: 25000"
+              class="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          </div>
+
+          <div>
+            <label for="f-label" class="block text-xs text-gray-400 mb-1">Description</label>
+            <input id="f-label" type="text" required placeholder="Ex: Salaire juin"
+              class="w-full border border-gray-200 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Date</label>
+            <input id="f-date" type="date" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          </div>
+
+          <!-- Compte unique (income / expense) -->
+          <div id="field-account">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs text-gray-400">Compte</label>
+              <button type="button" onclick="toggleInline('inline-acc')" class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">+ Nouveau compte</button>
+            </div>
+            <select id="f-account" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+            <!-- Inline création compte -->
+            <div id="inline-acc" class="hidden mt-3 bg-slate-50 border border-indigo-100 rounded-xl p-4 space-y-3">
+              <input id="ia-name" type="text" placeholder="Nom du compte"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <div class="flex flex-wrap gap-2" id="ia-icon-picker">
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="🏠">🏠</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="🏦">🏦</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="📱">📱</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="💳">💳</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="💰">💰</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="🏧">🏧</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="🪙">🪙</span>
+                <span class="ia-icon cursor-pointer text-xl p-1 rounded-lg hover:bg-white transition" data-icon="💵">💵</span>
+              </div>
+              <input id="ia-icon" type="hidden" value="🏦" />
+              <div class="flex gap-2">
+                <button type="button" onclick="iaPickColor('indigo')"  id="ia-col-indigo"  class="ia-col w-7 h-7 rounded-full bg-indigo-500 ring-2 ring-offset-1 ring-indigo-400"></button>
+                <button type="button" onclick="iaPickColor('emerald')" id="ia-col-emerald" class="ia-col w-7 h-7 rounded-full bg-emerald-500"></button>
+                <button type="button" onclick="iaPickColor('amber')"   id="ia-col-amber"   class="ia-col w-7 h-7 rounded-full bg-amber-500"></button>
+                <button type="button" onclick="iaPickColor('rose')"    id="ia-col-rose"    class="ia-col w-7 h-7 rounded-full bg-rose-500"></button>
+                <button type="button" onclick="iaPickColor('violet')"  id="ia-col-violet"  class="ia-col w-7 h-7 rounded-full bg-violet-500"></button>
+                <button type="button" onclick="iaPickColor('sky')"     id="ia-col-sky"     class="ia-col w-7 h-7 rounded-full bg-sky-500"></button>
+              </div>
+              <input id="ia-color" type="hidden" value="indigo" />
+              <button type="button" onclick="saveInlineAccount()" class="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-lg transition">✓ Enregistrer ce compte</button>
+            </div>
+          </div>
+
+          <!-- Comptes transfert -->
+          <div id="field-transfer" class="hidden space-y-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">De (source)</label>
+              <select id="f-from" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Vers (destination)</label>
+              <select id="f-to" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+            </div>
+          </div>
+
+          <!-- Champs projet -->
+          <div id="field-project" class="hidden space-y-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Date d'Échéance</label>
+              <input id="f-deadline" type="date"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Compte lié</label>
+              <select id="f-proj-account" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"></select>
+            </div>
+          </div>
+
+          <!-- Catégorie (masquée pour transfert) -->
+          <div id="field-category">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs text-gray-400">Catégorie</label>
+              <button type="button" onclick="toggleInline('inline-cat')" class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">+ Nouvelle catégorie</button>
+            </div>
+            <select id="f-category" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></select>
+            <!-- Inline création catégorie -->
+            <div id="inline-cat" class="hidden mt-3 bg-slate-50 border border-indigo-100 rounded-xl p-4 space-y-3">
+              <input id="ic-name" type="text" placeholder="Nom de la catégorie"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <div class="flex gap-3 items-center">
+                <input id="ic-icon" type="text" maxlength="2" placeholder="💼"
+                  class="w-14 border border-gray-200 rounded-lg px-2 py-2 text-xl text-center focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <select id="ic-group" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                  <option value="Travail">💼 Travail</option>
+                  <option value="Dépenses">🛒 Dépenses</option>
+                  <option value="Épargne">💰 Épargne</option>
+                  <option value="Loisirs">🎉 Loisirs</option>
+                  <option value="Santé">🏥 Santé</option>
+                  <option value="Famille">👨‍👩‍👧 Famille</option>
+                </select>
+              </div>
+              <button type="button" onclick="saveInlineCategory()" class="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-lg transition">✓ Enregistrer cette catégorie</button>
+            </div>
+          </div>
+
+          <!-- Champs compte -->
+          <div id="field-new-account" class="hidden space-y-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Icône</label>
+              <div id="icon-picker" class="flex flex-wrap gap-2">
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="🏠">🏠</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="🏦">🏦</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="📱">📱</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="💳">💳</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="💰">💰</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="🏧">🏧</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="🪙">🪙</span>
+                <span class="icon-opt cursor-pointer text-2xl p-1.5 rounded-lg hover:bg-slate-100 transition" data-icon="💵">💵</span>
+              </div>
+              <input id="f-acc-icon" type="hidden" value="🏦" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Couleur</label>
+              <div class="flex gap-2">
+                <button type="button" onclick="pickColor('indigo')"  id="col-indigo"  class="color-btn w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-indigo-500"></button>
+                <button type="button" onclick="pickColor('emerald')" id="col-emerald" class="color-btn w-8 h-8 rounded-full bg-emerald-500"></button>
+                <button type="button" onclick="pickColor('amber')"   id="col-amber"   class="color-btn w-8 h-8 rounded-full bg-amber-500"></button>
+                <button type="button" onclick="pickColor('rose')"    id="col-rose"    class="color-btn w-8 h-8 rounded-full bg-rose-500"></button>
+                <button type="button" onclick="pickColor('violet')"  id="col-violet"  class="color-btn w-8 h-8 rounded-full bg-violet-500"></button>
+                <button type="button" onclick="pickColor('sky')"     id="col-sky"     class="color-btn w-8 h-8 rounded-full bg-sky-500"></button>
+              </div>
+              <input id="f-acc-color" type="hidden" value="indigo" />
+            </div>
+          </div>
+
+          <!-- Champs catégorie -->
+          <div id="field-new-category" class="hidden space-y-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Icône</label>
+              <input id="f-cat-icon" type="text" maxlength="2" placeholder="💼"
+                class="w-20 border border-gray-200 rounded-xl px-3 py-2 text-xl text-center focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Groupe</label>
+              <select id="f-cat-group" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <option value="Travail">💼 Travail</option>
+                <option value="Dépenses">🛒 Dépenses</option>
+                <option value="Épargne">💰 Épargne</option>
+                <option value="Loisirs">🎉 Loisirs</option>
+                <option value="Santé">🏥 Santé</option>
+                <option value="Famille">👨‍👩‍👧 Famille</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" id="modal-btn" class="w-full mt-1 sm:mt-2 py-2.5 sm:py-3 rounded-xl text-white font-semibold text-sm transition"></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-100 px-4 sm:px-6 md:px-10 py-3 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-indigo-600 tracking-tight">💰 Emmanuel Finance</h1>
+      <p class="text-sm text-gray-400 mt-0.5">Gestion financière personnelle &nbsp;<span class="text-xs bg-indigo-50 text-indigo-400 font-semibold px-2 py-0.5 rounded-full border border-indigo-100">v1.0.0</span>
+      &nbsp;<button onclick="openHelp()" class="text-xs bg-indigo-100 text-indigo-500 hover:bg-indigo-200 font-semibold px-2 py-0.5 rounded-full border border-indigo-200 transition">? Aide</button></p>
+      <p class="text-xs text-indigo-300 mt-0.5"><a href="https://emmanuel-dpv.pages.dev" target="_blank" rel="noopener" class="hover:text-indigo-500 transition">🌐 emmanuel-dpv.pages.dev</a></p>
+    </div>
+    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+      <button onclick="openModal('income')"
+        class="flex items-center gap-1 sm:gap-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm shadow-emerald-200 transition-all">
+        ➕ Entrée
+      </button>
+      <button onclick="openModal('expense')"
+        class="flex items-center gap-1 sm:gap-1.5 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm shadow-rose-200 transition-all">
+        ➖ Sortie
+      </button>
+      <button onclick="openModal('transfer')"
+        class="flex items-center gap-1 sm:gap-1.5 bg-indigo-500 hover:bg-indigo-600 active:scale-95 text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm shadow-indigo-200 transition-all">
+        🔄 <span class="hidden sm:inline">Transfert</span><span class="sm:hidden">Transf.</span>
+      </button>
+      <button onclick="openModal('project')"
+        class="flex items-center gap-1 sm:gap-1.5 bg-violet-500 hover:bg-violet-600 active:scale-95 text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm shadow-violet-200 transition-all">
+        🚀 Projet
+      </button>
+      <button onclick="openDebtModal('loan')"
+        class="flex items-center gap-1 sm:gap-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm shadow-amber-200 transition-all">
+        🤝 Prêt
+      </button>
+      <button onclick="openDebtModal('borrow')"
+        class="flex items-center gap-1 sm:gap-1.5 bg-rose-700 hover:bg-rose-800 active:scale-95 text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm shadow-rose-200 transition-all">
+        💸 <span class="hidden sm:inline">Emprunt</span><span class="sm:hidden">Empr.</span>
+      </button>
+      <!-- Menu Plus -->
+      <div class="relative" id="more-menu-wrap">
+        <button onclick="toggleMoreMenu()"
+          class="flex items-center gap-1.5 text-gray-600 hover:text-indigo-600 text-xs sm:text-sm font-medium px-3 py-2 rounded-xl border border-gray-200 hover:border-indigo-300 transition-all">
+          ⚙️ <span class="hidden sm:inline">Plus</span><span class="sm:hidden">Plus</span> <span id="more-arrow" class="text-xs transition-transform">▾</span>
+        </button>
+        <div id="more-menu" class="hidden absolute right-0 top-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 min-w-[180px] py-2">
+          <button onclick="openModal('new-account'); closeMoreMenu()"
+            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition">
+            🏦 Nouveau compte
+          </button>
+          <button onclick="openModal('new-category'); closeMoreMenu()"
+            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition">
+            🏷️ Nouvelle catégorie
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-5xl mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-10 md:py-14 space-y-8 sm:space-y-12">
+
+    <!-- Solde global -->
+    <section class="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-2xl shadow-lg shadow-indigo-100 px-4 sm:px-6 py-5 sm:py-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+      <div class="text-center sm:text-left">
+        <p class="text-[10px] sm:text-xs text-indigo-300 uppercase tracking-widest font-semibold mb-1 sm:mb-2">💼 Patrimoine total</p>
+        <p id="total-balance" class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-none">0 FCFA</p>
+        <p class="text-indigo-300 text-[10px] sm:text-xs mt-1 sm:mt-2">Solde consolidé de tous vos comptes</p>
+      </div>
+      <!-- Effort quotidien -->
+      <div id="effort-bloc" class="hidden border-l-0 sm:border-l border-t sm:border-t-0 border-indigo-400/40 pt-4 sm:pt-0 sm:pl-6">
+        <p class="text-xs text-indigo-300 uppercase tracking-widest mb-1">⚡ Effort quotidien</p>
+        <p id="effort-amount" class="text-2xl md:text-3xl font-extrabold text-amber-300 tracking-tight"></p>
+        <p id="effort-label" class="text-indigo-200 text-xs mt-1"></p>
+      </div>
+    </section>
+
+    <!-- Comptes -->
+    <section>
+      <h2 class="text-base font-bold text-gray-500 uppercase tracking-widest mb-5">🏦 Mes Comptes</h2>
+      <div id="accounts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <p class="text-gray-400 text-sm col-span-3">Aucun compte. Cliquez sur ⚙️ Plus.</p>
+      </div>
+    </section>
+
+    <!-- Catégories -->
+    <section>
+      <h2 class="text-base font-bold text-gray-500 uppercase tracking-widest mb-5">🏷️ Catégories</h2>
+      <div id="categories-list" class="flex flex-wrap gap-3">
+        <p class="text-gray-400 text-sm">Aucune catégorie.</p>
+      </div>
+    </section>
+
+    <!-- Prêts & Emprunts -->
+    <section>
+      <h2 class="text-base font-bold text-gray-500 uppercase tracking-widest mb-5">🤝 Prêts &amp; Emprunts</h2>
+      <div id="debts-list" class="space-y-4">
+        <p class="text-gray-400 text-sm">Aucun prêt ni emprunt enregistré.</p>
+      </div>
+    </section>
+
+    <!-- Projets -->
+    <section>
+      <h2 class="text-base font-bold text-gray-500 uppercase tracking-widest mb-5">🚀 Mes Projets</h2>
+      <div id="projects-list" class="space-y-4">
+        <p class="text-gray-400 text-sm">Aucun projet. Cliquez sur 🚀 Projet.</p>
+      </div>
+    </section>
+
+    <!-- Graphiques -->
+    <section>
+      <h2 class="text-base font-bold text-gray-500 uppercase tracking-widest mb-5">📊 Tableaux de Bord</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Entrées vs Sorties -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 col-span-1 md:col-span-2 lg:col-span-2">
+          <p class="text-xs text-gray-400 uppercase tracking-widest mb-3 sm:mb-4">📅 Entrées vs Sorties — 6 derniers mois</p>
+          <div class="relative h-40 sm:h-56">
+            <canvas id="chart-flux"></canvas>
+          </div>
+        </div>
+
+        <!-- Donut catégories -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+          <p class="text-xs text-gray-400 uppercase tracking-widest mb-3 sm:mb-4">🏷️ Dépenses par catégorie</p>
+          <div class="relative h-40 sm:h-56 flex items-center justify-center">
+            <canvas id="chart-cat"></canvas>
+          </div>
+        </div>
+
+        <!-- Solde par compte -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 col-span-1 md:col-span-2 lg:col-span-3">
+          <p class="text-xs text-gray-400 uppercase tracking-widest mb-3 sm:mb-4">🏦 Solde par compte</p>
+          <div class="relative h-32 sm:h-40">
+            <canvas id="chart-accounts"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Transactions récentes -->
+    <section>
+      <h2 class="text-base font-bold text-gray-500 uppercase tracking-widest mb-5">💸 Flux récents</h2>
+
+      <!-- Filtres -->
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        <input id="filter-text" type="text" placeholder="🔍 Rechercher..." oninput="render()"
+          class="flex-1 min-w-[160px] border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        <button onclick="toggleAdvancedFilters()"
+          class="flex items-center gap-1.5 text-xs text-indigo-500 hover:text-indigo-700 font-semibold px-3 py-2 rounded-xl border border-indigo-100 hover:border-indigo-300 transition" id="adv-filter-btn">
+          ⚙️ Filtres avancés <span id="adv-filter-arrow" class="transition-transform">▾</span>
+        </button>
+      </div>
+
+      <!-- Filtres avancés (masqués par défaut) -->
+      <div id="advanced-filters" class="hidden bg-white border border-indigo-50 rounded-2xl p-4 mb-4 space-y-3">
+        <div class="flex flex-wrap gap-3">
+          <select id="filter-account" onchange="render()"
+            class="flex-1 min-w-[120px] border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">Tous les comptes</option>
+          </select>
+          <select id="filter-type" onchange="render()"
+            class="flex-1 min-w-[120px] border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">Tous les types</option>
+            <option value="income">➕ Entrées</option>
+            <option value="expense">➖ Sorties</option>
+          </select>
+          <select id="filter-category" onchange="render()"
+            class="flex-1 min-w-[120px] border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">Toutes les catégories</option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs text-gray-400 font-semibold uppercase tracking-widest self-center">📅 Période</span>
+            <button onclick="setFluxPeriod('month')" id="fp-month" class="fp-btn text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Ce mois</button>
+            <button onclick="setFluxPeriod('last')"  id="fp-last"  class="fp-btn text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Mois dernier</button>
+            <button onclick="setFluxPeriod('year')"  id="fp-year"  class="fp-btn text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Cette année</button>
+            <button onclick="setFluxPeriod('all')"   id="fp-all"   class="fp-btn text-xs px-3 py-1.5 rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 font-semibold transition">Tout</button>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="filter-date-from" type="date" onchange="clearFluxShortcut(); render()"
+              class="flex-1 min-w-[130px] border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+            <span class="text-gray-300 text-xs">→</span>
+            <input id="filter-date-to" type="date" onchange="clearFluxShortcut(); render()"
+              class="flex-1 min-w-[130px] border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+            <button onclick="setFluxPeriod('all')" class="text-gray-300 hover:text-gray-500 text-xs transition" title="Effacer">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recherche par libellé avec résumé -->
+      <div class="bg-white border border-indigo-100 rounded-2xl p-5 mb-5 shadow-sm">
+        <p class="text-xs text-indigo-400 uppercase tracking-widest font-semibold mb-3">🔎 Analyse par libellé / origine</p>
+        <div class="flex gap-3 mb-3">
+          <input id="filter-label" type="text" placeholder="Ex: Salaire, Loyer, Orange Money..."
+            oninput="renderLabelAnalysis()"
+            class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+          <button onclick="document.getElementById('filter-label').value=''; renderLabelAnalysis()"
+            class="text-gray-300 hover:text-gray-500 text-sm px-3 transition">✕</button>
+        </div>
+        <!-- Intervalle analyse -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs text-gray-400 font-semibold uppercase tracking-widest">📅 Période</span>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setLabelPeriod('month')" id="lp-month" class="lp-btn text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Ce mois</button>
+            <button onclick="setLabelPeriod('last')"  id="lp-last"  class="lp-btn text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Mois dernier</button>
+            <button onclick="setLabelPeriod('year')"  id="lp-year"  class="lp-btn text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition">Cette année</button>
+            <button onclick="setLabelPeriod('all')"   id="lp-all"   class="lp-btn text-xs px-3 py-1.5 rounded-lg border border-indigo-300 text-indigo-600 bg-indigo-50 font-semibold transition">Tout</button>
+          </div>
+          <div class="flex items-center gap-2 ml-auto">
+            <input id="label-date-from" type="date" onchange="clearLabelShortcut(); renderLabelAnalysis()"
+              class="border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+            <span class="text-gray-300 text-xs">→</span>
+            <input id="label-date-to" type="date" onchange="clearLabelShortcut(); renderLabelAnalysis()"
+              class="border border-gray-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+            <button onclick="setLabelPeriod('all')" class="text-gray-300 hover:text-gray-500 text-xs transition" title="Effacer">✕</button>
+          </div>
+        </div>
+        <div id="label-analysis" class="mt-4 hidden"></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-gray-400 uppercase text-xs tracking-wider">
+            <tr>
+              <th class="px-4 py-3 text-left">Date</th>
+              <th class="px-4 py-3 text-left">Description</th>
+              <th class="px-4 py-3 text-left hidden sm:table-cell">Catégorie</th>
+              <th class="px-4 py-3 text-left hidden sm:table-cell">Compte</th>
+              <th class="px-4 py-3 text-right">Montant</th>
+              <th class="px-3 py-3"></th>
+            </tr>
+          </thead>
+          <tbody id="transactions-body">
+            <tr><td colspan="6" class="px-4 py-10 text-center text-gray-400">Aucune transaction.</td></tr>
+          </tbody>
+          <tfoot id="transactions-foot" class="hidden">
+            <tr class="bg-indigo-50 border-t-2 border-indigo-100">
+              <td colspan="2" class="px-4 py-3 text-xs font-bold text-indigo-500 uppercase tracking-widest sm:hidden">📊 Total <span id="foot-count-sm" class="font-normal text-indigo-400"></span></td>
+              <td colspan="4" class="px-4 py-3 text-xs font-bold text-indigo-500 uppercase tracking-widest hidden sm:table-cell">📊 Total filtré <span id="foot-count" class="font-normal text-indigo-400"></span></td>
+              <td colspan="2" class="px-4 py-3 text-right sm:hidden">
+                <div id="foot-net-sm" class="text-sm font-extrabold"></div>
+              </td>
+              <td class="px-4 py-3 text-right hidden sm:table-cell">
+                <div id="foot-income" class="text-xs font-bold text-emerald-600"></div>
+                <div id="foot-expense" class="text-xs font-bold text-rose-500"></div>
+                <div id="foot-net" class="text-sm font-extrabold mt-0.5"></div>
+              </td>
+              <td class="hidden sm:table-cell"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modale Prêt / Emprunt -->
+  <div id="debt-modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeDebtModal()"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center justify-center sm:p-4">
+      <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md relative overflow-y-auto max-h-[92vh] sm:max-h-[85vh]">
+        <div class="p-5 sm:p-7">
+          <button onclick="closeDebtModal()" class="absolute top-4 right-5 text-gray-300 hover:text-gray-500 text-lg">✕</button>
+          <h3 id="debt-modal-title" class="text-lg font-bold text-gray-800 mb-5"></h3>
+
+          <!-- Formulaire création -->
+          <div id="debt-form-wrap">
+            <form id="debt-form" onsubmit="submitDebt(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Nom du demandeur / créancier</label>
+                <input id="d-name" type="text" required placeholder="Ex: Jean Dupont"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              </div>
+              <div class="flex gap-3">
+                <div class="flex-1">
+                  <label class="block text-xs text-gray-400 mb-1">Montant (FCFA)</label>
+                  <input id="d-amount" type="number" min="1" required placeholder="Ex: 50000"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                </div>
+                <div class="flex-1">
+                  <label class="block text-xs text-gray-400 mb-1">Date</label>
+                  <input id="d-date" type="date" required
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Caisse concernée</label>
+                <select id="d-account"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">📝 Circonstances &amp; contexte</label>
+                <textarea id="d-context" rows="3" placeholder="Pourquoi cette demande ? Dans quel contexte ?"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"></textarea>
+              </div>
+              <button type="submit" id="debt-btn"
+                class="w-full py-3 rounded-xl text-white font-semibold text-sm transition bg-amber-500 hover:bg-amber-600"></button>
+            </form>
+          </div>
+
+          <!-- Détail + remboursements -->
+          <div id="debt-detail-wrap" class="hidden">
+            <div id="debt-detail-content"></div>
+            <div class="mt-5 border-t border-gray-100 pt-5">
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">➕ Ajouter un remboursement</p>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <input id="r-amount" type="number" min="1" placeholder="Montant"
+                    class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+                  <input id="r-date" type="date"
+                    class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+                </div>
+                <textarea id="r-note" rows="2" placeholder="Circonstances du remboursement..."
+                  class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none"></textarea>
+                <button onclick="submitRemboursement()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-xl transition">✓ Enregistrer ce remboursement</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input import caché -->
+  <input type="file" id="import-input" accept=".json" class="hidden" onchange="importData(event)" />
+
+  <!-- Modale Aide -->
+  <div id="help-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeHelp()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl relative overflow-y-auto max-h-[90vh]">
+        <div class="p-8">
+          <button onclick="closeHelp()" class="absolute top-4 right-5 text-gray-300 hover:text-gray-500 text-lg">✕</button>
+          <h3 class="text-xl font-bold text-indigo-600 mb-1">💰 Emmanuel Finance — Guide de démarrage rapide</h3>
+          <p class="text-xs text-gray-400 mb-6">Tout ce qu'il faut savoir pour bien utiliser l'application.</p>
+
+          <div class="space-y-6 text-sm text-gray-700">
+
+            <!-- 1 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🏦 1. Créer un compte (caisse)</p>
+              <p class="text-gray-500 leading-relaxed">Clique sur <strong>⚙️ Plus</strong> puis sur <strong>🏦 Nouveau compte</strong> dans le header. Donne un nom, choisis une icône et une couleur. Un compte représente une caisse physique ou bancaire (ex : Caisse maison, Orange Money, Banque).</p>
+            </div>
+
+            <!-- 2 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🏷️ 2. Créer une catégorie</p>
+              <p class="text-gray-500 leading-relaxed">Clique sur <strong>⚙️ Plus</strong> puis sur <strong>🏷️ Nouvelle catégorie</strong> dans le header. Les catégories permettent de classer tes transactions (ex : Alimentation, Salaire, Transport). Tu peux aussi en créer directement lors d'une saisie.</p>
+            </div>
+
+            <!-- 3 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">➕➖ 3. Enregistrer une entrée ou une sortie</p>
+              <p class="text-gray-500 leading-relaxed">Clique sur <strong>➕ Entrée</strong> pour un argent reçu, <strong>➖ Sortie</strong> pour une dépense. Remplis le montant, le libellé (origine ou destination), la date, le compte et la catégorie.</p>
+            </div>
+
+            <!-- 4 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🔄 4. Faire un transfert</p>
+              <p class="text-gray-500 leading-relaxed">Clique sur <strong>🔄 Transfert</strong> pour déplacer de l'argent d'un compte vers un autre. Le solde global reste inchangé, seuls les soldes des deux comptes sont ajustés.</p>
+            </div>
+
+            <!-- 5 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🤝💸 5. Prêts & Emprunts</p>
+              <p class="text-gray-500 leading-relaxed"><strong>🤝 Prêt</strong> : tu donnes de l'argent à quelqu'un. <strong>💸 Emprunt</strong> : tu reçois de l'argent de quelqu'un. Dans les deux cas, tu peux enregistrer les remboursements progressifs et suivre le restant dû.</p>
+            </div>
+
+            <!-- 6 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🚀 6. Projets d'épargne</p>
+              <p class="text-gray-500 leading-relaxed">Clique sur <strong>🚀 Projet</strong>. Définis un nom, un montant cible, une échéance et le compte lié. L'app calcule automatiquement l'effort quotidien nécessaire pour atteindre ton objectif à temps.</p>
+            </div>
+
+            <!-- 7 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🔎 7. Filtres & Analyse</p>
+              <p class="text-gray-500 leading-relaxed">Dans la section <strong>Flux récents</strong>, filtre par compte, type, catégorie, période ou texte libre. Les totaux (entrées, sorties, solde net) se calculent automatiquement sur les résultats filtrés. Utilise <strong>🔎 Analyse par libellé</strong> pour retrouver toutes les transactions d'une même origine.</p>
+            </div>
+
+            <!-- 8 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">💾 8. Sauvegarde & Sécurité</p>
+              <p class="text-gray-500 leading-relaxed">Tes données sont stockées dans <strong>ce navigateur</strong> sur cette machine. Clique sur <strong>💾 Sauvegarder ma Caisse</strong> dans le footer pour télécharger un fichier <code class="bg-slate-100 px-1 rounded">.json</code> que tu peux garder ou partager. Pour restaurer, clique sur <strong>📂 Restaurer une sauvegarde</strong> (également dans le footer).</p>
+            </div>
+
+            <!-- 9 -->
+            <div>
+              <p class="font-bold text-gray-800 mb-2">🗃️ 9. Archives automatiques</p>
+              <p class="text-gray-500 leading-relaxed">À chaque réinitialisation, une archive est créée automatiquement (10 max). Clique sur <strong>🗃️ Archives</strong> dans le footer pour les consulter et restaurer l'une d'elles à tout moment.</p>
+            </div>
+
+            <!-- 10 -->
+            <div class="bg-amber-50 border border-amber-100 rounded-xl px-5 py-4">
+              <p class="font-bold text-amber-700 mb-1">❓ Questions fréquentes</p>
+              <ul class="space-y-2 text-amber-800 text-xs leading-relaxed">
+                <li><strong>Mes données sont-elles partagées si je donne le fichier ?</strong> Non. Les données sont dans ton navigateur, pas dans le fichier HTML. Le fichier est vide pour celui qui le reçoit.</li>
+                <li><strong>Que se passe-t-il si je vide mon navigateur ?</strong> Les données sont perdues. Fais toujours une sauvegarde <code class="bg-amber-100 px-1 rounded">.json</code> régulièrement.</li>
+                <li><strong>Puis-je utiliser l'app sur un autre PC ?</strong> Oui, en restaurant ton fichier <code class="bg-amber-100 px-1 rounded">.json</code> sur le nouveau PC.</li>
+                <li><strong>Le solde d'un compte est-il affecté par un prêt ?</strong> Oui. Un prêt crée une sortie, un emprunt crée une entrée sur le compte sélectionné.</li>
+              </ul>
+            </div>
+
+            <!-- 11 -->
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-5 py-4 text-center">
+              <p class="text-xs text-indigo-400 uppercase tracking-widest mb-2">🌐 Site officiel</p>
+              <p class="text-sm text-gray-600 leading-relaxed mb-3">Pour plus d'informations, mises à jour et support, visitez le site officiel de l'application.</p>
+              <a href="https://emmanuel-dpv.pages.dev" target="_blank" rel="noopener"
+                class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
+                🌐 emmanuel-dpv.pages.dev
+              </a>
+            </div>
+
+          </div>
+
+          <button onclick="closeHelp()" class="mt-8 w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm rounded-xl transition">Fermer le guide</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Archives -->
+  <div id="archives-modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeArchivesModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg relative overflow-y-auto max-h-[85vh]">
+        <div class="p-7">
+          <button onclick="closeArchivesModal()" class="absolute top-4 right-5 text-gray-300 hover:text-gray-500 text-lg">✕</button>
+          <h3 class="text-lg font-bold text-gray-800 mb-1">🗃️ Archives automatiques</h3>
+          <p class="text-xs text-gray-400 mb-5">Créées automatiquement à chaque réinitialisation. 10 archives maximum.</p>
+          <div id="archives-list" class="space-y-3"></div>
+          <div class="mt-6 pt-5 border-t border-gray-100">
+            <button onclick="purgeAllArchives()"
+              class="w-full flex items-center justify-center gap-2 text-rose-400 hover:text-rose-600 text-xs font-medium px-4 py-2.5 rounded-xl border border-rose-100 hover:border-rose-300 transition-all">
+              🗑️ Effacer toutes les archives
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale recommandation sauvegarde fermeture -->
+  <div id="save-reminder-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative">
+        <div class="text-5xl mb-4">💾</div>
+        <h3 class="text-lg font-bold text-gray-800 mb-2">Avant de partir…</h3>
+        <p class="text-sm text-gray-500 leading-relaxed mb-6">
+          Pense à <strong>sauvegarder ta caisse</strong> avant de fermer.<br/>
+          Tes données sont dans ce navigateur — un fichier de sauvegarde te protège en cas de problème.
+        </p>
+        <div class="flex flex-col gap-3">
+          <button onclick="exportData(); closeSaveReminder()"
+            class="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm rounded-xl transition">
+            💾 Sauvegarder maintenant
+          </button>
+          <button onclick="closeSaveReminder()"
+            class="w-full py-2.5 text-gray-400 hover:text-gray-600 text-sm transition">
+            Continuer sans sauvegarder
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Sagesse + Sécurité -->
+  <footer class="max-w-5xl mx-auto px-3 sm:px-4 md:px-8 pb-10 sm:pb-14 pt-2 flex flex-col md:flex-row gap-3 sm:gap-4">
+
+    <!-- Sagesse -->
+    <div class="flex-1 bg-white border border-indigo-100 rounded-2xl px-5 sm:px-8 py-4 sm:py-6 text-center shadow-sm">
+      <p class="text-[10px] sm:text-xs text-indigo-400 uppercase tracking-widest mb-2 sm:mb-3">✨ Parole de Sagesse</p>
+      <p id="sagesse-txt" class="text-gray-700 text-sm sm:text-base md:text-lg font-bold leading-relaxed italic"></p>
+      <button onclick="nextSagesse()" class="mt-3 sm:mt-4 text-xs text-indigo-400 hover:text-indigo-600 transition-colors">↻ Autre parole</button>
+    </div>
+
+    <!-- Sécurité -->
+    <div class="bg-white border border-gray-100 rounded-2xl px-4 sm:px-6 py-4 sm:py-6 shadow-sm flex flex-col justify-center gap-2.5 sm:gap-3 min-w-0 sm:min-w-[220px]">
+      <p class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">🔒 Ma Caisse</p>
+      <!-- Boutons principaux -->
+      <button onclick="exportData()"
+        class="flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 active:scale-95 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all">
+        💾 Sauvegarder ma Caisse
+      </button>
+      <button onclick="document.getElementById('import-input').click()"
+        class="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:scale-95 text-gray-600 text-sm font-medium px-4 py-3 rounded-xl border border-gray-200 transition-all">
+        📂 Restaurer une sauvegarde
+      </button>
+      <!-- Boutons secondaires en ligne -->
+      <div class="flex gap-2 pt-1">
+        <button onclick="openHelp()"
+          class="flex-1 flex items-center justify-center gap-1 text-indigo-400 hover:text-indigo-600 text-xs font-medium py-2 rounded-xl border border-indigo-100 hover:border-indigo-300 transition-all">
+          ❓ Aide
+        </button>
+        <button onclick="openArchivesModal()"
+          class="flex-1 flex items-center justify-center gap-1 text-gray-400 hover:text-indigo-500 text-xs font-medium py-2 rounded-xl border border-gray-200 hover:border-indigo-200 transition-all">
+          🗃️ Archives
+        </button>
+        <button onclick="resetData()"
+          class="flex-1 flex items-center justify-center gap-1 text-rose-300 hover:text-rose-500 text-xs font-medium py-2 rounded-xl border border-rose-100 hover:border-rose-300 transition-all">
+          🗑️ Reset
+        </button>
+      </div>
+    </div>
+
+  </footer>
+
+  <script>
+    // ─── Storage ──────────────────────────────────────────────────────────────
+    const KEYS = { accounts: 'ef_accounts', categories: 'ef_categories', transactions: 'ef_transactions', projects: 'ef_projects', loans: 'ef_loans', borrows: 'ef_borrows' };
+    const load = k => JSON.parse(localStorage.getItem(k) || '[]');
+    const save = (k, d) => localStorage.setItem(k, JSON.stringify(d));
+    const uid  = () => 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+
+
+    // ─── Calcul soldes ────────────────────────────────────────────────────────
+    // Les transferts créent 2 tx (expense source + income destination) :
+    // le calcul income/expense standard est donc mathématiquement exact.
+    function getBalances() {
+      return load(KEYS.transactions).reduce((acc, tx) => {
+        const amt = Number(tx.amount) || 0;
+        acc[tx.accountId] = (acc[tx.accountId] || 0) + (tx.type === 'income' ? amt : -amt);
+        return acc;
+      }, {});
+    }
+
+    // ─── Modale ───────────────────────────────────────────────────────────────
+    let currentMode = 'income';
+
+    const MODE = {
+      income:       { title: '➕ Nouvelle Entrée',        btn: 'Enregistrer l\'entrée',  cls: 'bg-emerald-500 hover:bg-emerald-600' },
+      expense:      { title: '➖ Nouvelle Sortie',         btn: 'Enregistrer la sortie',  cls: 'bg-rose-500 hover:bg-rose-600'       },
+      transfer:     { title: '🔄 Transfert entre comptes', btn: 'Effectuer le transfert', cls: 'bg-indigo-500 hover:bg-indigo-600'   },
+      project:      { title: '🚀 Nouveau Projet',          btn: 'Lancer le projet',       cls: 'bg-violet-500 hover:bg-violet-600'   },
+      'new-account':  { title: '🏦 Nouveau Compte',        btn: 'Créer le compte',        cls: 'bg-indigo-500 hover:bg-indigo-600'   },
+      'new-category': { title: '🏷️ Nouvelle Catégorie',   btn: 'Créer la catégorie',     cls: 'bg-indigo-500 hover:bg-indigo-600'   },
+    };
+
+    function openModal(mode) {
+      currentMode = mode;
+      const cfg = MODE[mode];
+      document.getElementById('modal-title').textContent = cfg.title;
+      const btn = document.getElementById('modal-btn');
+      btn.textContent = cfg.btn;
+      btn.className = `w-full mt-2 py-3 rounded-xl text-white font-semibold text-sm transition ${cfg.cls}`;
+
+      const isTransfer  = mode === 'transfer';
+      const isProject   = mode === 'project';
+      const isNewAcc    = mode === 'new-account';
+      const isNewCat    = mode === 'new-category';
+      const isSetup     = isNewAcc || isNewCat;
+
+      // Champs standard visibles seulement pour income/expense/transfer/project
+      document.getElementById('f-amount').closest('div').classList.toggle('hidden', isSetup);
+      document.getElementById('f-amount').required = !isSetup;
+      document.getElementById('f-label').required  = true; // toujours requis
+
+      document.getElementById('field-account').classList.toggle('hidden',  isTransfer || isProject || isSetup);
+      document.getElementById('field-transfer').classList.toggle('hidden',  !isTransfer);
+      document.getElementById('field-category').classList.toggle('hidden',  isTransfer || isProject || isSetup);
+      document.getElementById('field-project').classList.toggle('hidden',   !isProject);
+      document.getElementById('field-new-account').classList.toggle('hidden',  !isNewAcc);
+      document.getElementById('field-new-category').classList.toggle('hidden', !isNewCat);
+
+      // Champ date
+      document.getElementById('f-date').closest('div').classList.toggle('hidden', isProject || isSetup);
+      document.getElementById('f-date').required = !isProject && !isSetup;
+
+      // Labels dynamiques
+      document.querySelector('label[for="f-amount"]').textContent = isProject ? 'Montant Cible (FCFA)' : 'Montant (FCFA)';
+      document.getElementById('f-amount').placeholder = isProject ? 'Ex: 500000' : 'Ex: 25000';
+      document.querySelector('label[for="f-label"]').textContent =
+        isNewAcc ? 'Nom du Compte' : isNewCat ? 'Nom de la Catégorie' : isProject ? 'Nom du Projet' : 'Description';
+      document.getElementById('f-label').placeholder =
+        isNewAcc ? 'Ex: Caisse Maison' : isNewCat ? 'Ex: Alimentation' : isProject ? 'Ex: Achat voiture' : 'Ex: Salaire juin';
+
+      // Reset valeurs
+      document.getElementById('f-date').value   = new Date().toISOString().split('T')[0];
+      document.getElementById('f-amount').value = '';
+      document.getElementById('f-label').value  = '';
+      if (isNewAcc) { pickColor('indigo'); pickIcon('🏦'); }
+      if (isNewCat) { document.getElementById('f-cat-icon').value = ''; }
+
+      // Fermer les panneaux inline à chaque ouverture
+      document.getElementById('inline-acc').classList.add('hidden');
+      document.getElementById('inline-cat').classList.add('hidden');
+
+      // Peupler les selects
+      const accounts   = load(KEYS.accounts);
+      const categories = load(KEYS.categories);
+      const accOpts = accounts.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('');
+      const noAccMsg  = `<option value="" disabled selected>— Aucun compte, créez-en un ci-dessus —</option>`;
+      const noCatMsg  = `<option value="" disabled selected>— Aucune catégorie, créez-en une ci-dessus —</option>`;
+      document.getElementById('f-account').innerHTML  = accounts.length  ? accOpts : noAccMsg;
+      document.getElementById('f-from').innerHTML     = accounts.length  ? accOpts : noAccMsg;
+      document.getElementById('f-to').innerHTML       = accounts.length  ? accOpts : noAccMsg;
+      if (accounts.length > 1) document.getElementById('f-to').selectedIndex = 1;
+      document.getElementById('f-category').innerHTML = categories.length
+        ? categories.map(c => `<option value="${c.id}">${c.icon} ${c.name} · ${c.parent}</option>`).join('')
+        : noCatMsg;
+      document.getElementById('f-proj-account').innerHTML = accounts.length ? accOpts : noAccMsg;
+      // Ouvrir automatiquement le panneau inline si la liste est vide
+      if (!accounts.length  && (mode === 'income' || mode === 'expense' || mode === 'transfer'))
+        document.getElementById('inline-acc').classList.remove('hidden');
+      if (!categories.length && (mode === 'income' || mode === 'expense'))
+        document.getElementById('inline-cat').classList.remove('hidden');
+
+      document.getElementById('modal').classList.remove('hidden');
+      if (!isSetup) document.getElementById('f-amount').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeModal(); closeDebtModal(); closeArchivesModal(); closeHelp(); }
+    });
+
+    function submitOp(e) {
+      e.preventDefault();
+      const amount = Math.round(parseFloat(document.getElementById('f-amount').value));
+      const label  = document.getElementById('f-label').value.trim();
+      const date   = document.getElementById('f-date').value;
+      if (!label) return;
+      const isSetupMode = currentMode === 'new-account' || currentMode === 'new-category';
+      if (!isSetupMode && (!amount || amount <= 0)) return;
+      if (!isSetupMode && currentMode !== 'project' && !date) return;
+
+      const txs = load(KEYS.transactions);
+
+      if (currentMode === 'new-account') {
+        const name  = document.getElementById('f-label').value.trim();
+        const icon  = document.getElementById('f-acc-icon').value  || '🏦';
+        const color = document.getElementById('f-acc-color').value || 'indigo';
+        if (!name) { showToast('⚠️ Donne un nom à ce compte.', 'warn'); return; }
+        const accounts = load(KEYS.accounts);
+        accounts.push({ id: uid(), name, icon, color });
+        save(KEYS.accounts, accounts);
+        showToast(`🏦 Compte <strong>"${name}"</strong> créé. Il est prêt à recevoir.`, 'success');
+        closeModal(); render(); return;
+      }
+
+      if (currentMode === 'new-category') {
+        const name  = document.getElementById('f-label').value.trim();
+        const icon  = document.getElementById('f-cat-icon').value.trim() || '📌';
+        const group = document.getElementById('f-cat-group').value;
+        if (!name) { showToast('⚠️ Donne un nom à cette catégorie.', 'warn'); return; }
+        const cats = load(KEYS.categories);
+        cats.push({ id: uid(), name, icon, parent: group, sub: '' });
+        save(KEYS.categories, cats);
+        showToast(`🏷️ Catégorie <strong>"${name}"</strong> créée.`, 'success');
+        closeModal(); render(); return;
+      }
+
+      if (currentMode === 'project') {
+        const deadline  = document.getElementById('f-deadline').value;
+        const accountId = document.getElementById('f-proj-account').value;
+        if (!deadline || !accountId) { showToast('⚠️ Remplissez tous les champs du projet.', 'warn'); return; }
+        const projects = load(KEYS.projects);
+        projects.push({ id: uid(), name: label, target: amount, deadline, accountId });
+        save(KEYS.projects, projects);
+        showToast(`🚀 Projet <strong>"${label}"</strong> lancé. L'avenir se construit maintenant.`, 'success');
+        closeModal();
+        render();
+        return;
+      } else if (currentMode === 'transfer') {
+        const fromId   = document.getElementById('f-from').value;
+        const toId     = document.getElementById('f-to').value;
+        if (fromId === toId) { showToast('⚠️ Choisissez deux comptes différents.', 'warn'); return; }
+        const fromName = accName(fromId);
+        const toName   = accName(toId);
+        txs.push(
+          { id: uid(), date, label: `🔄 Vers ${toName} — ${label}`,   type: 'expense', amount, categoryId: null, accountId: fromId },
+          { id: uid(), date, label: `🔄 De ${fromName} — ${label}`,   type: 'income',  amount, categoryId: null, accountId: toId   }
+        );
+        showToast(`🔄 <strong>${fmt(amount)}</strong> déplacés. Ton argent travaille pour toi.`);
+      } else {
+        const accountId  = document.getElementById('f-account').value;
+        const categoryId = document.getElementById('f-category').value || null;
+        txs.push({ id: uid(), date, label, type: currentMode, amount, categoryId, accountId });
+        showToast(currentMode === 'income'
+          ? `💪 <strong>${fmt(amount)}</strong> encaissés. Continue à construire.`
+          : `✅ <strong>${fmt(amount)}</strong> enregistrés. Chaque centime compte.`, 'success');
+      }
+
+      save(KEYS.transactions, txs);
+      closeModal();
+      render();
+    }
+
+    function accName(id) {
+      return (load(KEYS.accounts).find(a => a.id === id) || {}).name || id;
+    }
+
+    // ─── Toast ────────────────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, type = 'ok') {
+      const wrap  = document.getElementById('toast');
+      const inner = document.getElementById('toast-inner');
+      inner.innerHTML = msg;
+      inner.className = `flex items-center gap-2 shadow-xl rounded-2xl px-5 py-3.5 text-sm font-semibold border ${
+        type === 'warn'
+          ? 'bg-amber-50 border-amber-200 text-amber-700'
+          : type === 'success'
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          : 'bg-white border-gray-100 text-gray-700'
+      }`;
+      wrap.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => wrap.classList.add('hidden'), 3000);
+    }
+
+    // ─── Rendu ────────────────────────────────────────────────────────────────
+    const fmt = n => Number(n).toLocaleString('fr-FR') + ' FCFA';
+
+    const COLOR = {
+      indigo:  { border: 'border-indigo-100',  text: 'text-indigo-600',  bg: 'bg-indigo-50'  },
+      emerald: { border: 'border-emerald-100', text: 'text-emerald-600', bg: 'bg-emerald-50' },
+      amber:   { border: 'border-amber-100',   text: 'text-amber-600',   bg: 'bg-amber-50'   },
+      rose:    { border: 'border-rose-100',    text: 'text-rose-600',    bg: 'bg-rose-50'    },
+      violet:  { border: 'border-violet-100',  text: 'text-violet-600',  bg: 'bg-violet-50'  },
+      sky:     { border: 'border-sky-100',     text: 'text-sky-600',     bg: 'bg-sky-50'     },
+    };
+
+    function render() {
+      const accounts     = load(KEYS.accounts);
+      const categories   = load(KEYS.categories);
+      const transactions = load(KEYS.transactions).sort((a, b) => b.date.localeCompare(a.date));
+      const balances     = getBalances();
+
+      // Maps partagées
+      const catMap = Object.fromEntries(categories.map(c => [c.id, c]));
+      const accMap = Object.fromEntries(accounts.map(a => [a.id, a]));
+
+      // Filtre transactions — mettre à jour le select comptes
+      const filterAccSel = document.getElementById('filter-account');
+      const prevFilterAcc = filterAccSel.value;
+      filterAccSel.innerHTML = '<option value="">Tous les comptes</option>' +
+        accounts.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('');
+      filterAccSel.value = prevFilterAcc;
+
+      // Filtre catégories — mettre à jour le select
+      const filterCatSel = document.getElementById('filter-category');
+      const prevFilterCat = filterCatSel.value;
+      filterCatSel.innerHTML = '<option value="">Toutes les catégories</option>' +
+        categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+      filterCatSel.value = prevFilterCat;
+
+      // Projets
+      const today    = new Date(); today.setHours(0,0,0,0);
+      const projects = load(KEYS.projects);
+      const projList = document.getElementById('projects-list');
+      projList.innerHTML = projects.length
+        ? projects.map(p => {
+            const bal      = balances[p.accountId] || 0;
+            const acc      = accMap[p.accountId] || {};
+            const pct      = p.target > 0 ? Math.min(100, Math.round((bal / p.target) * 100)) : 0;
+            const manquant = Math.max(0, p.target - bal);
+            const deadline = new Date(p.deadline); deadline.setHours(0,0,0,0);
+            const jours    = Math.ceil((deadline - today) / 86400000);
+            const done     = bal >= p.target;
+
+            // Couleur barre selon avancement
+            const barColor = done ? 'bg-emerald-500' : pct >= 60 ? 'bg-violet-500' : pct >= 30 ? 'bg-amber-400' : 'bg-red-400';
+
+            // Phrase de l'expert
+            let conseil;
+            if (done) {
+              conseil = `<span class="text-emerald-600 font-semibold">✅ Objectif atteint ! Vous avez même ${fmt(bal - p.target)} de plus.</span>`;
+            } else if (jours <= 0) {
+              conseil = `<span class="text-red-600 font-semibold">⚠️ Échéance dépassée. Il manque encore ${fmt(manquant)}.</span>`;
+            } else {
+              const parJour = Math.ceil(manquant / jours);
+              conseil = `<span class="text-gray-600">Il vous reste <strong>${jours} jour${jours > 1 ? 's' : ''}</strong> pour économiser <strong>${fmt(manquant)}</strong>, soit un effort de <strong class="text-violet-600">${fmt(parJour)} / jour</strong>.</span>`;
+            }
+
+            return `
+              <div class="bg-white border border-gray-100 rounded-xl px-5 py-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-semibold text-gray-700">🎯 ${p.name}</span>
+                  <div class="flex items-center gap-3">
+                    <span class="text-gray-400 text-xs">Échéance : ${p.deadline}${jours > 0 && !done ? ` · <strong class="text-gray-500">${jours}j</strong>` : ''}</span>
+                    <button onclick="deleteProject('${p.id}')" class="text-gray-300 hover:text-rose-500 text-xs transition" title="Supprimer">🗑️</button>
+                  </div>
+                </div>
+                <div class="text-gray-400 text-xs mb-3">${acc.icon || ''} ${acc.name || '—'} · ${fmt(bal)} / ${fmt(p.target)}</div>
+                <div class="w-full bg-gray-100 rounded-full h-2 mb-1">
+                  <div class="${barColor} h-2 rounded-full transition-all" style="width:${pct}%"></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+                  <span>${pct}%</span><span>${fmt(p.target)}</span>
+                </div>
+                <div class="text-xs leading-relaxed">${conseil}</div>
+              </div>`;
+          }).join('')
+        : '<p class="text-gray-400 text-sm">Aucun projet. Cliquez sur 🎯 Projet.</p>';
+
+      renderDebts(accMap);
+      renderCharts(transactions, categories, accounts, balances);
+
+      // Patrimoine total + effort quotidien global
+      const total = Object.values(balances).reduce((s, v) => s + v, 0);
+      document.getElementById('total-balance').textContent = fmt(total);
+
+      // Calcul effort quotidien : somme des efforts de tous les projets actifs
+      const today2 = new Date(); today2.setHours(0,0,0,0);
+      const efforts = load(KEYS.projects)
+        .filter(p => balances[p.accountId] < p.target)
+        .map(p => {
+          const jours = Math.ceil((new Date(p.deadline) - today2) / 86400000);
+          return jours > 0 ? Math.ceil((p.target - (balances[p.accountId] || 0)) / jours) : 0;
+        })
+        .filter(v => v > 0);
+      const effortBloc = document.getElementById('effort-bloc');
+      if (efforts.length) {
+        const totalEffort = efforts.reduce((s, v) => s + v, 0);
+        document.getElementById('effort-amount').textContent = fmt(totalEffort);
+        document.getElementById('effort-label').textContent  = `à économiser par jour sur ${efforts.length} projet${efforts.length > 1 ? 's' : ''} actif${efforts.length > 1 ? 's' : ''}`;
+        effortBloc.classList.remove('hidden');
+      } else {
+        effortBloc.classList.add('hidden');
+      }
+
+      // Comptes
+      const grid = document.getElementById('accounts-grid');
+      grid.innerHTML = accounts.length
+        ? accounts.map(a => {
+            const c   = COLOR[a.color] || COLOR.indigo;
+            const bal = balances[a.id] || 0;
+            return `
+              <div class="bg-white rounded-2xl border ${c.border} shadow-sm hover:shadow-md transition-shadow p-7 flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <span class="text-3xl">${a.icon}</span>
+                    <span class="font-semibold text-gray-700 text-base">${a.name}</span>
+                  </div>
+                  <button onclick="deleteAccount('${a.id}')" class="text-gray-200 hover:text-rose-400 transition text-sm" title="Supprimer ce compte">🗑️</button>
+                </div>
+                <p class="text-3xl font-extrabold ${c.text} tracking-tight">${fmt(bal)}</p>
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Solde disponible</p>
+              </div>`;
+          }).join('')
+        : '<p class="text-gray-400 text-sm col-span-3">Aucun compte.</p>';
+
+      // Catégories
+      const catList = document.getElementById('categories-list');
+      catList.innerHTML = categories.length
+        ? categories.map(c =>
+            `<span class="inline-flex items-center gap-1.5 bg-white border border-gray-100 rounded-full px-4 py-1.5 text-sm shadow-sm">
+              ${c.icon} <span class="font-medium">${c.name}</span>
+              <span class="text-gray-400 text-xs">· ${c.parent}</span>
+              <button onclick="deleteCategory('${c.id}')" class="ml-1 text-gray-300 hover:text-rose-400 transition text-xs leading-none" title="Supprimer">✕</button>
+            </span>`
+          ).join('')
+        : '<p class="text-gray-400 text-sm">Aucune catégorie.</p>';
+
+      // Transactions — avec filtres
+      const filterText     = (document.getElementById('filter-text').value || '').toLowerCase();
+      const filterAccount  = document.getElementById('filter-account').value;
+      const filterType     = document.getElementById('filter-type').value;
+      const filterCategory = document.getElementById('filter-category').value;
+      const filterDateFrom = document.getElementById('filter-date-from').value;
+      const filterDateTo   = document.getElementById('filter-date-to').value;
+      const filtered = transactions.filter(tx => {
+        if (filterAccount  && tx.accountId  !== filterAccount)  return false;
+        if (filterType     && tx.type       !== filterType)     return false;
+        if (filterCategory && tx.categoryId !== filterCategory) return false;
+        if (filterText     && !tx.label.toLowerCase().includes(filterText)) return false;
+        if (filterDateFrom && tx.date < filterDateFrom) return false;
+        if (filterDateTo   && tx.date > filterDateTo)   return false;
+        return true;
+      });
+      const tbody = document.getElementById('transactions-body');
+      tbody.innerHTML = filtered.length
+        ? filtered.map((tx, i) => {
+            const cat      = catMap[tx.categoryId] || {};
+            const acc      = accMap[tx.accountId]  || {};
+            const isIncome = tx.type === 'income';
+            return `
+              <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-indigo-50 transition-colors">
+                <td class="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">${tx.date}</td>
+                <td class="px-4 py-3 font-medium text-gray-800 text-sm">
+                  ${tx.label}
+                  <div class="sm:hidden text-xs text-gray-400 mt-0.5">${acc.icon || ''} ${acc.name || ''} ${cat.icon ? '· ' + cat.icon + ' ' + cat.name : ''}</div>
+                </td>
+                <td class="px-4 py-3 text-gray-500 text-xs hidden sm:table-cell">${cat.icon || '—'} ${cat.name || ''}</td>
+                <td class="px-4 py-3 text-gray-500 text-xs hidden sm:table-cell">${acc.icon || ''} ${acc.name || '—'}</td>
+                <td class="px-4 py-3 text-right font-bold ${isIncome ? 'text-emerald-600' : 'text-rose-500'} whitespace-nowrap">
+                  ${isIncome ? '+' : '-'}${fmt(tx.amount)}
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <button onclick="deleteTransaction('${tx.id}')" class="text-gray-300 hover:text-rose-500 transition text-xs" title="Supprimer">🗑️</button>
+                </td>
+              </tr>`;
+          }).join('')
+        : `<tr><td colspan="6" class="px-4 py-10 text-center text-gray-400">${transactions.length ? 'Aucun résultat pour ces filtres.' : 'Aucune transaction.'}</td></tr>`;
+
+      // Totaux filtrés
+      const foot = document.getElementById('transactions-foot');
+      if (filtered.length) {
+        const sumIncome  = filtered.filter(t => t.type === 'income') .reduce((s, t) => s + Number(t.amount), 0);
+        const sumExpense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+        const net        = sumIncome - sumExpense;
+        const countTxt   = `(${filtered.length} opération${filtered.length > 1 ? 's' : ''})`;
+        document.getElementById('foot-count').textContent    = countTxt;
+        const footCountSm = document.getElementById('foot-count-sm');
+        if (footCountSm) footCountSm.textContent = countTxt;
+        document.getElementById('foot-income').textContent  = sumIncome  ? `➕ Entrées : ${fmt(sumIncome)}`  : '';
+        document.getElementById('foot-expense').textContent = sumExpense ? `➖ Sorties : ${fmt(sumExpense)}` : '';
+        const netEl   = document.getElementById('foot-net');
+        const netSmEl = document.getElementById('foot-net-sm');
+        const netTxt  = `Solde : ${net >= 0 ? '+' : ''}${fmt(net)}`;
+        const netCls  = `text-sm font-extrabold mt-0.5 ${net >= 0 ? 'text-emerald-600' : 'text-rose-500'}`;
+        netEl.textContent = `Solde net : ${net >= 0 ? '+' : ''}${fmt(net)}`;
+        netEl.className   = netCls;
+        if (netSmEl) { netSmEl.textContent = netTxt; netSmEl.className = netCls; }
+        foot.classList.remove('hidden');
+      } else {
+        foot.classList.add('hidden');
+      }
+    }
+
+    // ─── Gestion des périodes ──────────────────────────────────────────────────────
+    function getPeriodDates(period) {
+      const now   = new Date();
+      const y     = now.getFullYear();
+      const m     = now.getMonth();
+      if (period === 'month') return { from: `${y}-${String(m+1).padStart(2,'0')}-01`, to: `${y}-${String(m+1).padStart(2,'0')}-31` };
+      if (period === 'last')  { const lm = new Date(y, m, 0); return { from: `${lm.getFullYear()}-${String(lm.getMonth()+1).padStart(2,'0')}-01`, to: lm.toISOString().split('T')[0] }; }
+      if (period === 'year')  return { from: `${y}-01-01`, to: `${y}-12-31` };
+      return { from: '', to: '' };
+    }
+
+    function setFluxPeriod(period) {
+      const { from, to } = getPeriodDates(period);
+      document.getElementById('filter-date-from').value = from;
+      document.getElementById('filter-date-to').value   = to;
+      document.querySelectorAll('.fp-btn').forEach(b => {
+        const active = b.id === 'fp-' + period;
+        b.classList.toggle('border-indigo-300', active);
+        b.classList.toggle('text-indigo-600',   active);
+        b.classList.toggle('bg-indigo-50',      active);
+        b.classList.toggle('font-semibold',     active);
+        b.classList.toggle('border-gray-200',   !active);
+        b.classList.toggle('text-gray-500',     !active);
+      });
+      render();
+    }
+
+    function clearFluxShortcut() {
+      document.querySelectorAll('.fp-btn').forEach(b => {
+        b.classList.remove('border-indigo-300','text-indigo-600','bg-indigo-50','font-semibold');
+        b.classList.add('border-gray-200','text-gray-500');
+      });
+    }
+
+    function setLabelPeriod(period) {
+      const { from, to } = getPeriodDates(period);
+      document.getElementById('label-date-from').value = from;
+      document.getElementById('label-date-to').value   = to;
+      document.querySelectorAll('.lp-btn').forEach(b => {
+        const active = b.id === 'lp-' + period;
+        b.classList.toggle('border-indigo-300', active);
+        b.classList.toggle('text-indigo-600',   active);
+        b.classList.toggle('bg-indigo-50',      active);
+        b.classList.toggle('font-semibold',     active);
+        b.classList.toggle('border-gray-200',   !active);
+        b.classList.toggle('text-gray-500',     !active);
+      });
+      renderLabelAnalysis();
+    }
+
+    function clearLabelShortcut() {
+      document.querySelectorAll('.lp-btn').forEach(b => {
+        b.classList.remove('border-indigo-300','text-indigo-600','bg-indigo-50','font-semibold');
+        b.classList.add('border-gray-200','text-gray-500');
+      });
+    }
+
+    // ─── Analyse par libellé ─────────────────────────────────────────────────────────
+    function renderLabelAnalysis() {
+      const query    = (document.getElementById('filter-label').value || '').trim().toLowerCase();
+      const dateFrom = document.getElementById('label-date-from').value;
+      const dateTo   = document.getElementById('label-date-to').value;
+      const bloc     = document.getElementById('label-analysis');
+      if (!query) { bloc.classList.add('hidden'); bloc.innerHTML = ''; return; }
+
+      const transactions = load(KEYS.transactions);
+      const accounts     = load(KEYS.accounts);
+      const accMap       = Object.fromEntries(accounts.map(a => [a.id, a]));
+
+      const matched = transactions
+        .filter(tx => {
+          if (!tx.label.toLowerCase().includes(query)) return false;
+          if (dateFrom && tx.date < dateFrom) return false;
+          if (dateTo   && tx.date > dateTo)   return false;
+          return true;
+        })
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      if (!matched.length) {
+        bloc.classList.remove('hidden');
+        bloc.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Aucune transaction trouvée pour ce libellé.</p>';
+        return;
+      }
+
+      const totalIncome  = matched.filter(t => t.type === 'income') .reduce((s, t) => s + Number(t.amount), 0);
+      const totalExpense = matched.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+      const total        = totalIncome - totalExpense;
+      const moyenne      = Math.round(matched.reduce((s, t) => s + Number(t.amount), 0) / matched.length);
+      const isAllIncome  = matched.every(t => t.type === 'income');
+      const isAllExpense = matched.every(t => t.type === 'expense');
+
+      bloc.classList.remove('hidden');
+      bloc.innerHTML = `
+        <!-- Résumé -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div class="bg-indigo-50 rounded-xl px-4 py-3 text-center">
+            <p class="text-xs text-indigo-400 uppercase tracking-widest mb-1">Opérations</p>
+            <p class="text-2xl font-extrabold text-indigo-600">${matched.length}</p>
+          </div>
+          <div class="bg-emerald-50 rounded-xl px-4 py-3 text-center">
+            <p class="text-xs text-emerald-400 uppercase tracking-widest mb-1">Total entrées</p>
+            <p class="text-lg font-extrabold text-emerald-600">${fmt(totalIncome)}</p>
+          </div>
+          <div class="bg-rose-50 rounded-xl px-4 py-3 text-center">
+            <p class="text-xs text-rose-400 uppercase tracking-widest mb-1">Total sorties</p>
+            <p class="text-lg font-extrabold text-rose-500">${fmt(totalExpense)}</p>
+          </div>
+          <div class="${total >= 0 ? 'bg-emerald-50' : 'bg-rose-50'} rounded-xl px-4 py-3 text-center">
+            <p class="text-xs ${total >= 0 ? 'text-emerald-400' : 'text-rose-400'} uppercase tracking-widest mb-1">Solde net</p>
+            <p class="text-lg font-extrabold ${total >= 0 ? 'text-emerald-600' : 'text-rose-500'}">${total >= 0 ? '+' : ''}${fmt(total)}</p>
+          </div>
+        </div>
+        <div class="text-xs text-gray-400 mb-3">Moyenne par opération : <strong class="text-gray-600">${fmt(moyenne)}</strong> &nbsp;·&nbsp; Période : <strong class="text-gray-600">${matched[matched.length-1].date}</strong> → <strong class="text-gray-600">${matched[0].date}</strong></div>
+
+        <!-- Détail par date -->
+        <div class="border border-gray-100 rounded-xl overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-gray-400 uppercase text-xs tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">Date</th>
+                <th class="px-4 py-3 text-left">Libellé</th>
+                <th class="px-4 py-3 text-left">Compte</th>
+                <th class="px-4 py-3 text-right">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matched.map((tx, i) => {
+                const acc      = accMap[tx.accountId] || {};
+                const isIncome = tx.type === 'income';
+                return `<tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
+                  <td class="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">${tx.date}</td>
+                  <td class="px-4 py-3 text-gray-700 font-medium">${tx.label}</td>
+                  <td class="px-4 py-3 text-gray-400 text-xs">${acc.icon || ''} ${acc.name || '—'}</td>
+                  <td class="px-4 py-3 text-right font-bold ${isIncome ? 'text-emerald-600' : 'text-rose-500'}">
+                    ${isIncome ? '+' : '-'}${fmt(tx.amount)}
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    // ─── Graphiques ───────────────────────────────────────────────────────────
+    let chartFlux, chartCat, chartAccounts;
+
+    const CHART_COLORS = [
+      '#6366f1','#10b981','#f59e0b','#f43f5e','#8b5cf6','#0ea5e9',
+      '#ec4899','#14b8a6','#f97316','#84cc16','#a78bfa','#34d399',
+    ];
+
+    function renderCharts(transactions, categories, accounts, balances) {
+      const catMap = Object.fromEntries(categories.map(c => [c.id, c]));
+
+      // ── 1. Entrées vs Sorties par mois ──────────────────────────────────────
+      const now    = new Date();
+      const months = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'}) });
+      }
+      const incomeByMonth  = Object.fromEntries(months.map(m => [m.key, 0]));
+      const expenseByMonth = Object.fromEntries(months.map(m => [m.key, 0]));
+      transactions.forEach(tx => {
+        const mk = tx.date.slice(0, 7);
+        if (incomeByMonth[mk]  !== undefined && tx.type === 'income')  incomeByMonth[mk]  += tx.amount;
+        if (expenseByMonth[mk] !== undefined && tx.type === 'expense') expenseByMonth[mk] += tx.amount;
+      });
+      const fluxCtx = document.getElementById('chart-flux').getContext('2d');
+      if (chartFlux) chartFlux.destroy();
+      chartFlux = new Chart(fluxCtx, {
+        type: 'bar',
+        data: {
+          labels: months.map(m => m.label),
+          datasets: [
+            { label: 'Entrées',  data: months.map(m => incomeByMonth[m.key]),  backgroundColor: '#10b981', borderRadius: 6 },
+            { label: 'Sorties',  data: months.map(m => expenseByMonth[m.key]), backgroundColor: '#f43f5e', borderRadius: 6 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+            y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, callback: v => v.toLocaleString('fr-FR') } },
+          },
+        },
+      });
+
+      // ── 2. Donut dépenses par catégorie ─────────────────────────────────────
+      const catTotals = {};
+      transactions.filter(tx => tx.type === 'expense' && tx.categoryId).forEach(tx => {
+        catTotals[tx.categoryId] = (catTotals[tx.categoryId] || 0) + tx.amount;
+      });
+      const catEntries = Object.entries(catTotals).sort((a,b) => b[1]-a[1]).slice(0, 8);
+      const catCtx = document.getElementById('chart-cat').getContext('2d');
+      if (chartCat) chartCat.destroy();
+      if (catEntries.length) {
+        chartCat = new Chart(catCtx, {
+          type: 'doughnut',
+          data: {
+            labels: catEntries.map(([id]) => { const c = catMap[id]; return c ? `${c.icon} ${c.name}` : id; }),
+            datasets: [{ data: catEntries.map(([,v]) => v), backgroundColor: CHART_COLORS, borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }],
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: {
+              legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10, padding: 8 } },
+              tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString('fr-FR')} FCFA` } },
+            },
+          },
+        });
+      } else {
+        // Aucune dépense catégorisée — afficher message
+        chartCat = new Chart(catCtx, {
+          type: 'doughnut',
+          data: { labels: ['Aucune dépense'], datasets: [{ data: [1], backgroundColor: ['#e2e8f0'], borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { enabled: false } } },
+        });
+      }
+
+      // ── 3. Solde par compte ──────────────────────────────────────────────────
+      if (chartAccounts) { chartAccounts.destroy(); chartAccounts = null; }
+      const accColors = { indigo:'#6366f1', emerald:'#10b981', amber:'#f59e0b', rose:'#f43f5e', violet:'#8b5cf6', sky:'#0ea5e9' };
+      const accCanvasEl = document.getElementById('chart-accounts');
+      if (accounts.length && accCanvasEl) {
+        chartAccounts = new Chart(accCanvasEl.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: accounts.map(a => `${a.icon} ${a.name}`),
+            datasets: [{
+              label: 'Solde',
+              data: accounts.map(a => balances[a.id] || 0),
+              backgroundColor: accounts.map(a => accColors[a.color] || '#6366f1'),
+              borderRadius: 8,
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x.toLocaleString('fr-FR')} FCFA` } } },
+            scales: {
+              x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, callback: v => v.toLocaleString('fr-FR') } },
+              y: { grid: { display: false }, ticks: { font: { size: 12 } } },
+            },
+          },
+        });
+      }
+    }
+
+    // ─── Prêts & Emprunts ──────────────────────────────────────────────────────
+    let debtMode = 'loan';
+    let currentDebtId = null;
+
+    function openDebtModal(mode, debtId = null) {
+      debtMode      = mode;
+      currentDebtId = debtId;
+      const isLoan  = mode === 'loan';
+      document.getElementById('debt-modal-title').textContent =
+        debtId ? (isLoan ? '🤝 Détail du Prêt' : '💸 Détail de l\'Emprunt')
+               : (isLoan ? '🤝 Nouveau Prêt'   : '💸 Nouvel Emprunt');
+
+      const formWrap   = document.getElementById('debt-form-wrap');
+      const detailWrap = document.getElementById('debt-detail-wrap');
+
+      if (debtId) {
+        formWrap.classList.add('hidden');
+        detailWrap.classList.remove('hidden');
+        renderDebtDetail(mode, debtId);
+        document.getElementById('r-date').value   = new Date().toISOString().split('T')[0];
+        document.getElementById('r-amount').value = '';
+        document.getElementById('r-note').value   = '';
+      } else {
+        formWrap.classList.remove('hidden');
+        detailWrap.classList.add('hidden');
+        const btn = document.getElementById('debt-btn');
+        btn.textContent = isLoan ? 'Enregistrer le prêt' : 'Enregistrer l\'emprunt';
+        btn.className   = `w-full py-3 rounded-xl text-white font-semibold text-sm transition ${
+          isLoan ? 'bg-amber-500 hover:bg-amber-600' : 'bg-rose-700 hover:bg-rose-800'}`;
+        document.getElementById('d-date').value    = new Date().toISOString().split('T')[0];
+        document.getElementById('d-name').value    = '';
+        document.getElementById('d-amount').value  = '';
+        document.getElementById('d-context').value = '';
+        const accounts = load(KEYS.accounts);
+        document.getElementById('d-account').innerHTML = accounts.length
+          ? accounts.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('')
+          : '<option value="" disabled selected>— Créez d\'abord une caisse —</option>';
+      }
+      document.getElementById('debt-modal').classList.remove('hidden');
+    }
+
+    function closeDebtModal() {
+      document.getElementById('debt-modal').classList.add('hidden');
+      currentDebtId = null;
+    }
+
+    function submitDebt(e) {
+      e.preventDefault();
+      const name      = document.getElementById('d-name').value.trim();
+      const amount    = Math.round(parseFloat(document.getElementById('d-amount').value));
+      const date      = document.getElementById('d-date').value;
+      const accountId = document.getElementById('d-account').value;
+      const context   = document.getElementById('d-context').value.trim();
+      if (!name || !amount || !date || !accountId) { showToast('⚠️ Remplis tous les champs.', 'warn'); return; }
+
+      const key  = debtMode === 'loan' ? KEYS.loans : KEYS.borrows;
+      const list = load(key);
+      const newDebt = { id: uid(), name, amount, date, accountId, context, remboursements: [] };
+      list.push(newDebt);
+      save(key, list);
+
+      const txs = load(KEYS.transactions);
+      txs.push({ id: uid(), date, amount, categoryId: null, accountId,
+        type:  debtMode === 'loan' ? 'expense' : 'income',
+        label: debtMode === 'loan' ? `🤝 Prêt — ${name}` : `💸 Emprunt — ${name}`,
+      });
+      save(KEYS.transactions, txs);
+      closeDebtModal(); render();
+      showToast(debtMode === 'loan'
+        ? `🤝 Prêt de <strong>${fmt(amount)}</strong> à ${name} enregistré.`
+        : `💸 Emprunt de <strong>${fmt(amount)}</strong> auprès de ${name} enregistré.`, 'success');
+      // Rouvrir en mode détail pour accès immédiat aux remboursements
+      openDebtModal(debtMode, newDebt.id);
+    }
+
+    function submitRemboursement() {
+      const amount = Math.round(parseFloat(document.getElementById('r-amount').value));
+      const date   = document.getElementById('r-date').value;
+      const note   = document.getElementById('r-note').value.trim();
+      if (!amount || !date) { showToast('⚠️ Montant et date requis.', 'warn'); return; }
+      const key  = debtMode === 'loan' ? KEYS.loans : KEYS.borrows;
+      const list = load(key);
+      const debt = list.find(d => d.id === currentDebtId);
+      if (!debt) return;
+      debt.remboursements.push({ id: uid(), amount, date, note });
+      save(key, list);
+      const txs = load(KEYS.transactions);
+      txs.push({ id: uid(), date, amount, categoryId: null, accountId: debt.accountId,
+        type:  debtMode === 'loan' ? 'income' : 'expense',
+        label: debtMode === 'loan' ? `✅ Remb. prêt — ${debt.name}` : `✅ Remb. emprunt — ${debt.name}`,
+      });
+      save(KEYS.transactions, txs);
+      render();
+      renderDebtDetail(debtMode, currentDebtId);
+      document.getElementById('r-amount').value = '';
+      document.getElementById('r-note').value   = '';
+      showToast(`✅ Remboursement de <strong>${fmt(amount)}</strong> enregistré.`, 'success');
+    }
+
+    function renderDebtDetail(mode, debtId) {
+      const key  = mode === 'loan' ? KEYS.loans : KEYS.borrows;
+      const debt = load(key).find(d => d.id === debtId);
+      if (!debt) return;
+      const acc       = load(KEYS.accounts).find(a => a.id === debt.accountId) || {};
+      const totalRemb = debt.remboursements.reduce((s, r) => s + r.amount, 0);
+      const restant   = Math.max(0, debt.amount - totalRemb);
+      const pct       = Math.min(100, Math.round((totalRemb / debt.amount) * 100));
+      const isLoan    = mode === 'loan';
+      document.getElementById('debt-detail-content').innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-gray-800">${isLoan ? '🤝' : '💸'} ${debt.name}</span>
+            <span class="text-xs text-gray-400">${debt.date}</span>
+          </div>
+          <div class="flex gap-4 text-xs text-gray-500">
+            <span>Montant : <strong>${fmt(debt.amount)}</strong></span>
+            <span>Caisse : <strong>${acc.icon || ''} ${acc.name || '—'}</strong></span>
+          </div>
+          ${debt.context ? `<div class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-800 italic">📝 ${debt.context}</div>` : ''}
+          <div class="w-full bg-gray-100 rounded-full h-2">
+            <div class="h-2 rounded-full ${pct >= 100 ? 'bg-emerald-500' : 'bg-amber-400'}" style="width:${pct}%"></div>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-400">Remboursé : <strong class="text-emerald-600">${fmt(totalRemb)}</strong></span>
+            <span class="font-semibold ${restant > 0 ? 'text-rose-500' : 'text-emerald-600'}">${restant > 0 ? fmt(restant) + ' restant' : '✅ Soldé'}</span>
+          </div>
+          ${debt.remboursements.length ? `<div class="space-y-2 mt-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Historique</p>
+            ${debt.remboursements.map(r => `
+              <div class="bg-slate-50 rounded-xl px-4 py-2.5 text-xs">
+                <div class="flex justify-between">
+                  <span class="font-semibold text-emerald-600">+${fmt(r.amount)}</span>
+                  <span class="text-gray-400">${r.date}</span>
+                </div>
+                ${r.note ? `<p class="text-gray-500 italic mt-1">📝 ${r.note}</p>` : ''}
+              </div>`).join('')}
+          </div>` : ''}
+        </div>`;
+    }
+
+    function renderDebts(accMap) {
+      const loans   = load(KEYS.loans);
+      const borrows = load(KEYS.borrows);
+      const all = [
+        ...loans.map(d   => ({ ...d, mode: 'loan' })),
+        ...borrows.map(d => ({ ...d, mode: 'borrow' })),
+      ].sort((a, b) => b.date.localeCompare(a.date));
+      const el = document.getElementById('debts-list');
+      if (!all.length) { el.innerHTML = '<p class="text-gray-400 text-sm">Aucun prêt ni emprunt enregistré.</p>'; return; }
+      el.innerHTML = all.map(d => {
+        const isLoan    = d.mode === 'loan';
+        const totalRemb = d.remboursements.reduce((s, r) => s + r.amount, 0);
+        const restant   = Math.max(0, d.amount - totalRemb);
+        const pct       = Math.min(100, Math.round((totalRemb / d.amount) * 100));
+        const done      = restant === 0;
+        const acc       = accMap[d.accountId] || {};
+        const barColor  = done ? 'bg-emerald-500' : isLoan ? 'bg-amber-400' : 'bg-rose-400';
+        const badge     = isLoan
+          ? `<span class="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">🤝 Prêt</span>`
+          : `<span class="bg-rose-100 text-rose-700 text-xs font-semibold px-2 py-0.5 rounded-full">💸 Emprunt</span>`;
+        return `
+          <div class="bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+               onclick="openDebtModal('${d.mode}','${d.id}')">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">${badge}<span class="font-semibold text-gray-800">${d.name}</span></div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-400">${d.date}</span>
+                <button onclick="event.stopPropagation(); deleteDebt('${d.mode}','${d.id}')" class="text-gray-300 hover:text-rose-500 transition text-xs" title="Supprimer">🗑️</button>
+              </div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mb-2">
+              <span>${acc.icon || ''} ${acc.name || '—'}</span>
+              <span>${fmt(totalRemb)} / <strong>${fmt(d.amount)}</strong></span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1">
+              <div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div>
+            </div>
+            <div class="flex justify-between text-xs mt-1">
+              <span class="text-gray-400">${pct}% remboursé</span>
+              <span class="font-semibold ${done ? 'text-emerald-600' : 'text-rose-500'}">${done ? '✅ Soldé' : fmt(restant) + ' restant'}</span>
+            </div>
+            ${d.context ? `<p class="text-xs text-gray-400 italic mt-2 truncate">📝 ${d.context}</p>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    // ─── Suppressions ─────────────────────────────────────────────────────────
+    function deleteTransaction(id) {
+      if (!confirm('Supprimer cette transaction ?')) return;
+      save(KEYS.transactions, load(KEYS.transactions).filter(t => t.id !== id));
+      render();
+      showToast('🗑️ Transaction supprimée.');
+    }
+
+    function deleteProject(id) {
+      if (!confirm('Supprimer ce projet ?')) return;
+      save(KEYS.projects, load(KEYS.projects).filter(p => p.id !== id));
+      render();
+      showToast('🗑️ Projet supprimé.');
+    }
+
+    function deleteDebt(mode, id) {
+      if (!confirm('Supprimer ce prêt / emprunt ?')) return;
+      const key = mode === 'loan' ? KEYS.loans : KEYS.borrows;
+      save(key, load(key).filter(d => d.id !== id));
+      render();
+      showToast('🗑️ Entrée supprimée.');
+    }
+
+    function deleteAccount(id) {
+      const txCount = load(KEYS.transactions).filter(t => t.accountId === id).length;
+      const msg = txCount
+        ? `Ce compte a ${txCount} transaction(s) liée(s).\nSupprimer quand même ?`
+        : 'Supprimer ce compte ?';
+      if (!confirm(msg)) return;
+      save(KEYS.accounts, load(KEYS.accounts).filter(a => a.id !== id));
+      render();
+      showToast('🗑️ Compte supprimé.');
+    }
+
+    function deleteCategory(id) {
+      if (!confirm('Supprimer cette catégorie ?')) return;
+      save(KEYS.categories, load(KEYS.categories).filter(c => c.id !== id));
+      render();
+      showToast('🗑️ Catégorie supprimée.');
+    }
+
+    // ─── Inline compte / catégorie ───────────────────────────────────────────────
+    function toggleInline(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('hidden');
+    }
+
+    function saveInlineAccount() {
+      const name  = document.getElementById('ia-name').value.trim();
+      const icon  = document.getElementById('ia-icon').value  || '🏦';
+      const color = document.getElementById('ia-color').value || 'indigo';
+      if (!name) { showToast('⚠️ Donne un nom au compte.', 'warn'); return; }
+      const accounts = load(KEYS.accounts);
+      const newAcc   = { id: uid(), name, icon, color };
+      accounts.push(newAcc);
+      save(KEYS.accounts, accounts);
+      // Mettre à jour les selects et sélectionner le nouveau
+      const accOpts = accounts.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('');
+      ['f-account','f-from','f-to','f-proj-account'].forEach(id => {
+        document.getElementById(id).innerHTML = accOpts;
+      });
+      document.getElementById('f-account').value = newAcc.id;
+      // Fermer le panneau et réinitialiser
+      document.getElementById('ia-name').value = '';
+      document.getElementById('inline-acc').classList.add('hidden');
+      render();
+      showToast(`🏦 Compte <strong>"${name}"</strong> ajouté.`, 'success');
+    }
+
+    function saveInlineCategory() {
+      const name  = document.getElementById('ic-name').value.trim();
+      const icon  = document.getElementById('ic-icon').value.trim() || '📌';
+      const group = document.getElementById('ic-group').value;
+      if (!name) { showToast('⚠️ Donne un nom à la catégorie.', 'warn'); return; }
+      const cats  = load(KEYS.categories);
+      const newCat = { id: uid(), name, icon, parent: group, sub: '' };
+      cats.push(newCat);
+      save(KEYS.categories, cats);
+      // Mettre à jour le select catégorie et sélectionner la nouvelle
+      document.getElementById('f-category').innerHTML = cats.map(c =>
+        `<option value="${c.id}">${c.icon} ${c.name} · ${c.parent}</option>`
+      ).join('');
+      document.getElementById('f-category').value = newCat.id;
+      // Fermer le panneau et réinitialiser
+      document.getElementById('ic-name').value = '';
+      document.getElementById('ic-icon').value = '';
+      document.getElementById('inline-cat').classList.add('hidden');
+      render();
+      showToast(`🏷️ Catégorie <strong>"${name}"</strong> ajoutée.`, 'success');
+    }
+
+    // Icônes inline compte
+    document.getElementById('ia-icon-picker').addEventListener('click', e => {
+      const opt = e.target.closest('.ia-icon');
+      if (!opt) return;
+      document.getElementById('ia-icon').value = opt.dataset.icon;
+      document.querySelectorAll('.ia-icon').forEach(el => el.classList.toggle('bg-indigo-100', el === opt));
+    });
+    function iaPickColor(color) {
+      document.getElementById('ia-color').value = color;
+      document.querySelectorAll('.ia-col').forEach(el => {
+        el.classList.toggle('ring-2',        el.id === 'ia-col-' + color);
+        el.classList.toggle('ring-offset-1', el.id === 'ia-col-' + color);
+        el.classList.toggle('ring-gray-400', el.id === 'ia-col-' + color);
+      });
+    }
+
+    // ─── Sélecteurs compte (modale dédiée) ───────────────────────────────────────
+    function pickIcon(icon) {
+      document.getElementById('f-acc-icon').value = icon;
+      document.querySelectorAll('.icon-opt').forEach(el => {
+        el.classList.toggle('bg-indigo-100', el.dataset.icon === icon);
+        el.classList.toggle('ring-2',        el.dataset.icon === icon);
+        el.classList.toggle('ring-indigo-400', el.dataset.icon === icon);
+      });
+    }
+    function pickColor(color) {
+      document.getElementById('f-acc-color').value = color;
+      document.querySelectorAll('.color-btn').forEach(el => {
+        el.classList.toggle('ring-2',        el.id === 'col-' + color);
+        el.classList.toggle('ring-offset-2', el.id === 'col-' + color);
+        el.classList.toggle('ring-gray-400', el.id === 'col-' + color);
+      });
+    }
+    document.getElementById('icon-picker').addEventListener('click', e => {
+      const opt = e.target.closest('.icon-opt');
+      if (opt) pickIcon(opt.dataset.icon);
+    });
+
+    // ─── Export / Import / Reset ──────────────────────────────────────────────
+    function exportData() {
+      const data = {
+        version:      1,
+        exportedAt:   new Date().toISOString(),
+        accounts:     load(KEYS.accounts),
+        categories:   load(KEYS.categories),
+        transactions: load(KEYS.transactions),
+        loans:        load(KEYS.loans),
+        borrows:      load(KEYS.borrows),
+        projects:     load(KEYS.projects),
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `emmanuel-finance-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('💾 <strong>Caisse sauvegardée.</strong> Ton patrimoine est en sécurité.', 'success');
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (!Array.isArray(data.accounts) || !Array.isArray(data.transactions)) throw new Error('Format invalide');
+          // Normaliser les montants en nombres pour éviter les bugs de concaténation
+          const normTx = (data.transactions || []).map(tx => ({ ...tx, amount: Number(tx.amount) || 0 }));
+          save(KEYS.accounts,     data.accounts     || []);
+          save(KEYS.categories,   data.categories   || []);
+          save(KEYS.transactions, normTx);
+          save(KEYS.projects,     (data.projects || []).map(p => ({ ...p, target: Number(p.target) || 0 })));
+          save(KEYS.loans,        (data.loans    || []).map(d => ({ ...d, amount: Number(d.amount) || 0, remboursements: (d.remboursements||[]).map(r => ({...r, amount: Number(r.amount)||0})) })));
+          save(KEYS.borrows,      (data.borrows  || []).map(d => ({ ...d, amount: Number(d.amount) || 0, remboursements: (d.remboursements||[]).map(r => ({...r, amount: Number(r.amount)||0})) })));
+          render();
+          showToast('📂 <strong>Données restaurées.</strong> Bienvenue de retour.', 'success');
+        } catch(err) {
+          console.error('Import error:', err);
+          showToast('⚠️ Fichier invalide. Vérifie ta sauvegarde.', 'warn');
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function openHelp()  { document.getElementById('help-modal').classList.remove('hidden'); }
+    function closeHelp()  { document.getElementById('help-modal').classList.add('hidden'); }
+
+    // ─── Menu Plus header
+    function toggleMoreMenu() {
+      const menu  = document.getElementById('more-menu');
+      const arrow = document.getElementById('more-arrow');
+      const open  = !menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', open);
+      arrow.style.transform = open ? '' : 'rotate(180deg)';
+    }
+    function closeMoreMenu() {
+      document.getElementById('more-menu').classList.add('hidden');
+      document.getElementById('more-arrow').style.transform = '';
+    }
+    document.addEventListener('click', e => {
+      if (!document.getElementById('more-menu-wrap').contains(e.target)) closeMoreMenu();
+    });
+
+    // ─── Filtres avancés toggle
+    function toggleAdvancedFilters() {
+      const panel = document.getElementById('advanced-filters');
+      const arrow = document.getElementById('adv-filter-arrow');
+      const open  = !panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', open);
+      arrow.style.transform = open ? '' : 'rotate(180deg)';
+    }
+
+    // ─── Archives ─────────────────────────────────────────────────────────────
+    const ARCHIVE_KEY  = 'ef_archives';
+    const MAX_ARCHIVES = 10;
+
+    function loadArchives() {
+      return JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]');
+    }
+
+    function saveArchive() {
+      const archives = loadArchives();
+      const snapshot = {
+        id:           Date.now(),
+        date:         new Date().toLocaleString('fr-FR'),
+        accounts:     load(KEYS.accounts),
+        categories:   load(KEYS.categories),
+        transactions: load(KEYS.transactions),
+        projects:     load(KEYS.projects),
+        loans:        load(KEYS.loans),
+        borrows:      load(KEYS.borrows),
+      };
+      archives.unshift(snapshot);
+      if (archives.length > MAX_ARCHIVES) archives.length = MAX_ARCHIVES;
+      localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archives));
+    }
+
+    function openArchivesModal() {
+      const archives = loadArchives();
+      const el = document.getElementById('archives-list');
+      if (!archives.length) {
+        el.innerHTML = '<p class="text-gray-400 text-sm text-center py-6">Aucune archive. Elles sont créées automatiquement à chaque réinitialisation.</p>';
+      } else {
+        el.innerHTML = archives.map((a, i) => {
+          const txCount  = (a.transactions || []).length;
+          const accCount = (a.accounts || []).length;
+          const total    = (a.transactions || []).reduce((s, tx) => {
+            const amt = Number(tx.amount) || 0;
+            return s + (tx.type === 'income' ? amt : -amt);
+          }, 0);
+          return `
+            <div class="bg-slate-50 border border-gray-100 rounded-xl px-5 py-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="font-semibold text-gray-700 text-sm">📅 ${a.date}</p>
+                  <p class="text-xs text-gray-400 mt-0.5">${accCount} compte${accCount>1?'s':''} · ${txCount} transaction${txCount>1?'s':''} · <span class="font-semibold ${total>=0?'text-emerald-600':'text-rose-500'}">${total>=0?'+':''}${Number(total).toLocaleString('fr-FR')} FCFA</span></p>
+                </div>
+                <button onclick="restoreArchive(${i})" class="text-xs bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-3 py-1.5 rounded-lg transition">↺ Restaurer</button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+      document.getElementById('archives-modal').classList.remove('hidden');
+    }
+
+    function closeArchivesModal() {
+      document.getElementById('archives-modal').classList.add('hidden');
+    }
+
+    function restoreArchive(index) {
+      if (!confirm('Restaurer cette archive ?\nLes données actuelles seront remplacées.')) return;
+      const a = loadArchives()[index];
+      if (!a) return;
+      save(KEYS.accounts,     a.accounts   || []);
+      save(KEYS.categories,   a.categories || []);
+      save(KEYS.transactions, (a.transactions||[]).map(tx => ({...tx, amount: Number(tx.amount)||0})));
+      save(KEYS.projects,     (a.projects  ||[]).map(p  => ({...p,  target: Number(p.target) ||0})));
+      save(KEYS.loans,        (a.loans     ||[]).map(d  => ({...d,  amount: Number(d.amount) ||0, remboursements:(d.remboursements||[]).map(r=>({...r,amount:Number(r.amount)||0}))})));
+      save(KEYS.borrows,      (a.borrows   ||[]).map(d  => ({...d,  amount: Number(d.amount) ||0, remboursements:(d.remboursements||[]).map(r=>({...r,amount:Number(r.amount)||0}))})));
+      closeArchivesModal();
+      render();
+      showToast('↺ <strong>Archive restaurée.</strong> Bienvenue de retour.', 'success');
+    }
+
+    function purgeAllArchives() {
+      if (!confirm('⚠️ Effacer toutes les archives ?\nCette action est irréversible.')) return;
+      localStorage.removeItem(ARCHIVE_KEY);
+      closeArchivesModal();
+      showToast('🗑️ Toutes les archives ont été effacées.');
+    }
+
+    function resetData() {
+      if (!confirm('⚠️ Réinitialiser toutes les données ?\nUne archive sera créée automatiquement avant l\'effacement.')) return;
+      saveArchive();
+      Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+      render();
+      showToast('🗑️ Ardoise effacée. <strong>Archive créée automatiquement.</strong>');
+    }
+
+    // ─── Recommandation sauvegarde à la fermeture ─────────────────────────────
+    function closeSaveReminder() {
+      document.getElementById('save-reminder-modal').classList.add('hidden');
+    }
+
+    window.addEventListener('beforeunload', e => {
+      if (load(KEYS.transactions).length > 0) {
+        document.getElementById('save-reminder-modal').classList.remove('hidden');
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // ─── Sagesse ──────────────────────────────────────────────────────────────
+    const SAGESSE = [
+      "La gestion est la racine de l'abondance.",
+      "Ta discipline aujourd'hui construit ta liberté de demain.",
+      "Chaque franc économisé est une brique de ton avenir.",
+      "L'argent est un outil — maîtrise-le avant qu'il ne te maîtrise.",
+      "Celui qui planifie ses dépenses planifie sa paix.",
+      "La richesse ne crie pas, elle murmure à ceux qui écoutent.",
+      "Un budget tenu est une promesse tenue à toi-même.",
+      "Épargner, c'est se faire confiance dans le futur.",
+      "La liberté financière commence par un seul geste conscient.",
+      "Ce que tu contrôles aujourd'hui, tu le possèdes demain.",
+    ];
+    let sagIdx = Math.floor(Math.random() * SAGESSE.length);
+    function nextSagesse() {
+      sagIdx = (sagIdx + 1) % SAGESSE.length;
+      document.getElementById('sagesse-txt').textContent = SAGESSE[sagIdx];
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    document.getElementById('sagesse-txt').textContent = SAGESSE[sagIdx];
+    render();
+    // Onboarding : premier lancement
+    if (!load(KEYS.accounts).length) openModal('new-account');
+  </script>
+  <!-- Footer Copyright -->
+  <footer class="max-w-5xl mx-auto px-4 pb-12 text-center border-t border-gray-100 pt-8 mt-6">
+    <p class="text-xs text-gray-400 font-medium tracking-wide">
+      &copy; 2024 Emmanuel Finance &bull; Tous droits réservés &bull; Propriété exclusive du <span class="text-indigo-400 font-bold">Pasteur Emmanuel</span>
+    </p>
+    <p class="text-[10px] text-gray-300 mt-1 uppercase tracking-[0.2em]">Protection Intellectuelle &bull; v1.0.0 Prod</p>
+  </footer>
+
+</body>
+</html>

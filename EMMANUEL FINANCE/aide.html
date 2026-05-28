@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aide — Emmanuel Finance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .btn-retour {
+        position: fixed; top: 130px; left: 20px; z-index: 9999;
+        text-decoration: none; color: rgba(255, 255, 255, 0.7);
+        background: rgba(0, 0, 0, 0.3); padding: 8px 16px;
+        border-radius: 50px; font-size: 0.8rem; backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease;
+    }
+    .btn-retour:hover { color: #fff; background: rgba(255, 255, 255, 0.1); transform: translateX(-3px); }
+    body { background: #0a0a0a !important; color: rgba(255, 255, 255, 0.9) !important; min-height: 100vh; overflow-y: auto; padding-bottom: 100px; }
+    .bg-white { background-color: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05) !important; color: rgba(255, 255, 255, 0.85) !important; }
+    header.bg-white { background-color: rgba(10, 10, 10, 0.8) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; }
+    .text-gray-900, .text-gray-800, .text-gray-600 { color: rgba(255, 255, 255, 0.9) !important; }
+    .text-gray-500, .text-gray-400 { color: rgba(255, 255, 255, 0.5) !important; }
+    .bg-slate-50, .bg-slate-100 { background-color: rgba(255, 255, 255, 0.02) !important; }
+    .border-slate-100, .border-gray-100 { border-color: rgba(255, 255, 255, 0.07) !important; }
+    .shadow-sm { box-shadow: none !important; }
+    @media (max-width: 768px) { header.bg-white { padding-top: 4.5rem !important; } .btn-retour { top: 15px; left: 15px; } }
+  </style>
+</head>
+<body data-page="help" class="min-h-screen font-sans text-gray-800 antialiased">
+  <a href="index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour Dashboard</a>
+  <header class="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-indigo-600 tracking-tight">❓ Aide & Guide</h1>
+      <p class="text-sm text-gray-500 mt-1">Tout ce qu'il faut savoir pour utiliser Emmanuel Finance.</p>
+      <p id="current-profile-name" class="text-xs text-gray-400 mt-2">Profil actif</p>
+    </div>
+    <nav class="flex flex-wrap gap-2 items-center">
+      <a href="index.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Tableau de bord</a>
+      <a href="transactions.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Transactions</a>
+      <a href="comptes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Comptes</a>
+      <a href="projets.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Projets</a>
+      <a href="dettes.html" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition">Dettes</a>
+      <button type="button" onclick="auth.logout()" class="px-3 py-2 rounded-xl border border-red-500 bg-red-500 text-sm text-white hover:bg-red-600 transition">Déconnexion</button>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <section class="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-6">
+      <h2 class="text-xl font-bold text-gray-900">Bienvenue dans l'aide</h2>
+      <div class="space-y-4 text-sm text-gray-600 leading-relaxed">
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">🔐 Créer un compte utilisateur</h3>
+          <p>Sur la page de connexion, cliquez sur <strong>Inscription</strong>, saisissez votre nom, un mot de passe et choisissez une question de sécurité. Vos données sont entièrement privées et cloisonnées.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">🏦 Créer un compte financier</h3>
+          <p>Rendez-vous sur la page <strong>Comptes</strong>, remplissez le nom, l'icône et la couleur, puis créez votre nouvelle caisse.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">🏷️ Créer une catégorie</h3>
+          <p>Depuis la page <strong>Comptes</strong>, ajoutez une catégorie et choisissez un groupe pour mieux classer vos dépenses.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">➕ Enregistrer une transaction</h3>
+          <p>Allez dans <strong>Transactions</strong>, remplissez le libellé, le montant, la date, le compte et la catégorie puis appuyez sur <strong>Entrée</strong> ou <strong>Sortie</strong> selon le type de flux.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">🚀 Créer un projet d'épargne</h3>
+          <p>Sur la page <strong>Projets</strong>, définissez un objectif, une échéance et un compte lié. L'application calcule l'effort quotidien pour atteindre l'objectif.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">🤝 Prêts et emprunts</h3>
+          <p>Sur la page <strong>Dettes</strong>, enregistrez un prêt ou un emprunt. Ajoutez des remboursements pour suivre le solde restant.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">🔒 Confidentialité des données</h3>
+          <p>Chaque utilisateur possède un espace totalement cloisonné. Vos comptes, transactions, projets et dettes ne sont jamais visibles par d'autres utilisateurs.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">💾 Sauvegarde</h3>
+          <p>Les données sont stockées localement dans votre navigateur. Faites une sauvegarde manuelle en exportant le fichier JSON si vous changez d'appareil.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-50 rounded-3xl border border-slate-100 shadow-sm p-8">
+      <h2 class="text-lg font-bold text-gray-900 mb-5">FAQ</h2>
+      <div class="space-y-4 text-sm text-gray-600 leading-relaxed">
+        <div>
+          <p class="font-semibold text-gray-800">Mes données sont-elles partagées avec d'autres utilisateurs ?</p>
+          <p>Non. Chaque utilisateur a son propre espace étanche. Personne d'autre ne peut voir vos enregistrements.</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-800">Puis-je utiliser l'application sur un autre PC ?</p>
+          <p>Oui. Importez votre fichier JSON sur le nouveau PC pour restaurer vos informations.</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-800">Comment sauvegarder mes données ?</p>
+          <p>Utilisez le bouton d'export JSON disponible depuis la page principale. Le fichier contient votre profil et toutes vos données financières.</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-800">Que se passe-t-il si je vide mon navigateur ?</p>
+          <p>Les données seront perdues si vous n'avez pas sauvegardé. Pensez à exporter régulièrement votre caisse.</p>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-800">J'ai oublié mon mot de passe, que faire ?</p>
+          <p>Sur la page de connexion, cliquez sur <strong>Mot de passe oublié ?</strong> et répondez à votre question de sécurité pour réinitialiser votre accès.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+    Emmanuel Finance — conçu pour une gestion simple, locale et privée de vos finances.
+  </footer>
+
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+  <script>
+    auth.checkAccess();
+  </script>
+</body>
+</html>

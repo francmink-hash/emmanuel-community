@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emmanuel Finance 💰 — Premium Noir</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* Thème Premium Sombre & Personnalisations */
+    body {
+      background-color: #0b0f19; /* Bleu nuit très sombre / Noir */
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .modal-animate { animation: slideUp 0.2s ease-out forwards; }
+    @keyframes slideUp {
+      from { transform: translateY(20%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Customisation des graphiques Chart.js pour le thème noir */
+    .chart-container { position: relative; width: 100%; height: 100%; }
+  </style>
+</head>
+<body class="text-slate-200 min-h-screen font-sans antialiased pb-12">
+
+  <div id="toast" class="fixed top-6 right-6 z-50 hidden transition-all">
+    <div id="toast-inner" class="flex items-center gap-2 bg-slate-900 text-slate-100 border border-slate-800 shadow-2xl rounded-2xl px-5 py-3 text-sm font-medium"></div>
+  </div>
+
+  <div id="auth-screen" class="fixed inset-0 z-50 bg(#0b0f19) flex items-center justify-center p-4" style="background-color: #0b0f19;">
+    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-850 rounded-3xl p-6 shadow-2xl w-full max-w-md space-y-6 relative">
+      <button onclick="window.location.href='../index.html'" class="absolute top-4 left-4 text-[10px] bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-700/50 transition flex items-center gap-1">⬅️ Retour</button>
+      <div class="text-center mt-4">
+        <h1 class="text-2xl font-black tracking-wider text-white flex items-center justify-center gap-2 uppercase">
+          <span class="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">Emmanuel Finance</span>
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">Système patrimonial sécurisé multi-session</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+        <h3 class="text-xs font-black tracking-wider text-amber-400 uppercase">🔑 Connexion</h3>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Identifiant / Nom</label>
+          <input type="text" id="login-user" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mot de passe</label>
+          <input type="password" id="login-pass" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Se connecter</button>
+        <div class="flex justify-between text-[11px] pt-2">
+          <button type="button" onclick="toggleAuthViews('register')" class="text-slate-400 hover:text-white underline">Créer un compte</button>
+          <button type="button" onclick="toggleAuthViews('forgot')" class="text-amber-500/80 hover:text-amber-400 underline">Mot de passe oublié ?</button>
+        </div>
+      </form>
+
+      <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+        <h3 class="text-xs font-black tracking-wider text-emerald-400 uppercase">📝 Inscription Nouvelle Session</h3>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Identifiant / Nom</label>
+          <input type="text" id="reg-user" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mot de passe</label>
+          <input type="password" id="reg-pass" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Question de sécurité (Réinitialisation)</label>
+          <select id="reg-question" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <option value="Q1">Quel est le nom de votre premier animal de compagnie ?</option>
+            <option value="Q2">Quelle est votre ville de naissance ?</option>
+            <option value="Q3">Quel est le modèle de votre première voiture ?</option>
+            <option value="Q4">Quel est votre verset ou livre préféré ?</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Réponse secrète</label>
+          <input type="text" id="reg-answer" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" placeholder="La réponse est stricte">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Créer mon espace</button>
+        <div class="text-center text-[11px] pt-2">
+          <button type="button" onclick="toggleAuthViews('login')" class="text-slate-400 hover:text-white underline">Retour à la connexion</button>
+        </div>
+      </form>
+
+      <form id="forgot-form" onsubmit="handleRecovery(event)" class="space-y-4 hidden">
+        <h3 class="text-xs font-black tracking-wider text-rose-400 uppercase">🛡️ Réinitialisation du Compte</h3>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Entrez votre Identifiant</label>
+          <input type="text" id="for-user" onchange="loadUserSecurityQuestion()" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+        </div>
+        <div id="recovery-question-box" class="hidden">
+          <p id="recovery-question-text" class="text-xs text-slate-400 bg-slate-950 p-2.5 border border-slate-800 rounded-xl mb-3 font-medium"></p>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Votre réponse secrète</label>
+            <input type="text" id="for-answer" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none mb-3">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nouveau mot de passe</label>
+            <input type="password" id="for-newpass" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+          </div>
+          <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition mt-3">Mettre à jour le mot de passe</button>
+        </div>
+        <div class="text-center text-[11px] pt-2">
+          <button type="button" onclick="toggleAuthViews('login')" class="text-slate-400 hover:text-white underline">Retour à la connexion</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div id="main-application" class="hidden">
+    <header class="bg-slate-950/60 backdrop-blur-md border-b border-slate-900 px-4 sm:px-10 py-5 sticky top-0 z-30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-black tracking-wider text-white flex items-center gap-2 uppercase">
+          <span class="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">Emmanuel Finance</span>
+          <span class="text-xs bg-amber-500/10 text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/20 tracking-normal normal-case">emmanuel-dpv.pages.dev</span>
+        </h1>
+        <p class="text-xs text-slate-500 mt-0.5">Session active : <span id="current-session-user" class="text-amber-400 font-bold"></span> <span class="text-[9px] text-slate-700 ml-2">v2.1.0</span></p>
+      </div>
+      
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="openModal('transfer')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-700 transition-all">🔄 Transfert</button>
+        <button onclick="openModal('income')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all">➕ Entrée</button>
+        <button onclick="openModal('expense')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all">➖ Sortie</button>
+        <button onclick="window.location.href='../index.html'" class="bg-indigo-900/50 hover:bg-indigo-900 text-indigo-300 text-xs font-bold px-3.5 py-2 rounded-xl border border-indigo-700 transition-all ml-2">🏠 Hub</button>
+        <button onclick="handleLogout()" class="bg-slate-950 text-slate-400 border border-slate-800 hover:bg-slate-900 text-xs font-bold px-3 py-2 rounded-xl transition-all ml-2">🚪 Quitter</button>
+      </div>
+    </header>
+
+    <div class="max-w-5xl mx-auto px-4 mt-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-850 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+          <div>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Patrimoine Net Consolidé</p>
+            <h2 id="total-balance" class="text-3xl md:text-4xl font-black text-white mt-1 tracking-tight">0 FCFA</h2>
+          </div>
+          <p class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-4"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Architecture SPA Virtuelle</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-850 rounded-3xl p-6 shadow-xl flex flex-col justify-between min-h-[140px]">
+          <div>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Effort Épargne du Mois</p>
+            <h3 id="effort-amount" class="text-xl md:text-2xl font-black mt-1 tracking-tight">0 FCFA / jour</h3>
+          </div>
+          <p id="effort-label" class="text-[11px] text-slate-400 truncate border-t border-slate-800/60 pt-3">Calcul en temps réel</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="max-w-5xl mx-auto px-4 mt-6">
+      <div class="flex border-b border-slate-900 gap-2 overflow-x-auto whitespace-nowrap pb-1">
+        <button onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white transition">🏠 TABLEAU DE BORD</button>
+        <button onclick="switchPage('transactions')" id="nav-transactions" class="nav-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white transition">💸 TRANSACTIONS</button>
+        <button onclick="switchPage('debts')" id="nav-debts" class="nav-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white transition">🤝 PRÊTS & EMPRUNTS</button>
+        <button onclick="switchPage('projects')" id="nav-projects" class="nav-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white transition">🚀 PROJETS AVANCÉS</button>
+        <button onclick="switchPage('config')" id="nav-config" class="nav-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white transition">⚙️ CONFIGURATION</button>
+      </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 mt-6">
+
+      <section id="page-dashboard" class="page-view space-y-8">
+        <div class="bg-slate-900/60 border border-slate-900 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <p id="sagesse-txt" class="text-xs font-medium text-slate-400 italic">"Chargement de vos maximes..."</p>
+          <button onclick="nextSagesse()" class="text-[10px] font-black text-amber-400 bg-amber-400/5 px-2.5 py-1.5 rounded-lg border border-amber-500/10 hover:bg-amber-400/10 transition">SUIVANT</button>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-black tracking-wider text-slate-400 uppercase">🗂️ Caisses & Disponibilités</h4>
+            <button onclick="openModal('new-account')" class="text-[11px] font-bold text-amber-400 hover:underline">➕ Nouvelle Caisse</button>
+          </div>
+          <div id="accounts-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-slate-900 border border-slate-850 rounded-3xl p-5 shadow-sm">
+            <h4 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">📈 Évolution Mensuelle (Flux)</h4>
+            <div class="h-60"><canvas id="chart-flux"></canvas></div>
+          </div>
+          <div class="bg-slate-900 border border-slate-850 rounded-3xl p-5 shadow-sm">
+            <h4 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">📊 Analyse des Dépenses</h4>
+            <div class="h-60 flex items-center justify-center"><canvas id="chart-categories"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="page-transactions" class="page-view hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-850 rounded-3xl p-5 shadow-md">
+          <h3 class="text-xs font-black tracking-wider text-slate-400 uppercase mb-4">🔍 Moteur de Filtres</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <input type="text" id="search-desc" oninput="filterTransactions()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500" placeholder="Rechercher libellé...">
+            <select id="filter-account" onchange="filterTransactions()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500"></select>
+            <select id="filter-category" onchange="filterTransactions()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500"></select>
+            <select id="filter-type" onchange="filterTransactions()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="all">Tous les flux</option>
+              <option value="income">Entrées</option>
+              <option value="expense">Sorties</option>
+              <option value="transfer">Transferts</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-slate-900 border border-slate-850 rounded-3xl p-6 shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-xs font-black tracking-wider text-slate-400 uppercase">📜 Historique des Écritures</h4>
+              <span id="tx-count" class="text-[10px] font-bold bg-slate-950 text-slate-400 border border-slate-800 px-2 py-0.5 rounded">0 flux</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="text-slate-500 uppercase font-black border-b border-slate-800">
+                  <tr>
+                    <th class="py-3">Détails</th>
+                    <th class="py-3 hidden sm:table-cell">Caisse/Cat</th>
+                    <th class="py-3 text-right">Montant</th>
+                    <th class="py-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tx-table-body" class="divide-y divide-slate-900"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-900 rounded-3xl p-6">
+            <h4 class="text-xs font-black tracking-wider text-amber-400 uppercase mb-2">🎯 Top Postes de Dépense</h4>
+            <p class="text-[11px] text-slate-500 mb-4">Analyse par récurrence stricte des libellés.</p>
+            <div id="analysis-list" class="space-y-3"></div>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="page-debts" class="page-view hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-850 rounded-3xl p-5 shadow-sm">
+          <h3 class="text-xs font-black tracking-wider text-slate-400 uppercase mb-4">🤝 Enregistrer un Prêt / Emprunt</h3>
+          <form id="debt-form" onsubmit="addDebt(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Type</label><select id="d-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"><option value="loan">J'ai prêté (Créance)</option><option value="borrow">J'ai emprunté (Dette)</option></select></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tiers / Personne</label><input type="text" id="d-person" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Montant (FCFA)</label><input type="number" id="d-amount" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Échéance</label><input type="date" id="d-duedate" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+            <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition">Valider</button>
+          </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-slate-900 border border-slate-850 rounded-3xl p-5">
+            <h4 class="text-xs font-black tracking-wider text-emerald-400 uppercase mb-4">🤝 Capitaux à Récupérer (Prêts)</h4>
+            <div id="loans-list" class="space-y-4"></div>
+          </div>
+          <div class="bg-slate-900 border border-slate-850 rounded-3xl p-5">
+            <h4 class="text-xs font-black tracking-wider text-rose-400 uppercase mb-4">💸 Engagements à Honorer (Dettes)</h4>
+            <div id="borrows-list" class="space-y-4"></div>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="page-projects" class="page-view hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-850 rounded-3xl p-5 shadow-sm">
+          <h3 class="text-xs font-black tracking-wider text-slate-400 uppercase mb-4">🚀 Planifier un Objectif d'Épargne</h3>
+          <form id="project-form" onsubmit="addProject(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nom de l'objectif</label><input type="text" id="p-title" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Montant Cible (FCFA)</label><input type="number" id="p-target" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Caisse assignée</label><select id="p-account" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></select></div>
+            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Date Cible</label><input type="date" id="p-duedate" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+            <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition">Créer</button>
+          </form>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-850 rounded-3xl p-6">
+          <h4 class="text-xs font-black tracking-wider text-slate-400 uppercase mb-6">🎯 Barres de progression de vos ambitions</h4>
+          <div id="projects-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </div>
+      </section>
+
+
+      <section id="page-config" class="page-view hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-slate-900 border border-slate-850 rounded-3xl p-6">
+            <h3 class="text-xs font-black tracking-wider text-slate-400 uppercase mb-4">🏷️ Gestion des Catégories</h3>
+            <form id="cat-form" onsubmit="addCategory(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end border-b border-slate-800 pb-5 mb-5">
+              <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nom</label><input type="text" id="c-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+              <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Émoji</label><input type="text" id="c-icon" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+              <button type="submit" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl text-xs border border-slate-700 transition">Ajouter</button>
+            </form>
+            <div id="categories-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-900 rounded-3xl p-6 space-y-4">
+            <h4 class="text-xs font-black tracking-wider text-amber-400 uppercase">🛡️ Outils de Maintenance & JSON</h4>
+            <p class="text-[11px] text-slate-500">Sauvegardez vos données localement pour sécuriser votre base.</p>
+            <button onclick="exportData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition">📤 Exporter Base de Données</button>
+            <div class="border border-dashed border-slate-800 rounded-xl p-3 text-center">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase cursor-pointer hover:text-white">
+                📥 Importer fichier JSON
+                <input type="file" id="import-file" onchange="importData(event)" class="hidden" accept=".json">
+              </label>
+            </div>
+            <button onclick="clearAllData()" class="w-full bg-rose-950/20 hover:bg-rose-950 text-rose-400 border border-rose-900/40 font-bold py-2 rounded-xl text-xs transition mt-6">🚨 Purge Complète (Reset)</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="closeModal()"></div>
+    <div class="absolute inset-0 flex items-end sm:items-center justify-center sm:p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-y-auto max-h-[90vh] modal-animate text-slate-200">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-sm">✕</button>
+        <h3 id="modal-title" class="text-sm font-black text-white uppercase tracking-wider mb-4">Opération</h3>
+        <form id="modal-form" onsubmit="handleModalSubmit(event)">
+          <div id="modal-fields" class="space-y-4"></div>
+          <button type="submit" class="w-full mt-6 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-widest transition">Confirmer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales Multi-Session
+    let currentUser = null;
+
+    // Clefs de stockage des configurations d'accès
+    const AUTH_KEY = 'ef_users_auth';
+
+    // Dictionnaire de questions
+    const SECURITY_QUESTIONS = {
+      Q1: "Quel est le nom de votre premier animal de compagnie ?",
+      Q2: "Quelle est votre ville de naissance ?",
+      Q3: "Quel est le modèle de votre première voiture ?",
+      Q4: "Quel est votre verset ou livre préféré ?"
+    };
+
+    // Obtenir le préfixe unique de clé pour l'utilisateur en cours
+    function getKeys() {
+      const pfx = currentUser ? `usr_${currentUser.toLowerCase()}_` : 'ef_';
+      return {
+        accounts: pfx + 'accounts',
+        categories: pfx + 'categories',
+        transactions: pfx + 'transactions',
+        projects: pfx + 'projects',
+        debts: pfx + 'debts'
+      };
+    }
+
+    const DEFAULT_CATEGORIES = [
+      { id: 'cat-salaire', name: 'Salaire', icon: '💼' },
+      { id: 'cat-alim', name: 'Alimentation', icon: '🛒' },
+      { id: 'cat-loyer', name: 'Loyer / Charges', icon: '🏠' },
+      { id: 'cat-epargne', name: 'Épargne Réserve', icon: '🔒' }
+    ];
+
+    const SAGESSE = [
+      "Chaque FCFA économisé est une brique de ton avenir.",
+      "L'argent est un outil — maîtrise-le avant qu'il ne te maîtrise.",
+      "Celui qui planifie ses d'épargne planifie sa paix.",
+      "La richesse ne crie pas, elle murmure à ceux qui écoutent."
+    ];
+    let sagIdx = 0;
+    let charts = {};
+    let currentModalType = '';
+    let currentEditId = null;
+
+    // Utilitaire LocalStorage
+    function load(key) {
+      const data = localStorage.getItem(key);
+      if (!data) {
+        if (currentUser && key === getKeys().categories) { save(getKeys().categories, DEFAULT_CATEGORIES); return DEFAULT_CATEGORIES; }
+        return [];
+      }
+      return JSON.parse(data);
+    }
+    function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+
+    // FONCTIONS MULTI-SESSION & AUTHENTIFICATION
+    function toggleAuthViews(view) {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('forgot-form').classList.add('hidden');
+      document.getElementById('recovery-question-box').classList.add('hidden');
+      
+      if(view === 'login') document.getElementById('login-form').classList.remove('hidden');
+      if(view === 'register') document.getElementById('register-form').classList.remove('hidden');
+      if(view === 'forgot') document.getElementById('forgot-form').classList.remove('hidden');
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const user = document.getElementById('reg-user').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const qKey = document.getElementById('reg-question').value;
+      const answer = document.getElementById('reg-answer').value.trim().toLowerCase();
+
+      if(!user || !pass || !answer) return;
+
+      let users = JSON.parse(localStorage.getItem(AUTH_KEY)) || {};
+      if(users[user.toLowerCase()]) {
+        showToast("❌ Cet identifiant existe déjà.");
+        return;
+      }
+
+      users[user.toLowerCase()] = { username: user, password: btoa(pass), questionKey: qKey, answerHash: btoa(answer) };
+      localStorage.setItem(AUTH_KEY, JSON.stringify(users));
+      showToast("✅ Espace créé avec succès ! Connectez-vous.");
+      document.getElementById('register-form').reset();
+      toggleAuthViews('login');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('login-user').value.trim();
+      const pass = document.getElementById('login-pass').value;
+
+      let users = JSON.parse(localStorage.getItem(AUTH_KEY)) || {};
+      const found = users[user.toLowerCase()];
+
+      if(found && atob(found.password) === pass) {
+        currentUser = found.username;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-application').classList.remove('hidden');
+        document.getElementById('current-session-user').textContent = currentUser;
+        
+        // Initialisation de la session utilisateur
+        document.getElementById('login-form').reset();
+        updateGlobalUI();
+        switchPage('dashboard');
+        showToast(`👋 Bienvenue dans votre espace, ${currentUser} !`);
+      } else {
+        showToast("❌ Identifiant ou mot de passe incorrect.");
+      }
+    }
+
+    function loadUserSecurityQuestion() {
+      const user = document.getElementById('for-user').value.trim().toLowerCase();
+      let users = JSON.parse(localStorage.getItem(AUTH_KEY)) || {};
+      const found = users[user];
+
+      const box = document.getElementById('recovery-question-box');
+      const qTxt = document.getElementById('recovery-question-text');
+
+      if(found) {
+        qTxt.textContent = SECURITY_QUESTIONS[found.questionKey] || "Question de sécurité non définie.";
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+        showToast("❌ Aucun utilisateur trouvé avec ce nom.");
+      }
+    }
+
+    function handleRecovery(e) {
+      e.preventDefault();
+      const user = document.getElementById('for-user').value.trim().toLowerCase();
+      const answer = document.getElementById('for-answer').value.trim().toLowerCase();
+      const newPass = document.getElementById('for-newpass').value;
+
+      let users = JSON.parse(localStorage.getItem(AUTH_KEY)) || {};
+      const found = users[user];
+
+      if(found && atob(found.answerHash) === answer) {
+        found.password = btoa(newPass);
+        users[user] = found;
+        localStorage.setItem(AUTH_KEY, JSON.stringify(users));
+        showToast("🔒 Mot de passe réinitialisé ! Connectez-vous.");
+        document.getElementById('forgot-form').reset();
+        toggleAuthViews('login');
+      } else {
+        showToast("❌ Réponse de sécurité incorrecte.");
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('main-application').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
+      toggleAuthViews('login');
+      showToast("🚪 Déconnexion réussie.");
+    }
+
+    // Navigation Interne Étanche (SPA)
+    function switchPage(pageId) {
+      if (!currentUser) return;
+      document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`page-${pageId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('border-amber-500', 'text-amber-500', 'text-white'));
+      document.getElementById(`nav-${pageId}`).classList.add('border-amber-500', 'text-amber-500');
+
+      // Rafraîchir les UI spécifiques
+      if (pageId === 'dashboard') renderDashboard();
+      if (pageId === 'transactions') { initFilters(); filterTransactions(); }
+      if (pageId === 'debts') renderDebts();
+      if (pageId === 'projects') { initProjectForm(); renderProjects(); }
+      if (pageId === 'config') renderCategories();
+    }
+
+    // Calculs de flux transversaux
+    function getFinancialState() {
+      const accounts = load(getKeys().accounts);
+      const transactions = load(getKeys().transactions);
+      let balances = {};
+      
+      accounts.forEach(a => balances[a.id] = 0);
+      
+      transactions.forEach(t => {
+        const amt = parseFloat(t.amount) || 0;
+        if (t.type === 'income' && balances[t.account] !== undefined) balances[t.account] += amt;
+        if (t.type === 'expense' && balances[t.account] !== undefined) balances[t.account] -= amt;
+        if (t.type === 'transfer') {
+          if (balances[t.fromAccount] !== undefined) balances[t.fromAccount] -= amt;
+          if (balances[t.toAccount] !== undefined) balances[t.toAccount] += amt;
+        }
+      });
+
+      let total = Object.values(balances).reduce((sum, val) => sum + val, 0);
+      return { totalBalance: total, accountBalances: balances };
+    }
+
+    function updateGlobalUI() {
+      if (!currentUser) return;
+      const state = getFinancialState();
+      document.getElementById('total-balance').textContent = state.totalBalance.toLocaleString('fr-FR') + " FCFA";
+
+      // Calcul effort d'épargne
+      const transactions = load(getKeys().transactions);
+      const now = new Date();
+      let inc = 0, exp = 0;
+      transactions.forEach(t => {
+        const d = new Date(t.date);
+        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+          if (t.type === 'income') inc += parseFloat(t.amount) || 0;
+          if (t.type === 'expense') exp += parseFloat(t.amount) || 0;
+        }
+      });
+      const net = inc - exp;
+      const currentDay = now.getDate();
+      const daily = currentDay > 0 ? Math.round(net / currentDay) : 0;
+
+      const effortAmt = document.getElementById('effort-amount');
+      effortAmt.textContent = (daily >= 0 ? "+" : "") + daily.toLocaleString('fr-FR') + " F / jour";
+      effortAmt.className = daily >= 0 ? "text-xl md:text-2xl font-black text-emerald-400 mt-1 tracking-tight" : "text-xl md:text-2xl font-black text-rose-400 mt-1 tracking-tight";
+      document.getElementById('effort-label').textContent = `Solde net mensuel : ${net.toLocaleString('fr-FR')} F`;
+    }
+
+    // RENDU : DASHBOARD
+    function renderDashboard() {
+      const accounts = load(getKeys().accounts);
+      const state = getFinancialState();
+      const grid = document.getElementById('accounts-grid');
+
+      if(accounts.length === 0) {
+        grid.innerHTML = `<div class="col-span-full border border-dashed border-slate-800 text-center py-6 text-xs text-slate-500 rounded-2xl">Aucune caisse active. Créez-en une pour commencer.</div>`;
+        return;
+      }
+
+      grid.innerHTML = accounts.map(a => {
+        const bal = state.accountBalances[a.id] || 0;
+        return `
+          <div class="bg-slate-900 border border-slate-850 rounded-2xl p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-xl bg-slate-950 w-10 h-10 border border-slate-800 rounded-xl flex items-center justify-center">${a.icon}</span>
+              <div>
+                <h5 class="text-xs font-bold text-white">${a.name}</h5>
+                <p class="text-[10px] text-slate-500 uppercase">${a.type}</p>
+              </div>
+            </div>
+            <span class="font-mono text-xs font-black ${bal >= 0 ? 'text-slate-200' : 'text-rose-500'}">${bal.toLocaleString('fr-FR')} F</span>
+          </div>
+        `;
+      }).join('');
+
+      renderCharts(state.accountBalances);
+    }
+
+    function renderCharts(balances) {
+      if (charts.flux) charts.flux.destroy();
+      if (charts.cats) charts.cats.destroy();
+
+      const transactions = load(getKeys().transactions);
+      const aggregate = (function() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+        const monthMap = {};
+        const formatMonth = d => d.toLocaleString('fr-FR', { month: 'short' });
+        for (let i = 0; i < 12; i++) {
+          const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+          const key = `${d.getFullYear()}-${d.getMonth()}`;
+          monthMap[key] = { income: 0, expense: 0 };
+        }
+        transactions.forEach(t => {
+          if (t.type === 'transfer') return;
+          const dt = new Date(t.date);
+          const key = `${dt.getFullYear()}-${dt.getMonth()}`;
+          if (!(key in monthMap)) return;
+          const amount = parseFloat(t.amount) || 0;
+          if (t.type === 'income') monthMap[key].income += amount;
+          if (t.type === 'expense') monthMap[key].expense += amount;
+        });
+        const labels = [];
+        const incomeData = [];
+        const expenseData = [];
+        for (let i = 0; i < 12; i++) {
+          const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+          const key = `${d.getFullYear()}-${d.getMonth()}`;
+          labels.push(formatMonth(d));
+          incomeData.push(monthMap[key].income);
+          expenseData.push(monthMap[key].expense);
+        }
+        return { labels, incomeData, expenseData };
+      })();
+
+      const ctxFlux = document.getElementById('chart-flux')?.getContext('2d');
+      if (ctxFlux) {
+        charts.flux = new Chart(ctxFlux, {
+          type: 'line',
+          data: {
+            labels: aggregate.labels,
+            datasets: [
+              { label: 'Flux Entrant', data: aggregate.incomeData, borderColor: '#10b981', tension: 0.2 },
+              { label: 'Flux Sortant', data: aggregate.expenseData, borderColor: '#f43f5e', tension: 0.2 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#94a3b8' } } },
+            scales: {
+              x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+              y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+            }
+          }
+        });
+      }
+
+      const ctxCats = document.getElementById('chart-categories')?.getContext('2d');
+      if (ctxCats) {
+        const categories = load(getKeys().categories);
+        let sums = {};
+        transactions.filter(t => t.type === 'expense').forEach(t => sums[t.category] = (sums[t.category] || 0) + parseFloat(t.amount));
+
+        charts.cats = new Chart(ctxCats, {
+          type: 'doughnut',
+          data: {
+            labels: categories.filter(c => sums[c.id]).map(c => c.name),
+            datasets: [{ data: categories.filter(c => sums[c.id]).map(c => sums[c.id]), backgroundColor: ['#f43f5e', '#f59e0b', '#3b82f6', '#10b981'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } } } }
+        });
+      }
+    }
+
+    // RENDU : TRANSACTIONS & JOURNAL
+    function initFilters() {
+      const accounts = load(getKeys().accounts);
+      const categories = load(getKeys().categories);
+      document.getElementById('filter-account').innerHTML = `<option value="all">Toutes les caisses</option>` + accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+      document.getElementById('filter-category').innerHTML = `<option value="all">Toutes les catégories</option>` + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+
+    function filterTransactions() {
+      const transactions = load(getKeys().transactions);
+      const accounts = load(getKeys().accounts);
+      const categories = load(getKeys().categories);
+
+      const sDesc = document.getElementById('search-desc').value.toLowerCase();
+      const fAcc = document.getElementById('filter-account').value;
+      const fCat = document.getElementById('filter-category').value;
+      const fType = document.getElementById('filter-type').value;
+
+      let filtered = transactions.filter(t => {
+        return (t.desc || '').toLowerCase().includes(sDesc) &&
+               (fAcc === 'all' || t.account === fAcc || t.fromAccount === fAcc || t.toAccount === fAcc) &&
+               (fCat === 'all' || t.category === fCat) &&
+               (fType === 'all' || t.type === fType);
+      });
+
+      filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+      document.getElementById('tx-count').textContent = `${filtered.length} écriture(s)`;
+
+      const tbody = document.getElementById('tx-table-body');
+      tbody.innerHTML = filtered.map(t => {
+        const aObj = accounts.find(a => a.id === t.account);
+        const cObj = categories.find(c => c.id === t.category);
+        let cl = 'text-slate-300', amt = `${parseFloat(t.amount).toLocaleString('fr-FR')} F`;
+        
+        if (t.type === 'income') { cl = 'text-emerald-400 font-bold'; amt = `+${amt}`; }
+        if (t.type === 'expense') { cl = 'text-rose-400 font-bold'; amt = `-${amt}`; }
+
+        return `
+          <tr class="hover:bg-slate-900/40">
+            <td class="py-3">
+              <p class="font-bold text-white text-xs">${t.desc}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">${t.date} &bull; <span class="uppercase text-[9px]">${t.type}</span></p>
+            </td>
+            <td class="py-3 text-[11px] text-slate-400 hidden sm:table-cell">
+              ${t.type === 'transfer' ? 'Multi-caisses' : (aObj?.name || 'Caisse')} &bull; ${cObj?.name || 'Général'}
+            </td>
+            <td class="py-3 text-right font-mono text-xs ${cl}">${amt}</td>
+            <td class="py-3 text-center space-x-2">
+              <button onclick="editTx('${t.id}')" class="text-slate-500 hover:text-amber-400 transition" title="Modifier">✏️</button>
+              <button onclick="deleteTx('${t.id}')" class="text-slate-500 hover:text-rose-400 transition" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Top Postes
+      let top = {};
+      filtered.filter(t => t.type === 'expense').forEach(t => { const d = t.desc.toUpperCase().trim(); top[d] = (top[d] || 0) + parseFloat(t.amount); });
+      document.getElementById('analysis-list').innerHTML = Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([d,s]) => `
+        <div class="flex justify-between border-b border-slate-900 pb-1.5 text-[11px]">
+          <span class="text-slate-400 truncate max-w-[140px]">${d}</span>
+          <span class="font-mono text-rose-400 font-bold">${s.toLocaleString('fr-FR')} F</span>
+        </div>
+      `).join('');
+    }
+
+    function deleteTx(id) {
+      if(confirm("Confirmer la suppression de cette transaction ?")) {
+        let txs = load(getKeys().transactions);
+        txs = txs.filter(t => t.id !== id);
+        save(getKeys().transactions, txs);
+        filterTransactions();
+        updateGlobalUI();
+        showToast("🗑️ Transaction supprimée.");
+      }
+    }
+
+    // FONCTION DE DECLENCHEMENT DE LA MODIFICATION
+    function editTx(id) {
+      const txs = load(getKeys().transactions);
+      const tx = txs.find(t => t.id === id);
+      if(!tx) return;
+
+      currentEditId = id; // On stocke l'id en modification globale
+      openModal(tx.type); // Ouvre la modale adaptée au type originel de flux
+
+      // Pré-remplissage des champs de formulaire spécifiques de la modale
+      setTimeout(() => {
+        if(document.getElementById('f-amount')) document.getElementById('f-amount').value = tx.amount;
+        if(document.getElementById('f-desc')) document.getElementById('f-desc').value = tx.desc;
+        if(document.getElementById('f-date')) document.getElementById('f-date').value = tx.date;
+        if(document.getElementById('f-account') && tx.account) document.getElementById('f-account').value = tx.account;
+        if(document.getElementById('f-category') && tx.category) document.getElementById('f-category').value = tx.category;
+        if(document.getElementById('f-from') && tx.fromAccount) document.getElementById('f-from').value = tx.fromAccount;
+        if(document.getElementById('f-to') && tx.toAccount) document.getElementById('f-to').value = tx.toAccount;
+        
+        document.getElementById('modal-title').textContent = "✏️ Modifier l'Écriture";
+      }, 50);
+    }
+
+    // RENDU : PRÊTS / EMPRUNTS
+    function renderDebts() {
+      const debts = load(getKeys().debts);
+      const buildHTML = (item) => {
+        const init = parseFloat(item.amount) || 0;
+        let rep = 0; (item.remboursements || []).forEach(r => rep += parseFloat(r.amount));
+        const rem = init - rep;
+        const isOver = rem <= 0;
+        return `
+          <div class="border border-slate-800 rounded-xl p-3 bg-slate-950/60 space-y-2">
+            <div class="flex justify-between text-xs">
+              <div><h6 class="font-bold text-white">${item.person}</h6><p class="text-[10px] text-slate-500">Délai : ${item.dueDate}</p></div>
+              <div class="text-right"><span class="font-mono font-black text-slate-200">${rem.toLocaleString('fr-FR')} F</span></div>
+            </div>
+            ${!isOver ? `
+              <div class="flex gap-2"><input type="number" id="amt-${item.id}" placeholder="Montant" class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-0.5 text-xs w-20 text-white"><button onclick="payDebt('${item.id}')" class="text-[10px] bg-slate-800 border border-slate-700 text-slate-200 px-2 rounded-lg">Payer</button></div>
+            ` : '<p class="text-[10px] font-bold text-emerald-400">✅ Intégralement Soldé</p>'}
+            <div class="flex gap-2 justify-end mt-2 pt-2 border-t border-slate-800/50">
+              <button onclick="editDebt('${item.id}')" class="text-[10px] text-slate-500 hover:text-amber-400 transition" title="Modifier">✏️ Modifier</button>
+              <button onclick="deleteDebt('${item.id}')" class="text-[10px] text-slate-500 hover:text-rose-400 transition" title="Supprimer">🗑️ Supprimer</button>
+            </div>
+          </div>
+        `;
+      };
+      document.getElementById('loans-list').innerHTML = debts.filter(d => d.type === 'loan').map(buildHTML).join('') || `<p class="text-[10px] text-slate-600 italic">Aucune créance.</p>`;
+      document.getElementById('borrows-list').innerHTML = debts.filter(d => d.type === 'borrow').map(buildHTML).join('') || `<p class="text-[10px] text-slate-600 italic">Aucune dette.</p>`;
+    }
+
+    function addDebt(e) {
+      e.preventDefault();
+      const debts = load(getKeys().debts);
+      debts.push({
+        id: 'd-'+Date.now(),
+        type: document.getElementById('d-type').value,
+        person: document.getElementById('d-person').value,
+        amount: parseFloat(document.getElementById('d-amount').value),
+        dueDate: document.getElementById('d-duedate').value,
+        remboursements: []
+      });
+      save(getKeys().debts, debts);
+      document.getElementById('debt-form').reset();
+      renderDebts();
+      updateGlobalUI();
+    }
+
+    function payDebt(id) {
+      const amt = parseFloat(document.getElementById(`amt-${id}`).value) || 0;
+      if (amt <= 0) return;
+      const debts = load(getKeys().debts);
+      const d = debts.find(x => x.id === id);
+      if(d) { d.remboursements.push({ amount: amt }); save(getKeys().debts, debts); renderDebts(); updateGlobalUI(); }
+    }
+
+    function deleteDebt(id) {
+      if(confirm("Confirmer la suppression de cette entrée ?")) {
+        let debts = load(getKeys().debts);
+        debts = debts.filter(d => d.id !== id);
+        save(getKeys().debts, debts);
+        renderDebts();
+        updateGlobalUI();
+        showToast("🗑️ Entrée supprimée.");
+      }
+    }
+    function editDebt(id) {
+      const debts = load(getKeys().debts);
+      const d = debts.find(x => x.id === id);
+      if(!d) return;
+      currentEditId = id;
+      openModal('edit-debt');
+      setTimeout(() => {
+        if(document.getElementById('f-person')) document.getElementById('f-person').value = d.person;
+        if(document.getElementById('f-amount')) document.getElementById('f-amount').value = d.amount;
+        if(document.getElementById('f-duedate')) document.getElementById('f-duedate').value = d.dueDate;
+        document.getElementById('modal-title').textContent = "✏️ Modifier Prêt / Emprunt";
+      }, 50);
+    }
+
+    // RENDU : PROJETS
+    function initProjectForm() {
+      document.getElementById('p-account').innerHTML = load(getKeys().accounts).map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+    }
+    function renderProjects() {
+      const projects = load(getKeys().projects);
+      const state = getFinancialState();
+      document.getElementById('projects-list').innerHTML = projects.map(p => {
+        const cur = state.accountBalances[p.accountId] || 0;
+        const pct = Math.min(100, Math.round((cur / p.target) * 100));
+        
+        let statsHtml = '';
+        if (p.dueDate) {
+          const now = new Date();
+          const due = new Date(p.dueDate);
+          const diffTime = due - now;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const rest = p.target - cur;
+          
+          if (diffDays > 0) {
+            const daily = Math.max(0, rest) / diffDays;
+            statsHtml = `<div class="flex justify-between items-center text-[10px] text-slate-400 bg-slate-900/50 p-2 rounded-lg mt-2">
+              <span>Jours restants: <b class="text-white">${diffDays}j</b></span>
+              <span>Effort: <b class="text-amber-400">${Math.round(daily).toLocaleString('fr-FR')} F/j</b></span>
+            </div>`;
+          } else {
+            statsHtml = `<div class="flex justify-between items-center text-[10px] text-rose-400 bg-rose-950/20 p-2 rounded-lg mt-2">
+              <span>Délai dépassé</span>
+              <span>Effort: <b>0 F/j</b></span>
+            </div>`;
+          }
+        } else {
+          statsHtml = `<div class="flex justify-between items-center text-[10px] text-slate-500 bg-slate-900/30 p-2 rounded-lg mt-2 italic">
+            <span>Aucune date cible définie</span>
+          </div>`;
+        }
+
+        return `
+          <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/40 space-y-3 relative group">
+            <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onclick="editProject('${p.id}')" class="text-[10px] text-slate-500 hover:text-amber-400 bg-slate-900 p-1 rounded transition" title="Modifier">✏️</button>
+              <button onclick="deleteProject('${p.id}')" class="text-[10px] text-slate-500 hover:text-rose-400 bg-slate-900 p-1 rounded transition" title="Supprimer">🗑️</button>
+            </div>
+            <div class="flex justify-between text-xs pr-12">
+              <div><h5 class="font-bold text-white uppercase">${p.title}</h5></div>
+              <div class="text-right"><span class="font-mono font-black text-amber-400">${cur.toLocaleString('fr-FR')} F</span> / ${p.target.toLocaleString('fr-FR')}</div>
+            </div>
+            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden"><div class="h-full bg-amber-400" style="width: ${pct}%"></div></div>
+            ${statsHtml}
+          </div>
+        `;
+      }).join('') || `<p class="text-[10px] text-slate-600 italic">Aucun plan d'épargne.</p>`;
+    }
+    function addProject(e) {
+      e.preventDefault();
+      const projects = load(getKeys().projects);
+      projects.push({ id: 'p-'+Date.now(), title: document.getElementById('p-title').value, target: parseFloat(document.getElementById('p-target').value), accountId: document.getElementById('p-account').value, dueDate: document.getElementById('p-duedate') ? document.getElementById('p-duedate').value : '' });
+      save(getKeys().projects, projects);
+      document.getElementById('project-form').reset();
+      renderProjects();
+    }
+
+    function deleteProject(id) {
+      if(confirm("Confirmer la suppression de ce projet ?")) {
+        let projects = load(getKeys().projects);
+        projects = projects.filter(p => p.id !== id);
+        save(getKeys().projects, projects);
+        renderProjects();
+        showToast("🗑️ Projet supprimé.");
+      }
+    }
+    function editProject(id) {
+      const projects = load(getKeys().projects);
+      const p = projects.find(x => x.id === id);
+      if(!p) return;
+      currentEditId = id;
+      openModal('edit-project');
+      setTimeout(() => {
+        if(document.getElementById('f-title')) document.getElementById('f-title').value = p.title;
+        if(document.getElementById('f-target')) document.getElementById('f-target').value = p.target;
+        if(document.getElementById('f-account')) document.getElementById('f-account').value = p.accountId;
+        if(document.getElementById('f-duedate')) document.getElementById('f-duedate').value = p.dueDate || '';
+        document.getElementById('modal-title').textContent = "✏️ Modifier le Projet";
+      }, 50);
+    }
+
+    // RENDU : CONFIGURATION & PARAMS
+    function renderCategories() {
+      document.getElementById('categories-list').innerHTML = load(getKeys().categories).map(c => `
+        <div class="flex items-center justify-between border border-slate-850 bg-slate-900/60 rounded-xl p-2.5 text-xs text-slate-300">
+          <span>${c.icon} ${c.name}</span>
+        </div>
+      `).join('');
+    }
+    function addCategory(e) {
+      e.preventDefault();
+      const cats = load(getKeys().categories);
+      cats.push({ id: 'c-'+Date.now(), name: document.getElementById('c-name').value, icon: document.getElementById('c-icon').value });
+      save(getKeys().categories, cats);
+      document.getElementById('cat-form').reset();
+      renderCategories();
+    }
+
+    // EXPORT ET IMPORT DB
+    function exportData() {
+      let data = {}; Object.keys(getKeys()).forEach(k => data[getKeys()[k]] = localStorage.getItem(getKeys()[k]));
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${currentUser.toUpperCase()}_FINANCE_BLACK_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+    function importData(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const parsed = JSON.parse(evt.target.result);
+        Object.keys(parsed).forEach(k => { if(parsed[k]) localStorage.setItem(k, parsed[k]); });
+        window.location.reload();
+      };
+      reader.readAsText(file);
+    }
+    function clearAllData() { if(confirm("Tout effacer pour cette session ?")) { Object.keys(getKeys()).forEach(k => localStorage.removeItem(getKeys()[k])); window.location.reload(); } }
+
+    // GESTIONNAIRE MODALES
+    function openModal(type) {
+      currentModalType = type;
+      const modal = document.getElementById('modal');
+      const title = document.getElementById('modal-title');
+      const fields = document.getElementById('modal-fields');
+      const accounts = load(getKeys().accounts);
+      const categories = load(getKeys().categories);
+
+      modal.classList.remove('hidden');
+
+      if (type === 'new-account') {
+        title.textContent = "🗂️ Ouvrir une nouvelle Caisse";
+        fields.innerHTML = `
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nom de la Caisse</label><input type="text" id="f-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Émoji</label><input type="text" id="f-icon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" placeholder="💳"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Type</label><select id="f-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"><option value="courant">Compte Liquide / Courant</option><option value="epargne">Coffre d'Épargne / Bloqué</option></select></div>
+        `;
+      } else if (['income', 'expense'].includes(type)) {
+        title.textContent = type === 'income' ? "➕ Enregistrer une Entrée" : "➖ Enregistrer une Sortie";
+        fields.innerHTML = `
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Montant (FCFA)</label><input type="number" id="f-amount" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Caisse</label><select id="f-account" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">${accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Catégorie</label><select id="f-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">${categories.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Libellé</label><input type="text" id="f-desc" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Date</label><input type="date" id="f-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+        `;
+        document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+      } else if (type === 'transfer') {
+        title.textContent = "🔄 Transfert de Caisse à Caisse";
+        fields.innerHTML = `
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Montant (FCFA)</label><input type="number" id="f-amount" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Depuis</label><select id="f-from" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">${accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Vers</label><select id="f-to" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">${accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Date</label><input type="date" id="f-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+        `;
+        document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+      } else if (type === 'edit-project') {
+        title.textContent = "✏️ Modifier le Projet";
+        fields.innerHTML = `
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nom de l'objectif</label><input type="text" id="f-title" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Montant Cible (FCFA)</label><input type="number" id="f-target" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Caisse assignée</label><select id="f-account" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">${accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Date Cible</label><input type="date" id="f-duedate" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+        `;
+      } else if (type === 'edit-debt') {
+        title.textContent = "✏️ Modifier Prêt / Emprunt";
+        fields.innerHTML = `
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tiers / Personne</label><input type="text" id="f-person" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Montant (FCFA)</label><input type="number" id="f-amount" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Échéance</label><input type="date" id="f-duedate" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"></div>
+        `;
+      }
+    }
+
+    function closeModal() { document.getElementById('modal').classList.add('hidden'); currentEditId = null; }
+
+    function handleModalSubmit(e) {
+      e.preventDefault();
+      
+      if (currentModalType === 'new-account') {
+        const accs = load(getKeys().accounts);
+        accs.push({ id: 'a-'+Date.now(), name: document.getElementById('f-name').value, icon: document.getElementById('f-icon').value || '💳', type: document.getElementById('f-type').value });
+        save(getKeys().accounts, accs);
+      } 
+      
+      // Branchement de la logique d'ajout VS modification pour les flux
+      else if (['income', 'expense'].includes(currentModalType)) {
+        const txs = load(getKeys().transactions);
+        
+        if (currentEditId !== null) {
+          // Mode modification
+          const idx = txs.findIndex(t => t.id === currentEditId);
+          if(idx !== -1) {
+            txs[idx].amount = parseFloat(document.getElementById('f-amount').value);
+            txs[idx].account = document.getElementById('f-account').value;
+            txs[idx].category = document.getElementById('f-category').value;
+            txs[idx].desc = document.getElementById('f-desc').value;
+            txs[idx].date = document.getElementById('f-date').value;
+            showToast("✏️ Transaction mise à jour !");
+          }
+        } else {
+          // Mode ajout classique
+          txs.push({ id: 't-'+Date.now(), type: currentModalType, amount: parseFloat(document.getElementById('f-amount').value), account: document.getElementById('f-account').value, category: document.getElementById('f-category').value, desc: document.getElementById('f-desc').value, date: document.getElementById('f-date').value });
+          showToast("➕ Flux ajouté !");
+        }
+        save(getKeys().transactions, txs);
+      }
+      
+      else if (currentModalType === 'transfer') {
+        const txs = load(getKeys().transactions);
+        
+        if (currentEditId !== null) {
+          // Mode modification transfert
+          const idx = txs.findIndex(t => t.id === currentEditId);
+          if(idx !== -1) {
+            txs[idx].amount = parseFloat(document.getElementById('f-amount').value);
+            txs[idx].fromAccount = document.getElementById('f-from').value;
+            txs[idx].toAccount = document.getElementById('f-to').value;
+            txs[idx].date = document.getElementById('f-date').value;
+            showToast("✏️ Transfert mis à jour !");
+          }
+        } else {
+          // Mode ajout transfert classique
+          txs.push({ id: 't-'+Date.now(), type: 'transfer', amount: parseFloat(document.getElementById('f-amount').value), fromAccount: document.getElementById('f-from').value, toAccount: document.getElementById('f-to').value, desc: 'Virement Interne', date: document.getElementById('f-date').value });
+          showToast("🔄 Transfert exécuté !");
+        }
+        save(getKeys().transactions, txs);
+      }
+      
+      else if (currentModalType === 'edit-project') {
+        const projects = load(getKeys().projects);
+        const idx = projects.findIndex(p => p.id === currentEditId);
+        if(idx !== -1) {
+          projects[idx].title = document.getElementById('f-title').value;
+          projects[idx].target = parseFloat(document.getElementById('f-target').value);
+          projects[idx].accountId = document.getElementById('f-account').value;
+          projects[idx].dueDate = document.getElementById('f-duedate').value;
+          save(getKeys().projects, projects);
+          showToast("✏️ Projet mis à jour !");
+          renderProjects();
+        }
+      } 
+      
+      else if (currentModalType === 'edit-debt') {
+        const debts = load(getKeys().debts);
+        const idx = debts.findIndex(d => d.id === currentEditId);
+        if(idx !== -1) {
+          debts[idx].person = document.getElementById('f-person').value;
+          debts[idx].amount = parseFloat(document.getElementById('f-amount').value);
+          debts[idx].dueDate = document.getElementById('f-duedate').value;
+          save(getKeys().debts, debts);
+          showToast("✏️ Entrée mise à jour !");
+          renderDebts();
+        }
+      }
+      
+      closeModal(); 
+      updateGlobalUI(); 
+      // Si nous étions sur la page transaction lors de la modification, on rafraîchit la vue filtrée
+      if(!document.getElementById('page-transactions').classList.contains('hidden')) {
+        filterTransactions();
+      } else {
+        renderDashboard();
+      }
+    }
+
+    function showToast(m) { const t = document.getElementById('toast'); document.getElementById('toast-inner').textContent = m; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2500); }
+    function nextSagesse() { sagIdx = (sagIdx + 1) % SAGESSE.length; document.getElementById('sagesse-txt').textContent = `"${SAGESSE[sagIdx]}"`; }
+
+    // DÉMARRAGE AUTOMATIQUE CONTRÔLÉ (Vérifie si session active)
+    document.addEventListener("DOMContentLoaded", () => {
+      nextSagesse();
+      // On maintient l'écran d'authentification visible au démarrage obligatoire.
+    });
+  </script>
+</body>
+</html>
