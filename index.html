@@ -243,6 +243,101 @@
                 letter-spacing: 5px;
             }
         }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1.5rem 0.75rem;
+            }
+
+            .identity-block {
+                margin-bottom: 3rem;
+            }
+
+            .title-main {
+                font-size: 1.8rem;
+                letter-spacing: -0.5px;
+            }
+
+            .domain-link {
+                font-size: 0.8rem;
+            }
+
+            .tagline {
+                font-size: 0.95rem;
+            }
+
+            .nav-menu {
+                gap: 1rem;
+            }
+
+            .nav-link {
+                font-size: 0.95rem;
+                padding: 1rem 0.75rem;
+                letter-spacing: 2px;
+            }
+
+            .nav-link:hover {
+                letter-spacing: 3px;
+            }
+
+            .decoration {
+                font-size: 0.7rem;
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .title-main {
+                font-size: 1.5rem;
+            }
+
+            .nav-link {
+                font-size: 0.85rem;
+                padding: 0.9rem 0.5rem;
+                letter-spacing: 1.5px;
+            }
+
+            .tagline {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .nav-link {
+                min-height: 48px;
+                min-width: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 1rem 0.75rem;
+            }
+
+            .identity-block {
+                margin-bottom: 2rem;
+            }
+
+            .title-main {
+                font-size: 1.6rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .nav-menu {
+                gap: 0.75rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 0.8rem 0.5rem;
+            }
+        }
     </style>
 </head>
 

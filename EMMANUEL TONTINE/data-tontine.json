@@ -1,0 +1,13 @@
+{
+  "nomAsso": "",
+  "explicationAsso": "",
+  "sessionActuelle": 1,
+  "reunionActuelle": 1,
+  "membres": [],
+  "comptabilite": {},
+  "depenses": [],
+  "reunionsHistorique": [],
+  "config_caisses": [],
+  "config_amendes": [],
+  "reglement_interieur": "Le règlement intérieur de l'association n'a pas encore été rédigé par l'Administrateur."
+}

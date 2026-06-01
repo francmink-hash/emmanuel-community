@@ -479,3 +479,103 @@ table {
         gap: 6px;
     }
 }
+
+/* ── Enhanced Mobile Responsiveness ── */
+@media (max-width: 400px) {
+    body {
+        padding: 8px;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+    }
+
+    header p {
+        font-size: 0.9rem;
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .menu-item {
+        padding: 14px;
+        font-size: 0.9rem;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .summary-card {
+        padding: 12px;
+    }
+
+    input, select, button {
+        font-size: 14px;
+    }
+
+    button.small {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    /* Responsive tables for very small screens */
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 8px 6px;
+    }
+}
+
+/* ── Touch-friendly improvements ── */
+@media (hover: none) and (pointer: coarse) {
+    button, .menu-item, .config-tab {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    input, select {
+        min-height: 44px;
+    }
+}
+
+/* ── Landscape mobile improvements ── */
+@media (max-height: 500px) and (orientation: landscape) {
+    body {
+        padding: 8px;
+    }
+
+    header {
+        margin: 0 auto 12px;
+        padding-bottom: 10px;
+    }
+
+    header h1 {
+        font-size: 1.4rem;
+        margin: 0;
+    }
+
+    .menu-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 8px;
+        margin: 12px auto;
+    }
+
+    .card {
+        padding: 12px;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+    }
+}

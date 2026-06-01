@@ -367,6 +367,17 @@
                     <div class="config-tab" onclick="switchTab('session')">📆 Réunions</div>
                     <div class="config-tab" onclick="switchTab('fin-session')">🏆 Fin de Session</div>
                 </div>
+                
+                <!-- Download JSON button for admin2 -->
+                <div id="json-download-section" style="margin-top: 20px; padding: 15px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; display: none;">
+                    <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">
+                        💾 <strong>Mode JSON activé</strong><br>
+                        <small>Téléchargez le fichier data-tontine.json pour sauvegarder vos modifications.</small>
+                    </p>
+                    <button onclick="downloadJsonData()" style="width: 100%; padding: 10px; background: #d4af37; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                        📥 Télécharger data-tontine.json
+                    </button>
+                </div>
             </div>
 
             <!-- Main Content Area -->
@@ -688,10 +699,17 @@
 
     <footer><small>EMMANUEL_TONTINE — administration de l'association.</small></footer>
 
+    <script src="app-dual-storage.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>
     <script>
         auth.checkAdmin();
+
+        // Show download button for admin2
+        const user = auth.getCurrentUser();
+        if (user && user.storageType === 'json') {
+            document.getElementById('json-download-section').style.display = 'block';
+        }
 
         // ── Navigation par onglets ──
         function switchTab(name) {
