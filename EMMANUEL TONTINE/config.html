@@ -1434,7 +1434,8 @@
             alert("✓ Caisse modifiée avec succès !");
         };
 
-        window.onload = loadConfig;
+        // Écouter l'événement de chargement des données avant d'initialiser l'UI
+        document.addEventListener('dataLoaded', loadConfig);
     </script>
 
     <!-- ══════════════════════════════════════════

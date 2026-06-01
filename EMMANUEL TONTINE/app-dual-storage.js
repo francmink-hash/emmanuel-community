@@ -1,8 +1,7 @@
-/**
- * DUAL-STORAGE MODULE FOR EMMANUEL TONTINE
- * Détecte automatiquement l'environnement et bascule entre :
- * - API (localhost:8080 avec serveur) → lit/écrit data-tontine.json via API
- * - localStorage (Vercel/Internet) → lit/écrit dans le localStorage du navigateur
+/*
+ * app-dual-storage.js
+ * Module de stockage double pour l'application TONTINE
+ * Permet de basculer entre localStorage (mode internet) et API serveur (mode localhost)
  */
 
 // Détection de l'environnement
@@ -13,8 +12,9 @@ function detectEnvironment() {
     const hostname = window.location.hostname;
     const port = window.location.port;
     
-    // Détecte si on est sur localhost:8080
-    isLocalhost = (hostname === 'localhost' || hostname === '127.0.0.1') && port === '8080';
+    // Détecte si on est sur localhost (peu importe le port)
+    // Si c'est localhost ou 127.0.0.1, on utilise l'API
+    isLocalhost = (hostname === 'localhost' || hostname === '127.0.0.1');
     useLocalStorage = !isLocalhost;
     
     console.log(`[Dual Storage] Environnement détecté: ${isLocalhost ? 'LOCAL (API)' : 'INTERNET (localStorage)'}`);
@@ -25,21 +25,19 @@ function detectEnvironment() {
 async function loadDataFromAPI() {
     try {
         const response = await fetch('/api/data-tontine');
-        if (response.ok) {
-            const data = await response.json();
-            console.log('[Dual Storage] Données chargées depuis l\'API:', data);
-            return data;
-        } else {
-            console.error('[Dual Storage] Erreur API:', response.status);
-            return null;
+        if (!response.ok) {
+            throw new Error('Erreur de chargement depuis l\'API');
         }
-    } catch (e) {
-        console.error('[Dual Storage] Erreur lors du chargement API:', e);
+        const data = await response.json();
+        console.log('[Dual Storage] Données chargées depuis l\'API:', data);
+        return data;
+    } catch (error) {
+        console.error('[Dual Storage] Erreur de chargement depuis l\'API:', error);
         return null;
     }
 }
 
-// Sauvegarder les données via l'API (mode local)
+// Sauvegarder les données vers l'API (mode local)
 async function saveDataToAPI(data) {
     try {
         const response = await fetch('/api/data-tontine', {
@@ -49,24 +47,25 @@ async function saveDataToAPI(data) {
             },
             body: JSON.stringify(data)
         });
-        if (response.ok) {
-            console.log('[Dual Storage] Données sauvegardées via l\'API');
-            return true;
-        } else {
-            console.error('[Dual Storage] Erreur sauvegarde API:', response.status);
-            return false;
+        
+        if (!response.ok) {
+            throw new Error('Erreur de sauvegarde vers l\'API');
         }
-    } catch (e) {
-        console.error('[Dual Storage] Erreur lors de la sauvegarde API:', e);
+        
+        const result = await response.json();
+        console.log('[Dual Storage] Données sauvegardées vers l\'API:', result);
+        return true;
+    } catch (error) {
+        console.error('[Dual Storage] Erreur de sauvegarde vers l\'API:', error);
         return false;
     }
 }
 
-// Charger les données depuis localStorage (mode Internet)
+// Charger les données depuis localStorage (mode internet)
 function loadDataFromLocalStorage() {
     try {
         const data = {
-            nomAsso: localStorage.getItem('apbmData') ? JSON.parse(localStorage.getItem('apbmData')) : {
+            nomAsso: JSON.parse(localStorage.getItem('apbmData')) || {
                 nomAsso: '',
                 explicationAsso: '',
                 sessionActuelle: 1,
@@ -80,21 +79,15 @@ function loadDataFromLocalStorage() {
             config_amendes: JSON.parse(localStorage.getItem('config_amendes')) || [],
             reglement_interieur: localStorage.getItem('reglement_interieur') || "Le règlement intérieur de l'association n'a pas encore été rédigé par l'Administrateur."
         };
-        
-        // Fusionner les données principales
-        if (typeof localStorage.getItem('apbmData') === 'string') {
-            data.nomAsso = JSON.parse(localStorage.getItem('apbmData'));
-        }
-        
-        console.log('[Dual Storage] Données chargées depuis localStorage');
+        console.log('[Dual Storage] Données chargées depuis localStorage:', data);
         return data;
-    } catch (e) {
-        console.error('[Dual Storage] Erreur lors du chargement localStorage:', e);
+    } catch (error) {
+        console.error('[Dual Storage] Erreur de chargement depuis localStorage:', error);
         return null;
     }
 }
 
-// Sauvegarder les données dans localStorage (mode Internet)
+// Sauvegarder les données vers localStorage (mode internet)
 function saveDataToLocalStorage(data) {
     try {
         if (data.nomAsso) {
@@ -109,10 +102,10 @@ function saveDataToLocalStorage(data) {
         if (data.reglement_interieur) {
             localStorage.setItem('reglement_interieur', data.reglement_interieur);
         }
-        console.log('[Dual Storage] Données sauvegardées dans localStorage');
+        console.log('[Dual Storage] Données sauvegardées vers localStorage');
         return true;
-    } catch (e) {
-        console.error('[Dual Storage] Erreur lors de la sauvegarde localStorage:', e);
+    } catch (error) {
+        console.error('[Dual Storage] Erreur de sauvegarde vers localStorage:', error);
         return false;
     }
 }
@@ -130,8 +123,23 @@ async function loadDualStorageData() {
     
     if (data) {
         // Appliquer les données aux variables globales
-        if (typeof associationData !== 'undefined' && data.nomAsso) {
-            Object.assign(associationData, data.nomAsso);
+        if (typeof associationData !== 'undefined') {
+            // Si data.nomAsso est un objet (ancienne structure), l'utiliser directement
+            // Sinon, reconstruire l'objet depuis les champs plats
+            if (data.nomAsso && typeof data.nomAsso === 'object' && !data.nomAsso.nomAsso) {
+                // Structure plate du serveur
+                associationData.nomAsso = data.nomAsso || '';
+                associationData.explicationAsso = data.explicationAsso || '';
+                associationData.sessionActuelle = data.sessionActuelle || 1;
+                associationData.reunionActuelle = data.reunionActuelle || 1;
+                associationData.membres = data.membres || [];
+                associationData.comptabilite = data.comptabilite || {};
+                associationData.depenses = data.depenses || [];
+                associationData.reunionsHistorique = data.reunionsHistorique || [];
+            } else if (data.nomAsso && typeof data.nomAsso === 'object') {
+                // Ancienne structure imbriquée
+                Object.assign(associationData, data.nomAsso);
+            }
         }
         if (typeof configCaisses !== 'undefined' && data.config_caisses) {
             configCaisses.length = 0;
@@ -144,6 +152,10 @@ async function loadDualStorageData() {
         if (typeof reglementInterieur !== 'undefined' && data.reglement_interieur) {
             reglementInterieur = data.reglement_interieur;
         }
+        
+        // Déclencher un événement personnalisé pour indiquer que les données sont chargées
+        const event = new CustomEvent('dataLoaded', { detail: data });
+        document.dispatchEvent(event);
     }
     
     return data;
@@ -153,11 +165,19 @@ async function loadDualStorageData() {
 async function saveDualStorageData() {
     detectEnvironment();
     
+    // Structure plate attendue par le serveur
     const data = {
-        nomAsso: typeof associationData !== 'undefined' ? associationData : null,
+        nomAsso: typeof associationData !== 'undefined' ? (associationData.nomAsso || '') : '',
+        explicationAsso: typeof associationData !== 'undefined' ? (associationData.explicationAsso || '') : '',
+        sessionActuelle: typeof associationData !== 'undefined' ? (associationData.sessionActuelle || 1) : 1,
+        reunionActuelle: typeof associationData !== 'undefined' ? (associationData.reunionActuelle || 1) : 1,
+        membres: typeof associationData !== 'undefined' ? (associationData.membres || []) : [],
+        comptabilite: typeof associationData !== 'undefined' ? (associationData.comptabilite || {}) : {},
+        depenses: typeof associationData !== 'undefined' ? (associationData.depenses || []) : [],
+        reunionsHistorique: typeof associationData !== 'undefined' ? (associationData.reunionsHistorique || []) : [],
         config_caisses: typeof configCaisses !== 'undefined' ? configCaisses : [],
         config_amendes: typeof configAmendes !== 'undefined' ? configAmendes : [],
-        reglement_interieur: typeof reglementInterieur !== 'undefined' ? reglementInterieur : null
+        reglement_interieur: typeof reglementInterieur !== 'undefined' ? reglementInterieur : "Le règlement intérieur de l'association n'a pas encore été rédigé par l'Administrateur."
     };
     
     let success;
@@ -170,33 +190,19 @@ async function saveDualStorageData() {
     return success;
 }
 
-// Override des fonctions de sauvegarde existantes
-let originalSauvegarder = null;
-let originalSauvegarderCaisses = null;
-let originalSauvegarderAmendes = null;
-let originalSauvegarderReglement = null;
-
 // Initialisation du dual storage
-async function initializeDualStorage() {
-    detectEnvironment();
+function initializeDualStorage() {
+    console.log('[Dual Storage] Initialisation...');
     
-    // Charger les données
-    await loadDualStorageData();
+    // Sauvegarder les fonctions originales
+    const originalSauvegarder = window.sauvegarder;
+    const originalSauvegarderCaisses = window.sauvegarderCaisses;
+    const originalSauvegarderAmendes = window.sauvegarderAmendes;
+    const originalSauvegarderReglement = window.sauvegarderReglement;
     
-    // Attendre que app.js soit chargé pour override les fonctions
+    // Attendre que app.js soit chargé
     setTimeout(() => {
-        if (typeof window.sauvegarder === 'function') {
-            originalSauvegarder = window.sauvegarder;
-        }
-        if (typeof window.sauvegarderCaisses === 'function') {
-            originalSauvegarderCaisses = window.sauvegarderCaisses;
-        }
-        if (typeof window.sauvegarderAmendes === 'function') {
-            originalSauvegarderAmendes = window.sauvegarderAmendes;
-        }
-        if (typeof window.sauvegarderReglement === 'function') {
-            originalSauvegarderReglement = window.sauvegarderReglement;
-        }
+        detectEnvironment();
         
         // Override sauvegarder
         window.sauvegarder = async function() {
@@ -259,15 +265,47 @@ async function initializeDualStorage() {
 
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeDualStorage);
+    document.addEventListener('DOMContentLoaded', async () => {
+        await initializeDualStorage();
+        // Charger les données automatiquement au démarrage
+        await loadDualStorageData();
+    });
 } else {
-    initializeDualStorage();
+    (async () => {
+        await initializeDualStorage();
+        // Charger les données automatiquement au démarrage
+        await loadDualStorageData();
+    })();
 }
+
+// Fonction pour télécharger le fichier JSON (pour admin2)
+window.downloadJsonData = async function() {
+    try {
+        const response = await fetch('/api/data-tontine');
+        if (!response.ok) {
+            throw new Error('Erreur de téléchargement depuis l\'API');
+        }
+        const data = await response.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data-tontine.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log('[Dual Storage] Fichier data-tontine.json téléchargé avec succès');
+    } catch (error) {
+        console.error('[Dual Storage] Erreur de téléchargement:', error);
+        alert('Erreur lors du téléchargement du fichier JSON');
+    }
+};
 
 // Exporter les fonctions pour usage externe
 window.dualStorage = {
-    isLocalhost: () => isLocalhost,
-    useLocalStorage: () => useLocalStorage,
     loadData: loadDualStorageData,
-    saveData: saveDualStorageData
+    saveData: saveDualStorageData,
+    detectEnvironment: detectEnvironment,
+    isLocalhost: () => isLocalhost
 };

@@ -546,8 +546,19 @@
         // PILIER 2 — DASHBOARD PUBLIC (LECTURE SEULE)
         // Caisses dynamiques + règlement + rapport de session
         // ============================================================
-        appliquerNomAsso();
-        document.getElementById('sess-num').innerText = associationData.sessionActuelle;
+        // Écouter l'événement de chargement des données avant d'initialiser l'UI
+        document.addEventListener('dataLoaded', function() {
+            appliquerNomAsso();
+            document.getElementById('sess-num').innerText = associationData.sessionActuelle;
+            renderDashboardCaisses();
+            // Afficher le règlement intérieur après chargement des données
+            const reglEl = document.getElementById('reglement-display');
+            if (reglEl) {
+                reglEl.innerHTML = reglementInterieur;
+                // Ajuster le style pour le rendu HTML (listes, etc.)
+                reglEl.style.whiteSpace = 'normal';
+            }
+        });
 
         // Injecter les caisses dynamiquement dans le dashboard global
         function renderDashboardCaisses() {
@@ -587,7 +598,6 @@
                 }
             }).join('');
         }
-        renderDashboardCaisses();
 
         function ouvrirHistoriqueCaisse(caisseId) {
             const caisse = configCaisses.find(c => c.id.toString() === caisseId.toString());

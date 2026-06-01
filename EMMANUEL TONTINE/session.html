@@ -517,7 +517,8 @@
             if (typeof chargerSanctionsUI === 'function') chargerSanctionsUI();
         }
 
-        window.onload = initSessionPage;
+        // Écouter l'événement de chargement des données avant d'initialiser l'UI
+        document.addEventListener('dataLoaded', initSessionPage);
     </script>
 </body>
 </html>

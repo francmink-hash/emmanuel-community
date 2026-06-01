@@ -52,10 +52,11 @@
     <script src="auth.js"></script>
     <script>
         auth.checkAdmin();
-        window.onload = function() {
+        // Écouter l'événement de chargement des données avant de mettre à jour l'UI
+        document.addEventListener('dataLoaded', function() {
             appliquerNomAsso();
             updateMembresUI();
-        };
+        });
     </script>
 </body>
 </html>
