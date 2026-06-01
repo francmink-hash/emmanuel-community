@@ -1,14 +1,5 @@
 {
-  "nomAsso": {
-    "nomAsso": "",
-    "explicationAsso": "",
-    "sessionActuelle": 1,
-    "reunionActuelle": 1,
-    "membres": [],
-    "comptabilite": {},
-    "depenses": [],
-    "reunionsHistorique": []
-  },
+  "nomAsso": "",
   "explicationAsso": "",
   "sessionActuelle": 1,
   "reunionActuelle": 1,
