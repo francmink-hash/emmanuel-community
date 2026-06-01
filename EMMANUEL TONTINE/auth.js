@@ -45,18 +45,20 @@ const auth = {
     },
 
     // Inscription
-    signup(username, password, question, answer) {
+    // ownerAdmin : si 'admin2', le compte créé hérite du flag storageType='json'
+    signup(username, password, question, answer, ownerAdmin = null) {
         let users = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         if (users.find(u => u.username === username)) return { success: false, msg: "Cet utilisateur existe déjà." };
 
-        // Par défaut, le compte est "En attente" pour les nouveaux utilisateurs
-        users.push({ 
-            username, 
-            password, 
-            question, 
-            answer, 
-            role: 'user', 
-            accountStatus: 'En attente' 
+        users.push({
+            username,
+            password,
+            question,
+            answer,
+            role: 'user',
+            accountStatus: 'En attente',
+            // Hérite du mode de stockage de l'admin qui gère ce compte
+            storageType: ownerAdmin === 'admin2' ? 'json' : 'localStorage'
         });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
         return { success: true };

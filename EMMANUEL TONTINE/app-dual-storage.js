@@ -44,17 +44,15 @@ async function saveDataToAPI(data) {
 
 // ── localStorage isolé par utilisateur (mode internet) ───────────────────────
 
-// Lit le username brut depuis la SESSION_KEY de auth.js sans passer par auth
+// Lit la session brute depuis localStorage sans passer par auth
 // pour éviter tout risque de lecture d'une session écrasée par un autre utilisateur.
-function getRawUsername() {
-    // SESSION_KEY dans auth.js = `EMMANUEL_SESSION_${APP_NAME}`
-    // On parcourt toutes les clés du localStorage pour trouver celle qui correspond.
+function getRawSession() {
     for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k && k.startsWith('EMMANUEL_SESSION_')) {
             try {
                 const session = JSON.parse(localStorage.getItem(k));
-                if (session && session.username) return session.username;
+                if (session && session.username) return session;
             } catch (e) { /* clé corrompue, on continue */ }
         }
     }
@@ -62,14 +60,19 @@ function getRawUsername() {
 }
 
 // Clé strictement unique par username exact : "tontine_data_admin", "tontine_data_admin2", etc.
-// La casse originale est préservée pour garantir l'unicité même entre "Admin" et "admin2".
 function getUserStorageKey() {
-    const username = getRawUsername();
-    if (username) {
-        // On normalise uniquement les espaces (remplacés par _), la casse reste intacte
-        return 'tontine_data_' + username.replace(/\s+/g, '_');
+    const session = getRawSession();
+    if (session && session.username) {
+        return 'tontine_data_' + session.username.replace(/\s+/g, '_');
     }
     return 'tontine_data_default';
+}
+
+// Retourne true si l'utilisateur connecté doit utiliser l'API (admin2 et ses adhérents)
+// Critère : présence du flag storageType === 'json' dans la session
+function shouldUseAPI() {
+    const session = getRawSession();
+    return session && session.storageType === 'json';
 }
 
 // Structure plate identique à celle du serveur — une seule clé par utilisateur
@@ -117,7 +120,17 @@ function defaultData() {
 async function loadDualStorageData() {
     detectEnvironment();
 
-    let data = isLocalhost ? await loadDataFromAPI() : loadDataFromLocalStorage();
+    // En local → toujours l'API fichier
+    // Sur internet → API si storageType==='json' (admin2 + ses adhérents), sinon localStorage
+    let data;
+    if (isLocalhost) {
+        data = await loadDataFromAPI();
+    } else if (shouldUseAPI()) {
+        data = await loadDataFromAPI();
+        console.log('[DualStorage] Utilisateur admin2 : chargement depuis API (internet)');
+    } else {
+        data = loadDataFromLocalStorage();
+    }
     if (!data) data = defaultData();
 
     // Injecter dans les variables globales de app.js
@@ -168,7 +181,16 @@ async function saveDualStorageData() {
             : "Le règlement intérieur de l'association n'a pas encore été rédigé par l'Administrateur."
     };
 
-    return isLocalhost ? saveDataToAPI(data) : saveDataToLocalStorage(data);
+    // En local → API fichier
+    // Sur internet → API si storageType==='json', sinon localStorage
+    if (isLocalhost) {
+        return saveDataToAPI(data);
+    } else if (shouldUseAPI()) {
+        console.log('[DualStorage] Utilisateur admin2 : sauvegarde vers API (internet)');
+        return saveDataToAPI(data);
+    } else {
+        return saveDataToLocalStorage(data);
+    }
 }
 
 // ── Patch des fonctions de sauvegarde de app.js ───────────────────────────────
