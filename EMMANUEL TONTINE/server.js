@@ -16,8 +16,8 @@ const mimeTypes = {
     '.ico': 'image/x-icon'
 };
 
-// Chemin vers le fichier data-tontine.json
-const DATA_FILE_PATH = path.join(__dirname, 'EMMANUEL TONTINE', 'data-tontine.json');
+// Chemin vers le fichier data-tontine.json (dans le même dossier)
+const DATA_FILE_PATH = path.join(__dirname, 'data-tontine.json');
 
 const server = http.createServer((req, res) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
@@ -116,7 +116,8 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
     console.log(`\n========================================`);
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`EMMANUEL TONTINE Server`);
+    console.log(`Running at http://localhost:${PORT}`);
     console.log(`Press Ctrl+C to stop the server`);
     console.log(`========================================\n`);
 });
