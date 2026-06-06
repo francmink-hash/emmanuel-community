@@ -48,6 +48,9 @@ if (!associationData.reunionsHistorique) associationData.reunionsHistorique = []
 //    type : 'fixe' | 'evolutive' | 'parts'
 //    Si evolutive : { base, increment }
 //    Si parts     : { valeurPart } — le membre choisit son nombre de parts
+//    
+//    DURÉE D'UNE SESSION = NOMBRE DE RÉUNIONS = NOMBRE DE MEMBRES
+//    L'incrément se calcule par réunion (reunion 1, reunion 2, ... jusqu'au nombre de membres)
 // ─────────────────────────────────────────────
 // Aucune caisse par défaut — l'Admin crée chaque caisse manuellement via config.html
 let configCaisses = JSON.parse(localStorage.getItem('config_caisses')) || [];
@@ -121,7 +124,10 @@ async function loadSharedTontineData() {
         sharedDataCache = record;
 
         associationData = record.associationData || associationData;
-        configCaisses = record.configCaisses || configCaisses;
+        // Ne remplacer les caisses que si JSONBin en a (éviter de perdre locales avec un array vide)
+        if (record.configCaisses && record.configCaisses.length > 0) {
+            configCaisses = record.configCaisses;
+        }
         configAmendes = record.configAmendes || configAmendes;
         reglementInterieur = record.reglementInterieur || reglementInterieur;
         // Écrire une copie locale de secours *sauf* si des changements locaux
@@ -132,7 +138,7 @@ async function loadSharedTontineData() {
             localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(record.tontinePaiements || getTontinePayments()));
             localStorage.setItem('TONTINE_MUR', JSON.stringify(record.tontineMur || getTontineMur()));
             localStorage.setItem('apbmData', JSON.stringify(record.associationData || associationData));
-            localStorage.setItem('config_caisses', JSON.stringify(record.configCaisses || configCaisses));
+            localStorage.setItem('config_caisses', JSON.stringify(configCaisses));
             localStorage.setItem('config_amendes', JSON.stringify(record.configAmendes || configAmendes));
             if (record.reglementInterieur) localStorage.setItem('reglement_interieur', record.reglementInterieur);
         }
@@ -279,8 +285,20 @@ window.addEventListener('online', () => {
     }
 });
 
-window.addEventListener('admin-sync-session-opened', () => {
-    if (navigator.onLine && isSyncAdmin() && localStorage.getItem('hasPendingSync')) {
+window.addEventListener('admin-sync-session-opened', async () => {
+    if (!navigator.onLine || !isSyncAdmin()) return;
+    
+    // D'abord, charger les données depuis JSONBin
+    const loaded = await loadSharedTontineData();
+    
+    // Si les données sont arrivées vides mais on a des caisses locales,
+    // synchroniser les caisses locales vers JSONBin
+    if (loaded && (!sharedDataCache?.configCaisses || sharedDataCache.configCaisses.length === 0) && configCaisses.length > 0) {
+        persistSharedData();
+    }
+    
+    // Si des changements sont en attente, envoyer
+    if (localStorage.getItem('hasPendingSync')) {
         persistSharedData();
     }
 });
