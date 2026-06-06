@@ -68,11 +68,10 @@ function getUserStorageKey() {
     return 'tontine_data_default';
 }
 
-// Retourne true si l'utilisateur connecté doit utiliser l'API (admin2 et ses adhérents)
-// Critère : présence du flag storageType === 'json' dans la session
+// Sur internet, PERSONNE n'utilise l'API (pas de serveur Node.js sur Vercel)
+// L'API est réservée exclusivement au mode local (localhost)
 function shouldUseAPI() {
-    const session = getRawSession();
-    return session && session.storageType === 'json';
+    return false;
 }
 
 // Structure plate identique à celle du serveur — une seule clé par utilisateur
@@ -120,14 +119,11 @@ function defaultData() {
 async function loadDualStorageData() {
     detectEnvironment();
 
-    // En local → toujours l'API fichier
-    // Sur internet → API si storageType==='json' (admin2 + ses adhérents), sinon localStorage
+    // En local → API fichier (server.js)
+    // Sur internet → localStorage isolé par utilisateur (Vercel = fichiers statiques uniquement)
     let data;
     if (isLocalhost) {
         data = await loadDataFromAPI();
-    } else if (shouldUseAPI()) {
-        data = await loadDataFromAPI();
-        console.log('[DualStorage] Utilisateur admin2 : chargement depuis API (internet)');
     } else {
         data = loadDataFromLocalStorage();
     }
@@ -181,16 +177,9 @@ async function saveDualStorageData() {
             : "Le règlement intérieur de l'association n'a pas encore été rédigé par l'Administrateur."
     };
 
-    // En local → API fichier
-    // Sur internet → API si storageType==='json', sinon localStorage
-    if (isLocalhost) {
-        return saveDataToAPI(data);
-    } else if (shouldUseAPI()) {
-        console.log('[DualStorage] Utilisateur admin2 : sauvegarde vers API (internet)');
-        return saveDataToAPI(data);
-    } else {
-        return saveDataToLocalStorage(data);
-    }
+    // En local → API fichier (server.js)
+    // Sur internet → localStorage isolé par utilisateur
+    return isLocalhost ? saveDataToAPI(data) : saveDataToLocalStorage(data);
 }
 
 // ── Patch des fonctions de sauvegarde de app.js ───────────────────────────────

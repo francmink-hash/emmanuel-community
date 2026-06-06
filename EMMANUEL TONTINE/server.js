@@ -1,8 +1,31 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const PORT = 8080;
+
+// Charger .env minimaliste si présent (pas de dépendances externes)
+try {
+    const envPath = path.join(__dirname, '.env');
+    if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        envContent.split(/\r?\n/).forEach(line => {
+            const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+            if (match) {
+                const key = match[1];
+                let val = match[2] || '';
+                // Remove optional surrounding quotes
+                if ((val.startsWith("\'") && val.endsWith("\'")) || (val.startsWith('"') && val.endsWith('"'))) {
+                    val = val.slice(1, -1);
+                }
+                if (!process.env[key]) process.env[key] = val;
+            }
+        });
+    }
+} catch (e) {
+    console.warn('Impossible de charger .env', e);
+}
 
 const mimeTypes = {
     '.html': 'text/html',
@@ -50,6 +73,79 @@ const server = http.createServer((req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
                 res.end(data, 'utf-8');
             }
+        });
+        return;
+    }
+    
+    // Proxy JSONBin simple sécurisé via .env : GET -> lire la bin, POST -> écrire la bin
+    if (req.url === '/api/jsonbin' && req.method === 'GET') {
+        const BIN = process.env.JSONBIN_BIN_ID;
+        const READ_KEY = process.env.JSONBIN_READ_KEY;
+        if (!BIN || !READ_KEY) {
+            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify({ error: 'JSONBin non configuré' }));
+            return;
+        }
+        const options = {
+            hostname: 'api.jsonbin.io',
+            path: `/v3/b/${BIN}/latest`,
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Bin-Key': READ_KEY
+            }
+        };
+        const proxyReq = https.request(options, proxyRes => {
+            let data = '';
+            proxyRes.on('data', chunk => data += chunk);
+            proxyRes.on('end', () => {
+                res.writeHead(proxyRes.statusCode || 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                res.end(data);
+            });
+        });
+        proxyReq.on('error', err => {
+            res.writeHead(502, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify({ error: 'Proxy JSONBin GET failed', detail: err.message }));
+        });
+        proxyReq.end();
+        return;
+    }
+
+    if (req.url === '/api/jsonbin' && req.method === 'POST') {
+        const BIN = process.env.JSONBIN_BIN_ID;
+        const MASTER_KEY = process.env.JSONBIN_MASTER_KEY;
+        if (!BIN || !MASTER_KEY) {
+            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify({ error: 'JSONBin non configuré' }));
+            return;
+        }
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', () => {
+            const options = {
+                hostname: 'api.jsonbin.io',
+                path: `/v3/b/${BIN}`,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': MASTER_KEY,
+                    'X-Bin-Versioning': 'false'
+                }
+            };
+            const proxyReq = https.request(options, proxyRes => {
+                let data = '';
+                proxyRes.on('data', chunk => data += chunk);
+                proxyRes.on('end', () => {
+                    res.writeHead(proxyRes.statusCode || 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(data);
+                });
+            });
+            proxyReq.on('error', err => {
+                res.writeHead(502, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                res.end(JSON.stringify({ error: 'Proxy JSONBin POST failed', detail: err.message }));
+            });
+            proxyReq.write(body);
+            proxyReq.end();
         });
         return;
     }

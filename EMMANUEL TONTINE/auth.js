@@ -1,28 +1,11 @@
 /**
  * AUTH SYSTEM - ANTIGRAVITY STYLE
  * Gestion multi-compte sécurisée via localStorage
- * Support dual-authentication avec encodage personnalisé pour admin2
- * Compatible avec file:// protocol (pas besoin de contexte sécurisé)
  */
 
 const APP_NAME = window.location.pathname.split('/').slice(-2, -1)[0] || 'APP';
 const STORAGE_KEY = `EMMANUEL_USERS_${APP_NAME.replace(/ /g, '_')}`;
 const SESSION_KEY = `EMMANUEL_SESSION_${APP_NAME.replace(/ /g, '_')}`;
-
-// Hash personnalisé pour admin2 (Emmanuel@2026)
-// Utilise un encodage personnalisé qui fonctionne avec file:// protocol
-const ADMIN2_HASH = btoa("Emmanuel@2026"); // btoa("Emmanuel@2026")
-
-// Fonction de hachage personnalisé (fonctionne avec file:// protocol)
-function customHash(message) {
-    // Utilise btoa pour un encodage simple qui fonctionne partout
-    try {
-        return btoa(message);
-    } catch (e) {
-        console.error('Hash error:', e);
-        return '';
-    }
-}
 
 const auth = {
     // Initialisation : Créer l'admin par défaut s'il n'existe pas
@@ -30,67 +13,61 @@ const auth = {
         let users = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         // Recherche insensible à la casse pour éviter les doublons
         const adminExists = users.find(u => u.username.toLowerCase() === 'admin');
+        const syncAdminExists = users.find(u => u.username.toLowerCase() === 'admin2');
         
         if (!adminExists) {
-            users.unshift({ // On le met au début
+            users.unshift({
                 username: 'admin',
                 password: 'admin123',
                 role: 'Administrateur',
                 accountStatus: 'Approuvé',
                 question: 'Système',
-                answer: 'Origine'
+                answer: 'Origine',
+                syncMode: false
             });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
         }
+
+        if (!syncAdminExists) {
+            users.unshift({
+                username: 'admin2',
+                password: 'admin456',
+                role: 'Administrateur',
+                accountStatus: 'Approuvé',
+                question: 'Système',
+                answer: 'Origine',
+                syncMode: true
+            });
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
     },
 
     // Inscription
-    // ownerAdmin : si 'admin2', le compte créé hérite du flag storageType='json'
-    signup(username, password, question, answer, ownerAdmin = null) {
+    signup(username, password, question, answer) {
         let users = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         if (users.find(u => u.username === username)) return { success: false, msg: "Cet utilisateur existe déjà." };
 
-        users.push({
-            username,
-            password,
-            question,
-            answer,
-            role: 'user',
-            accountStatus: 'En attente',
-            // Hérite du mode de stockage de l'admin qui gère ce compte
-            storageType: ownerAdmin === 'admin2' ? 'json' : 'localStorage'
+        // Si un administrateur est connecté et crée un compte, on l'approuve automatiquement
+        const current = this.getCurrentUser && this.getCurrentUser();
+        const createdByAdmin = current && current.role === 'Administrateur';
+        const accountStatus = createdByAdmin ? 'Approuvé' : 'En attente';
+
+        users.push({ 
+            username, 
+            password, 
+            question, 
+            answer, 
+            role: 'user', 
+            accountStatus: accountStatus,
+            syncMode: false
         });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
         return { success: true };
     },
 
     // Connexion
-    async login(username, password) {
+    login(username, password) {
         const users = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        
-        // Vérification spéciale pour admin2 (Second Administrator)
-        if (username.toLowerCase() === 'admin2') {
-            const inputHash = customHash(password);
-            console.log('Admin2 login attempt:');
-            console.log('Password:', password);
-            console.log('Input hash:', inputHash);
-            console.log('Expected hash:', ADMIN2_HASH);
-            console.log('Match:', inputHash === ADMIN2_HASH);
-            
-            if (inputHash === ADMIN2_HASH) {
-                const admin2User = {
-                    username: 'admin2',
-                    role: 'Administrateur',
-                    accountStatus: 'Approuvé',
-                    storageType: 'json' // Indicateur pour utiliser JSON storage
-                };
-                localStorage.setItem(SESSION_KEY, JSON.stringify(admin2User));
-                return { success: true, user: admin2User };
-            } else {
-                return { success: false, msg: "❌ Mot de passe incorrect." };
-            }
-        }
-        
         // Recherche insensible à la casse pour matcher "admin", "Admin", "ADMIN", etc.
         const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
         
@@ -110,6 +87,13 @@ const auth = {
             };
         }
         localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        if (user.role === 'Administrateur' && user.syncMode === true) {
+            try {
+                window.dispatchEvent(new Event('admin-sync-session-opened'));
+            } catch (e) {
+                console.warn('Impossible d\'événément dispatch admin-sync-session-opened', e);
+            }
+        }
         return { success: true, user };
     },
 

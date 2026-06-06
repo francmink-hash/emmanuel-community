@@ -251,7 +251,6 @@
     <div id="error-msg" class="error"></div>
 </div>
 
-<script src="app-dual-storage.js"></script>
 <script src="app.js"></script>
 <script src="auth.js"></script>
 <script>
@@ -291,10 +290,10 @@
 
     let loginFailures = {};
 
-    async function handleLogin() {
+    function handleLogin() {
         const user = document.getElementById('l-user').value.trim().toUpperCase();
         const pass = document.getElementById('l-pass').value;
-        const res = await auth.login(user, pass);
+        const res = auth.login(user, pass);
         
         if (res.success) {
             delete loginFailures[user];

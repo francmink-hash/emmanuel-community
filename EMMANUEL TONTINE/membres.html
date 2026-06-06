@@ -47,16 +47,14 @@
 
     <footer><small>EMMANUEL_TONTINE — gestion pastorale pour la famille.</small></footer>
 
-    <script src="app-dual-storage.js"></script>
     <script src="app.js"></script>
     <script src="auth.js"></script>
     <script>
         auth.checkAdmin();
-        // Écouter l'événement de chargement des données avant de mettre à jour l'UI
-        document.addEventListener('dataLoaded', function() {
+        window.onload = function() {
             appliquerNomAsso();
             updateMembresUI();
-        });
+        };
     </script>
 </body>
 </html>

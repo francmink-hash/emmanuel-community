@@ -172,42 +172,22 @@
         .historique-list { font-size: 0.8rem; }
         .historique-item { color: #bdc3c7; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: rgba(255,255,255,0.02); border-radius: 4px;}
 
-        /* ── Layout Dynamique (Flexbox) ── */
-        @media (min-width: 900px) {
-            main.dashboard {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                align-items: stretch;
-            }
-            main.dashboard > .card {
-                flex: 1 1 auto;
-                margin-top: 0 !important;
-                min-width: 200px; /* Évite qu'une fenêtre ne disparaisse complètement */
-            }
-            #ventilation-card, #sanctions-card {
-                width: 300px; /* Largeur de base */
-                resize: horizontal;
-                overflow: auto;
-            }
-            .card:has(#pv-editor) {
-                width: 500px; /* L'éditeur de PV prend plus de place par défaut */
-                resize: horizontal;
-                overflow: auto;
-            }
+        /* ── Cartes Redimensionnables ── */
+        #ventilation-card {
+            resize: vertical;
+            overflow: auto;
+            min-height: 300px;
         }
-
-        @media (max-width: 899px) {
-            /* ── Cartes Redimensionnables (Vertical pour Mobile/Tablette) ── */
-            #ventilation-card, #sanctions-card {
-                resize: vertical;
-                overflow: auto;
-                min-height: 200px;
-            }
-            .card:has(#pv-editor) {
-                resize: vertical;
-                overflow: auto;
-                min-height: 300px;
-            }
+        #sanctions-card {
+            resize: vertical;
+            overflow: auto;
+            min-height: 200px;
+        }
+        .card:has(#pv-editor) {
+            resize: both;
+            overflow: auto;
+            min-height: 300px;
+            min-width: 300px;
         }
 
         /* ── Responsive Tablette ── */
@@ -376,7 +356,6 @@
 
     <footer><small>EMMANUEL_TONTINE — gestion pastorale apaisée.</small></footer>
 
-    <script src="app-dual-storage.js"></script>
     <script src="app.js"></script>
     <script src="auth.js"></script>
     <script>
@@ -496,13 +475,13 @@
             }
             
             // Également publier sur le Mur pour info
-            let wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            let wallMessages = getTontineMur();
             wallMessages.push({
                 user: 'SYSTÈME',
                 text: `📝 **Le Procès-Verbal de la Réunion Mensuelle #${currentReunion}** a été rédigé et validé par l'Administrateur. Vous pouvez le consulter dans la section Comptes-rendus.`,
                 date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
             });
-            localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+            saveTontineMur(wallMessages);
             
             // Afficher confirmation
             const confirm = document.getElementById('pv-confirm');
@@ -517,8 +496,7 @@
             if (typeof chargerSanctionsUI === 'function') chargerSanctionsUI();
         }
 
-        // Écouter l'événement de chargement des données avant d'initialiser l'UI
-        document.addEventListener('dataLoaded', initSessionPage);
+        window.onload = initSessionPage;
     </script>
 </body>
 </html>

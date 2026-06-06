@@ -367,17 +367,6 @@
                     <div class="config-tab" onclick="switchTab('session')">📆 Réunions</div>
                     <div class="config-tab" onclick="switchTab('fin-session')">🏆 Fin de Session</div>
                 </div>
-                
-                <!-- Download JSON button for admin2 -->
-                <div id="json-download-section" style="margin-top: 20px; padding: 15px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; display: none;">
-                    <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">
-                        💾 <strong>Mode JSON activé</strong><br>
-                        <small>Téléchargez le fichier data-tontine.json pour sauvegarder vos modifications.</small>
-                    </p>
-                    <button onclick="downloadJsonData()" style="width: 100%; padding: 10px; background: #d4af37; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s;">
-                        📥 Télécharger data-tontine.json
-                    </button>
-                </div>
             </div>
 
             <!-- Main Content Area -->
@@ -699,17 +688,10 @@
 
     <footer><small>EMMANUEL_TONTINE — administration de l'association.</small></footer>
 
-    <script src="app-dual-storage.js"></script>
-    <script src="app.js"></script>
     <script src="auth.js"></script>
+    <script src="app.js"></script>
     <script>
         auth.checkAdmin();
-
-        // Show download button for admin2
-        const user = auth.getCurrentUser();
-        if (user && user.storageType === 'json') {
-            document.getElementById('json-download-section').style.display = 'block';
-        }
 
         // ── Navigation par onglets ──
         function switchTab(name) {
@@ -913,7 +895,7 @@
         function renderPaiements() {
             const list = document.getElementById('liste-paiements-admin');
             if (!list) return;
-            const paiements = JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+            const paiements = getTontinePayments();
             const pending = paiements.filter(p => p.status === 'pending');
 
             if (!pending.length) {
@@ -933,16 +915,16 @@
         }
 
         function validerPaiement(id) {
-            let paiements = JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+            let paiements = getTontinePayments();
             const index = paiements.findIndex(p => p.id === id);
             if (index === -1) return;
 
             const p = paiements[index];
             p.status = 'validated';
-            localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(paiements));
+            saveTontinePayments(paiements);
 
             // 2. NOTIFICATION PUBLIQUE SUR LE MUR (Transparence)
-            let wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            let wallMessages = getTontineMur();
             wallMessages.push({
                 user: 'SYSTÈME',
                 text: '✅ Transaction validée : Le versement de **' + p.user.toUpperCase() + '** a été approuvé par l\'Administrateur.',
@@ -950,7 +932,7 @@
             });
             
             if (wallMessages.length > 50) wallMessages.shift();
-            localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+            saveTontineMur(wallMessages);
 
             renderPaiements();
             alert('Déclaration de paiement validée avec succès ! (Note : Veuillez enregistrer ce montant manuellement dans les cotisations du membre).');
@@ -1164,13 +1146,13 @@
             associationData.lastSessionHost = '';
             associationData.lastSessionDate = '';
             
-            let wall = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            let wall = getTontineMur();
             wall.push({
                 user: 'SYSTÈME',
                 text: `🏆 **FIN DE SESSION ${cur}** 🏆<br>La Session ${cur} est close ! Les dettes sont reportées. ✨ **Ouverture de la SESSION ${next}** ✨`,
                 date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
             });
-            localStorage.setItem('TONTINE_MUR', JSON.stringify(wall));
+            saveTontineMur(wall);
             sauvegarder();
             loadConfig();
             alert(`🎉 La Session ${cur} a été clôturée.\nBienvenue dans la Session ${next} !`);
@@ -1434,8 +1416,7 @@
             alert("✓ Caisse modifiée avec succès !");
         };
 
-        // Écouter l'événement de chargement des données avant d'initialiser l'UI
-        document.addEventListener('dataLoaded', loadConfig);
+        window.onload = loadConfig;
     </script>
 
     <!-- ══════════════════════════════════════════

@@ -10,8 +10,9 @@
  *   reglement_interieur → texte du règlement rédigé par l'admin
  *
  * TYPES DE CAISSES :
- *   'fixe'      → cotisation identique chaque session (ex: 5 000 FCFA)
- *   'evolutive' → cotisation = base + (session-1) × incrément
+ *   'fixe'      → cotisation identique chaque réunion (ex: 5 000 FCFA)
+ *   'evolutive' → cotisation = base + (réunion-1) × incrément
+ *                 Une session = ensemble de réunions (durée = nombre de membres)
  *   'parts'     → le membre choisit librement son nombre de parts ;
  *                 montant = partsChoisies × valeurPart
  *                 partsChoisies est stocké dans membre.parts[caisseId]
@@ -70,22 +71,226 @@ let reglementInterieur = localStorage.getItem('reglement_interieur') ||
 // ─────────────────────────────────────────────
 // 5. FONCTIONS DE PERSISTANCE
 // ─────────────────────────────────────────────
+// Les clés JSONBin sont stockées côté serveur dans .env. Le client appelle
+// l'endpoint local `/api/jsonbin` pour lire/écrire la bin de manière sécurisée.
+const JSONBIN_API = '/api/jsonbin';
+let sharedDataCache = null;
+
+function isSyncAdmin() {
+    if (typeof auth === 'undefined') return false;
+    const currentUser = auth.getCurrentUser();
+    return currentUser && currentUser.role === 'Administrateur' && currentUser.syncMode === true;
+}
+
+function buildSharedDataRecord() {
+    return {
+        associationData,
+        configCaisses,
+        configAmendes,
+        reglementInterieur,
+        tontinePaiements: JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [],
+        tontineMur: JSON.parse(localStorage.getItem('TONTINE_MUR')) || []
+    };
+}
+
+async function fetchSharedTontineData() {
+    const response = await fetch(JSONBIN_API, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!response.ok) throw new Error(`Lecture JSONBin impossible (${response.status})`);
+    const body = await response.json();
+    // Lorsque la proxy renvoie la structure JSONBin, elle contient "record"
+    return body.record || body || {};
+}
+
+async function saveSharedTontineData(record) {
+    const response = await fetch(JSONBIN_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+    });
+    if (!response.ok) throw new Error(`Écriture JSONBin impossible (${response.status})`);
+    return response.json();
+}
+
+async function loadSharedTontineData() {
+    if (!isSyncAdmin()) return false;
+    try {
+        const record = await fetchSharedTontineData();
+        sharedDataCache = record;
+
+        associationData = record.associationData || associationData;
+        configCaisses = record.configCaisses || configCaisses;
+        configAmendes = record.configAmendes || configAmendes;
+        reglementInterieur = record.reglementInterieur || reglementInterieur;
+        // Écrire une copie locale de secours *sauf* si des changements locaux
+        // non synchronisés existent (flag JSONBIN_DIRTY). Cela permet à
+        // l'admin en mode sync de continuer à travailler hors-ligne.
+        const dirty = !!localStorage.getItem('JSONBIN_DIRTY');
+        if (!dirty) {
+            localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(record.tontinePaiements || getTontinePayments()));
+            localStorage.setItem('TONTINE_MUR', JSON.stringify(record.tontineMur || getTontineMur()));
+            localStorage.setItem('apbmData', JSON.stringify(record.associationData || associationData));
+            localStorage.setItem('config_caisses', JSON.stringify(record.configCaisses || configCaisses));
+            localStorage.setItem('config_amendes', JSON.stringify(record.configAmendes || configAmendes));
+            if (record.reglementInterieur) localStorage.setItem('reglement_interieur', record.reglementInterieur);
+        }
+
+        refreshSharedState();
+        return true;
+    } catch (err) {
+        console.warn('Synchronisation JSONBin échouée :', err);
+        return false;
+    }
+}
+
+async function persistSharedData() {
+    if (!isSyncAdmin()) return;
+    try {
+        sharedDataCache = buildSharedDataRecord();
+        await saveSharedTontineData(sharedDataCache);
+        // Si succès, effacer les marqueurs de sync pendante
+        localStorage.removeItem('JSONBIN_DIRTY');
+        localStorage.removeItem('hasPendingSync');
+    } catch (err) {
+        console.warn('Enregistrement JSONBin impossible :', err);
+        // Marquer comme dirty / pending pour réessayer plus tard
+        localStorage.setItem('JSONBIN_DIRTY', '1');
+        localStorage.setItem('hasPendingSync', '1');
+    }
+}
+
+function getTontinePayments() {
+    if (isSyncAdmin() && sharedDataCache?.tontinePaiements) return sharedDataCache.tontinePaiements;
+    return JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+}
+
+function saveTontinePayments(paiements) {
+    // Toujours écrire localement (sauvegarde de secours)
+    localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(paiements));
+    if (isSyncAdmin()) {
+        sharedDataCache = sharedDataCache || {};
+        sharedDataCache.tontinePaiements = paiements;
+        if (!navigator.onLine) {
+            localStorage.setItem('hasPendingSync', '1');
+            localStorage.setItem('JSONBIN_DIRTY', '1');
+        }
+        persistSharedData();
+    }
+}
+
+function getTontineMur() {
+    if (isSyncAdmin() && sharedDataCache?.tontineMur) return sharedDataCache.tontineMur;
+    return JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+}
+
+function saveTontineMur(wallMessages) {
+    // Toujours écrire localement (sauvegarde de secours)
+    localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+    if (isSyncAdmin()) {
+        sharedDataCache = sharedDataCache || {};
+        sharedDataCache.tontineMur = wallMessages;
+        if (!navigator.onLine) {
+            localStorage.setItem('hasPendingSync', '1');
+            localStorage.setItem('JSONBIN_DIRTY', '1');
+        }
+        persistSharedData();
+    }
+}
+
+function refreshSharedState() {
+    try {
+        if (typeof appliquerNomAsso === 'function') appliquerNomAsso();
+        if (typeof loadConfig === 'function') loadConfig();
+        if (typeof renderDashboardCaisses === 'function') renderDashboardCaisses();
+        if (typeof renderWall === 'function') {
+            wallMessages = getTontineMur();
+            renderWall();
+        }
+        if (typeof renderPaiements === 'function') renderPaiements();
+        if (typeof chargerFinances === 'function') chargerFinances();
+    } catch (e) {
+        console.warn('refreshSharedState', e);
+    }
+}
+
 function sauvegarder() {
-    localStorage.setItem('apbmData', JSON.stringify(associationData));
+    if (!isSyncAdmin()) {
+        // Toujours écrire localement
+        localStorage.setItem('apbmData', JSON.stringify(associationData));
+    } else {
+        sharedDataCache = sharedDataCache || {};
+        sharedDataCache.associationData = associationData;
+        persistSharedData();
+    }
 }
 
 function sauvegarderCaisses() {
-    localStorage.setItem('config_caisses', JSON.stringify(configCaisses));
+    if (!isSyncAdmin()) {
+        // Toujours écrire localement
+        localStorage.setItem('config_caisses', JSON.stringify(configCaisses));
+    } else {
+        sharedDataCache = sharedDataCache || {};
+        sharedDataCache.configCaisses = configCaisses;
+        persistSharedData();
+    }
 }
 
 function sauvegarderAmendes() {
-    localStorage.setItem('config_amendes', JSON.stringify(configAmendes));
+    if (!isSyncAdmin()) {
+        // Toujours écrire localement
+        localStorage.setItem('config_amendes', JSON.stringify(configAmendes));
+    } else {
+        sharedDataCache = sharedDataCache || {};
+        sharedDataCache.configAmendes = configAmendes;
+        persistSharedData();
+    }
 }
 
 function sauvegarderReglement(texte) {
     reglementInterieur = texte;
-    localStorage.setItem('reglement_interieur', texte);
+    if (!isSyncAdmin()) {
+        // Toujours écrire localement
+        localStorage.setItem('reglement_interieur', texte);
+    } else {
+        sharedDataCache = sharedDataCache || {};
+        sharedDataCache.reglementInterieur = texte;
+        persistSharedData();
+    }
 }
+
+window.loadSharedTontineData = loadSharedTontineData;
+window.getTontinePayments = getTontinePayments;
+window.saveTontinePayments = saveTontinePayments;
+window.getTontineMur = getTontineMur;
+window.saveTontineMur = saveTontineMur;
+window.isSyncAdmin = isSyncAdmin;
+window.refreshSharedState = refreshSharedState;
+
+window.addEventListener('load', () => {
+    if (isSyncAdmin()) loadSharedTontineData();
+});
+
+// Réessayer la synchronisation automatique lorsque la connexion revient
+window.addEventListener('online', () => {
+    if (isSyncAdmin() && localStorage.getItem('hasPendingSync')) {
+        persistSharedData();
+    }
+});
+
+window.addEventListener('admin-sync-session-opened', () => {
+    if (navigator.onLine && isSyncAdmin() && localStorage.getItem('hasPendingSync')) {
+        persistSharedData();
+    }
+});
+
+// Tentative périodique de synchronisation si des changements locaux sont marqués dirty
+setInterval(() => {
+    if (navigator.onLine && isSyncAdmin() && localStorage.getItem('JSONBIN_DIRTY')) {
+        persistSharedData();
+    }
+}, 60 * 1000); // toutes les 60s
 
 // ─────────────────────────────────────────────
 // 6. UTILITAIRES
@@ -121,9 +326,9 @@ function appliquerNomAsso() {
  * @param {string} nom
  * @param {string} type - 'fixe', 'evolutive' ou 'parts'
  * @param {number} base - montant de base (= cotisation si fixe, valeurPart si parts)
- * @param {number} increment - incrément par session (0 si fixe ou parts)
+ * @param {number} increment - incrément par réunion (0 si fixe ou parts)
  * @param {boolean} [exclureCompta=false] - exclure de la comptabilité globale
- * @param {string} [periodicite='session'] - 'session' ou 'mensuelle'
+ * @param {string} [periodicite='session'] - 'session' ou 'mensuelle' (non utilisé pour le calcul d'incrément)
  */
 function creerCaisse(nom, type, base, increment, exclureCompta = false, periodicite = 'session', icone = '🏦') {
     const caisse = {
@@ -168,7 +373,8 @@ function supprimerCaisse(id) {
 }
 
 /**
- * Calcule le montant dû pour une caisse à la session actuelle.
+ * Calcule le montant dû pour une caisse à la réunion actuelle.
+ * Une session = ensemble de réunions (durée = nombre de membres).
  * Pour les caisses de type 'parts', on passe le nombre de parts choisi.
  * @param {number} caisseId
  * @param {number} [nbParts=1] - utilisé uniquement si type === 'parts'
@@ -177,7 +383,7 @@ function calculerCotisationCaisse(caisseId, nbParts) {
     const caisse = configCaisses.find(c => c.id === caisseId);
     if (!caisse) return 0;
     if (caisse.type === 'evolutive') {
-        return caisse.base + ((associationData.sessionActuelle - 1) * caisse.increment);
+        return caisse.base + ((associationData.reunionActuelle - 1) * caisse.increment);
     }
     if (caisse.type === 'parts') {
         const parts = Number(nbParts) || 1;
@@ -197,7 +403,7 @@ function getPartsMembreCaisse(membre, caisseId) {
 
 /**
  * Enregistre le choix de parts d'un membre pour une caisse.
- * Met à jour la dette en cours si elle existe pour la session actuelle.
+ * Calcule la cotisation en fonction de la réunion actuelle, mais la caisse est suivie par session.
  */
 function setPartsMembreCaisse(membreId, caisseId, nbParts) {
     const membre = associationData.membres.find(m => m.id === membreId);

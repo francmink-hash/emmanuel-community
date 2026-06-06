@@ -341,6 +341,7 @@
             <div class="wall-header">
                 <span>💬 Mur Communautaire</span>
                 <span id="online-tag" style="color:var(--gold-primary); font-size:0.7rem">● Direct</span>
+                <span id="sync-status" style="display:none; color:#2ecc71; font-size:0.7rem; font-weight:700; letter-spacing:0.3px; white-space:nowrap; margin-left:10px;">🔄 Mode synchronisé</span>
             </div>
             <div class="messages-list" id="wall-messages">
                 <!-- Messages injectés ici -->
@@ -529,7 +530,6 @@
         </div>
     </div>
 
-    <script src="app-dual-storage.js"></script>
     <script src="app.js"></script>
     <script src="auth.js"></script>
     <script>
@@ -546,19 +546,15 @@
         // PILIER 2 — DASHBOARD PUBLIC (LECTURE SEULE)
         // Caisses dynamiques + règlement + rapport de session
         // ============================================================
-        // Écouter l'événement de chargement des données avant d'initialiser l'UI
-        document.addEventListener('dataLoaded', function() {
-            appliquerNomAsso();
-            document.getElementById('sess-num').innerText = associationData.sessionActuelle;
-            renderDashboardCaisses();
-            // Afficher le règlement intérieur après chargement des données
-            const reglEl = document.getElementById('reglement-display');
-            if (reglEl) {
-                reglEl.innerHTML = reglementInterieur;
-                // Ajuster le style pour le rendu HTML (listes, etc.)
-                reglEl.style.whiteSpace = 'normal';
-            }
-        });
+        appliquerNomAsso();
+        document.getElementById('sess-num').innerText = associationData.sessionActuelle;
+        updateSyncIndicator();
+
+        function updateSyncIndicator() {
+            const badge = document.getElementById('sync-status');
+            if (!badge) return;
+            badge.style.display = isSyncAdmin() ? 'inline-flex' : 'none';
+        }
 
         // Injecter les caisses dynamiquement dans le dashboard global
         function renderDashboardCaisses() {
@@ -570,7 +566,7 @@
             }
             
             const currentUser = auth.getCurrentUser();
-            const isAdmin = currentUser && currentUser.role === 'admin';
+            const isAdmin = currentUser && currentUser.role === 'Administrateur';
 
             grid.innerHTML = configCaisses.map(c => {
                 const total = getTotalCaisse(c.id);
@@ -598,6 +594,7 @@
                 }
             }).join('');
         }
+        renderDashboardCaisses();
 
         function ouvrirHistoriqueCaisse(caisseId) {
             const caisse = configCaisses.find(c => c.id.toString() === caisseId.toString());
@@ -1232,7 +1229,7 @@
                 : '<div style="grid-column: 1 / -1; color:rgba(255,255,255,0.35); text-align:center; padding:1.5rem 0;">Aucune opération réglée ce mois-ci.</div>';
 
             // ── Historique des déclarations de paiement mobile du mois ──
-            const allMobilePaiements = JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+            const allMobilePaiements = getTontinePayments();
             
             // Filtrer par membre ET par mois de la réunion active
             const memberMobilePaiements = allMobilePaiements.filter(p => {
@@ -1634,7 +1631,7 @@
         // ============================================================
         // PILIER 3 — MUR DE CONVERSATION
         // ============================================================
-        let wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+        let wallMessages = getTontineMur();
 
         function renderWall() {
             const container = document.getElementById('wall-messages');
@@ -1670,7 +1667,7 @@
                 date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
             });
             if (wallMessages.length > 50) wallMessages.shift();
-            localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+            saveTontineMur(wallMessages);
             input.innerHTML = '';
             renderWall();
         }
@@ -1775,7 +1772,7 @@
             const motif = selectedCaisses.join(', ');
 
             // 1. Enregistrement en attente
-            const paiements = JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+            const paiements = getTontinePayments();
             const newPaiement = {
                 id: Date.now(),
                 user: user.username,
@@ -1787,16 +1784,16 @@
                 date: new Date().toLocaleDateString('fr-FR')
             };
             paiements.push(newPaiement);
-            localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(paiements));
+            saveTontinePayments(paiements);
 
             // 2. Notification Publique sur le Mur
-            let wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            let wallMessages = getTontineMur();
             wallMessages.push({
                 user: 'SYSTÈME',
                 text: '⚠️ Transaction initiée : **' + user.username + '** a soumis une transaction pour validation (ID: ' + ref + ').',
                 date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
             });
-            localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+            saveTontineMur(wallMessages);
             renderWall(); // Déclenche l'auto-scroll déjà présent dans renderWall
 
             errorEl.style.color = "#2ecc71";
@@ -1820,7 +1817,7 @@
 
         renderWall();
         setInterval(() => {
-            wallMessages = JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+            wallMessages = getTontineMur();
             renderWall();
         }, 5000);
 
