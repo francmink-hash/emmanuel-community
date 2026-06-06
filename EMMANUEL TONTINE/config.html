@@ -570,6 +570,16 @@
                         <button class="btn-add" onclick="enregistrerNomAsso()"
                             style="align-self: flex-start;">Enregistrer</button>
                     </div>
+
+                    <hr style="border: none; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 2rem 0;">
+
+                    <h3>💾 Sauvegarde & Restauration de Secours</h3>
+                    <p><small>En cas de coupure internet ou pour effectuer une copie de sécurité de la tontine, vous pouvez télécharger ou restaurer l'intégralité des données localement.</small></p>
+                    <div style="display:flex; gap: 12px; margin-top: 1.2rem; flex-wrap: wrap;">
+                        <button class="btn-add" onclick="telechargerSauvegarde()" style="background: #d4af37; color: #000;">📥 Télécharger le fichier de secours (JSON)</button>
+                        <button class="btn-add" onclick="declencherRestauration()" style="background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);">📤 Restaurer le fichier local (JSON)</button>
+                        <input type="file" id="input-restaurer-fichier" accept=".json" style="display: none;" onchange="restaurerSauvegarde(event)">
+                    </div>
                 </div>
 
                 <!-- ══════════════════════════════════════════
@@ -1627,6 +1637,71 @@
             renderListeCaisses();
             fermerModalModifierCaisse();
             alert("✓ Caisse modifiée avec succès !");
+        };
+
+        // ── SAUVEGARDE & RESTAURATION DE SECOURS (JSON LOCAL) ──
+        window.telechargerSauvegarde = function () {
+            try {
+                const record = {
+                    associationData: associationData,
+                    configCaisses: configCaisses,
+                    configAmendes: configAmendes,
+                    reglementInterieur: reglementInterieur,
+                    tontinePaiements: JSON.parse(localStorage.getItem(getAdminKey('TONTINE_PAIEMENTS'))) || [],
+                    tontineMur: JSON.parse(localStorage.getItem(getAdminKey('TONTINE_MUR'))) || []
+                };
+                const jsonStr = JSON.stringify(record, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sauvegarde_tontine.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                console.log("✅ [BACKUP] Téléchargement du fichier de secours JSON réussi.");
+            } catch (err) {
+                alert("❌ Échec de la génération de sauvegarde : " + err.message);
+            }
+        };
+
+        window.declencherRestauration = function () {
+            document.getElementById('input-restaurer-fichier').click();
+        };
+
+        window.restaurerSauvegarde = function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const record = JSON.parse(e.target.result);
+                    if (!record || typeof record !== 'object') {
+                        throw new Error("Format JSON invalide.");
+                    }
+                    if (!record.associationData || !Array.isArray(record.configCaisses || [])) {
+                        throw new Error("Structure de données tontine invalide ou incomplète.");
+                    }
+
+                    // Écrire UNIQUEMENT dans le localStorage local avec les clés de secours de l'admin
+                    localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(record.associationData));
+                    localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(record.configCaisses || []));
+                    localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(record.configAmendes || []));
+                    if (record.reglementInterieur !== undefined) {
+                        localStorage.setItem(getAdminKey('reglement_interieur'), record.reglementInterieur);
+                    }
+                    localStorage.setItem(getAdminKey('TONTINE_PAIEMENTS'), JSON.stringify(record.tontinePaiements || []));
+                    localStorage.setItem(getAdminKey('TONTINE_MUR'), JSON.stringify(record.tontineMur || []));
+
+                    alert("🎉 Restauration locale réussie avec succès ! La page va se recharger.");
+                    window.location.reload();
+                } catch (err) {
+                    alert("❌ Échec de la restauration : " + err.message);
+                }
+            };
+            reader.readAsText(file);
         };
 
         window.onload = loadConfig;
