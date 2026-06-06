@@ -505,7 +505,16 @@ function calculerCotisationCaisse(caisseId, nbParts) {
     const caisse = configCaisses.find(c => c.id === caisseId);
     if (!caisse) return 0;
     if (caisse.type === 'evolutive') {
-        return caisse.base + ((associationData.reunionActuelle - 1) * caisse.increment);
+        if (caisse.periodicite === 'mensuelle') {
+            // "Par mois" : Augmentation mensuelle à chaque réunion
+            return caisse.base + ((associationData.reunionActuelle - 1) * caisse.increment);
+        } else {
+            // "Par session" : Augmentation uniquement au passage à une nouvelle session.
+            // La durée d'une session est strictement égale au nombre total d'adhérents actifs.
+            const activeMembersCount = associationData.membres.length || 1;
+            const sessionIndex = Math.floor((associationData.reunionActuelle - 1) / activeMembersCount);
+            return caisse.base + (sessionIndex * caisse.increment);
+        }
     }
     if (caisse.type === 'parts') {
         const parts = Number(nbParts) || 1;
