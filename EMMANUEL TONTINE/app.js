@@ -128,9 +128,11 @@ let reglementInterieur = localStorage.getItem(getAdminKey('reglement_interieur')
 // ─────────────────────────────────────────────
 // 5. FONCTIONS DE PERSISTANCE
 // ─────────────────────────────────────────────
-// Les clés JSONBin sont stockées côté serveur dans .env. Le client appelle
-// l'endpoint local `/api/jsonbin` pour lire/écrire la bin de manière sécurisée.
-const JSONBIN_API = '/api/jsonbin';
+// ⚡ CONNEXION DIRECTE À JSONBIN V3 (hébergement statique Vercel — pas de proxy serveur)
+// TODO POST-EXPO : Remplacer la Master Key par une Access Key restreinte à cette bin uniquement
+const JSONBIN_BIN_ID = '6a240bbef5f4af5e29c2285d';
+const JSONBIN_MASTER_KEY = '$2a$10$T0Sc.sP4nfZ52D/EFhFrTuzHvYcKHRQ2SxWjjT9QbI9th1Z.Ks5d.';
+const JSONBIN_API_BASE = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 let sharedDataCache = null;
 
 function getCurrentAdminId() {
@@ -162,24 +164,46 @@ function buildSharedDataRecord() {
 }
 
 async function fetchSharedTontineData() {
-    const response = await fetch(JSONBIN_API, {
+    console.log('🔽 [SYNC] Lecture JSONBin en cours...', JSONBIN_API_BASE + '/latest');
+    const response = await fetch(`${JSONBIN_API_BASE}/latest`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+            'X-Master-Key': JSONBIN_MASTER_KEY
+        }
     });
-    if (!response.ok) throw new Error(`Lecture JSONBin impossible (${response.status})`);
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.error(`❌ [SYNC] Lecture JSONBin ÉCHOUÉE (HTTP ${response.status})`, errorText);
+        throw new Error(`Lecture JSONBin impossible (${response.status}): ${errorText}`);
+    }
     const body = await response.json();
-    // Lorsque la proxy renvoie la structure JSONBin, elle contient "record"
-    return body.record || body || {};
+    const record = body.record || body || {};
+    const memberCount = record.associationData?.membres?.length || 0;
+    const caisseCount = record.configCaisses?.length || 0;
+    console.log(`✅ [SYNC] Lecture JSONBin RÉUSSIE — ${memberCount} membre(s), ${caisseCount} caisse(s) trouvé(s)`);
+    return record;
 }
 
 async function saveSharedTontineData(record) {
-    const response = await fetch(JSONBIN_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record)
+    const payload = JSON.stringify(record);
+    console.log('🔼 [SYNC] Écriture JSONBin en cours...', `${(payload.length / 1024).toFixed(1)} Ko`);
+    const response = await fetch(JSONBIN_API_BASE, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_MASTER_KEY,
+            'X-Bin-Versioning': 'false'
+        },
+        body: payload
     });
-    if (!response.ok) throw new Error(`Écriture JSONBin impossible (${response.status})`);
-    return response.json();
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.error(`❌ [SYNC] Écriture JSONBin ÉCHOUÉE (HTTP ${response.status})`, errorText);
+        throw new Error(`Écriture JSONBin impossible (${response.status}): ${errorText}`);
+    }
+    const result = await response.json();
+    console.log('✅ [SYNC] Écriture JSONBin RÉUSSIE —', new Date().toLocaleTimeString());
+    return result;
 }
 
 async function loadSharedTontineData() {
@@ -227,18 +251,26 @@ async function loadSharedTontineData() {
 }
 
 async function persistSharedData() {
-    if (!isSyncAdmin()) return;
+    if (!isSyncAdmin()) {
+        console.log('⏭️ [SYNC] persistSharedData ignoré — utilisateur non-sync');
+        return;
+    }
     try {
         sharedDataCache = buildSharedDataRecord();
+        const memberCount = sharedDataCache.associationData?.membres?.length || 0;
+        const caisseCount = sharedDataCache.configCaisses?.length || 0;
+        console.log(`📦 [SYNC] Préparation envoi : ${memberCount} membre(s), ${caisseCount} caisse(s)`);
         await saveSharedTontineData(sharedDataCache);
         // Si succès, effacer les marqueurs de sync pendante
         localStorage.removeItem(getAdminKey('JSONBIN_DIRTY'));
         localStorage.removeItem(getAdminKey('hasPendingSync'));
+        console.log('🟢 [SYNC] Synchronisation terminée avec succès — drapeaux nettoyés');
     } catch (err) {
-        console.warn('Enregistrement JSONBin impossible :', err);
+        console.error('🔴 [SYNC] Enregistrement JSONBin IMPOSSIBLE :', err.message);
         // Marquer comme dirty / pending pour réessayer plus tard
         localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
         localStorage.setItem(getAdminKey('hasPendingSync'), '1');
+        console.warn('🟡 [SYNC] Données marquées DIRTY — nouvelle tentative dans 60s ou au retour internet');
         throw err; // Propager l'erreur pour la gestion au chargement
     }
 }
