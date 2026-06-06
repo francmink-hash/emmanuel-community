@@ -184,34 +184,44 @@ async function saveSharedTontineData(record) {
 
 async function loadSharedTontineData() {
     if (!isSyncAdmin()) return false;
+
+    const dirty = !!localStorage.getItem(getAdminKey('JSONBIN_DIRTY'));
+    if (dirty) {
+        console.log('Données locales non synchronisées détectées. Tentative d\'envoi vers le serveur...');
+        try {
+            await persistSharedData();
+            console.log('Synchronisation des données locales réussie.');
+        } catch (err) {
+            console.warn('Échec de la synchronisation montante au démarrage (toujours hors-ligne) :', err);
+            // On s'arrête ici pour préserver notre cache local de secours
+            return false;
+        }
+    }
+
     try {
         const record = await fetchSharedTontineData();
         sharedDataCache = record;
 
         associationData = record.associationData || associationData;
-        // Ne remplacer les caisses que si JSONBin en a (éviter de perdre locales avec un array vide)
         if (record.configCaisses && record.configCaisses.length > 0) {
             configCaisses = record.configCaisses;
         }
         configAmendes = record.configAmendes || configAmendes;
         reglementInterieur = record.reglementInterieur || reglementInterieur;
-        // Écrire une copie locale de secours *sauf* si des changements locaux
-        // non synchronisés existent (flag JSONBIN_DIRTY). Cela permet à
-        // l'admin en mode sync de continuer à travailler hors-ligne.
-        const dirty = !!localStorage.getItem(getAdminKey('JSONBIN_DIRTY'));
-        if (!dirty) {
-            localStorage.setItem(getAdminKey('TONTINE_PAIEMENTS'), JSON.stringify(record.tontinePaiements || getTontinePayments()));
-            localStorage.setItem(getAdminKey('TONTINE_MUR'), JSON.stringify(record.tontineMur || getTontineMur()));
-            localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(record.associationData || associationData));
-            localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(configCaisses));
-            localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(record.configAmendes || configAmendes));
-            if (record.reglementInterieur) localStorage.setItem(getAdminKey('reglement_interieur'), record.reglementInterieur);
-        }
+        
+        // Écrire une copie locale de secours propre
+        localStorage.setItem(getAdminKey('TONTINE_PAIEMENTS'), JSON.stringify(record.tontinePaiements || getTontinePayments()));
+        localStorage.setItem(getAdminKey('TONTINE_MUR'), JSON.stringify(record.tontineMur || getTontineMur()));
+        localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(record.associationData || associationData));
+        localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(configCaisses));
+        localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(record.configAmendes || configAmendes));
+        if (record.reglementInterieur) localStorage.setItem(getAdminKey('reglement_interieur'), record.reglementInterieur);
 
         refreshSharedState();
         return true;
     } catch (err) {
-        console.warn('Synchronisation JSONBin échouée :', err);
+        console.warn('Synchronisation descendante JSONBin échouée (mode hors-ligne) :', err);
+        // Conserver les données locales issues du localStorage déjà chargées en mémoire
         return false;
     }
 }
@@ -229,6 +239,7 @@ async function persistSharedData() {
         // Marquer comme dirty / pending pour réessayer plus tard
         localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
         localStorage.setItem(getAdminKey('hasPendingSync'), '1');
+        throw err; // Propager l'erreur pour la gestion au chargement
     }
 }
 
@@ -247,7 +258,7 @@ function saveTontinePayments(paiements) {
             localStorage.setItem(getAdminKey('hasPendingSync'), '1');
             localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
         }
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance paiements :', err));
     }
 }
 
@@ -266,7 +277,7 @@ function saveTontineMur(wallMessages) {
             localStorage.setItem(getAdminKey('hasPendingSync'), '1');
             localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
         }
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance mur :', err));
     }
 }
 
@@ -287,47 +298,43 @@ function refreshSharedState() {
 }
 
 function sauvegarder() {
-    if (!isSyncAdmin()) {
-        // Toujours écrire localement avec clé admin-spécifique
-        localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(associationData));
-    } else {
+    // Toujours écrire localement avec la clé de secours
+    localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(associationData));
+    if (isSyncAdmin()) {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.associationData = associationData;
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance données tontine :', err));
     }
 }
 
 function sauvegarderCaisses() {
-    if (!isSyncAdmin()) {
-        // Toujours écrire localement avec clé admin-spécifique
-        localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(configCaisses));
-    } else {
+    // Toujours écrire localement avec la clé de secours
+    localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(configCaisses));
+    if (isSyncAdmin()) {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.configCaisses = configCaisses;
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance caisses :', err));
     }
 }
 
 function sauvegarderAmendes() {
-    if (!isSyncAdmin()) {
-        // Toujours écrire localement avec clé admin-spécifique
-        localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(configAmendes));
-    } else {
+    // Toujours écrire localement avec la clé de secours
+    localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(configAmendes));
+    if (isSyncAdmin()) {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.configAmendes = configAmendes;
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance amendes :', err));
     }
 }
 
 function sauvegarderReglement(texte) {
     reglementInterieur = texte;
-    if (!isSyncAdmin()) {
-        // Toujours écrire localement avec clé admin-spécifique
-        localStorage.setItem(getAdminKey('reglement_interieur'), texte);
-    } else {
+    // Toujours écrire localement avec la clé de secours
+    localStorage.setItem(getAdminKey('reglement_interieur'), texte);
+    if (isSyncAdmin()) {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.reglementInterieur = texte;
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance reglement :', err));
     }
 }
 
@@ -346,7 +353,7 @@ window.addEventListener('load', () => {
 // Réessayer la synchronisation automatique lorsque la connexion revient
 window.addEventListener('online', () => {
     if (isSyncAdmin() && localStorage.getItem(getAdminKey('hasPendingSync'))) {
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance online trigger :', err));
     }
 });
 
@@ -359,19 +366,19 @@ window.addEventListener('admin-sync-session-opened', async () => {
     // Si les données sont arrivées vides mais on a des caisses locales,
     // synchroniser les caisses locales vers JSONBin
     if (loaded && (!sharedDataCache?.configCaisses || sharedDataCache.configCaisses.length === 0) && configCaisses.length > 0) {
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance admin-session caisses :', err));
     }
     
     // Si des changements sont en attente, envoyer
     if (localStorage.getItem(getAdminKey('hasPendingSync'))) {
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance admin-session pending :', err));
     }
 });
 
 // Tentative périodique de synchronisation si des changements locaux sont marqués dirty
 setInterval(() => {
     if (navigator.onLine && isSyncAdmin() && localStorage.getItem(getAdminKey('JSONBIN_DIRTY'))) {
-        persistSharedData();
+        persistSharedData().catch(err => console.warn('Erreur persistance interval :', err));
     }
 }, 60 * 1000); // toutes les 60s
 
