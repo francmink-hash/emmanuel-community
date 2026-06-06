@@ -1288,7 +1288,10 @@
                     '<small>Sanction : ' + valAff + '</small>' +
                     '</div>' +
                     '<span class="' + badgeClass + '">' + badgeLabel + '</span>' +
+                    '<div style="display:flex; gap:8px;">' +
+                    '<button class="editor-btn" style="background:rgba(212,175,55,0.1); border-color:#d4af37; color:#fff; padding:6px 12px; font-size:0.8rem; border-radius:6px; cursor:pointer;" onclick="ouvrirModalModifierAmende(' + a.id + ')">📝 Modifier</button>' +
                     '<button class="btn-del" onclick="deleteAmende(' + a.id + ')">Supprimer</button>' +
+                    '</div>' +
                     '</div>';
             }).join('');
         }
@@ -1638,6 +1641,102 @@
             fermerModalModifierCaisse();
             alert("✓ Caisse modifiée avec succès !");
         };
+
+        // ── MODULE 2 : Édition d'infraction/amende ──
+        window.ouvrirModalModifierAmende = function (id) {
+            const a = configAmendes.find(item => item.id === id);
+            if (!a) return alert("Infraction introuvable.");
+
+            document.getElementById('edit-amende-id').value = a.id;
+            document.getElementById('edit-amende-libelle').value = a.libelle;
+            document.getElementById('edit-amende-type').value = a.typeAmende;
+            document.getElementById('edit-amende-icone').value = a.icone || '⚠️';
+
+            // Peupler le sélecteur de caisses
+            const selectDest = document.getElementById('edit-amende-caisse-destination');
+            if (selectDest) {
+                selectDest.innerHTML = '<option value="">🏦 Verser dans (caisse)...</option>';
+                configCaisses.forEach(c => {
+                    if (c.exclureCompta) return;
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nom;
+                    selectDest.appendChild(opt);
+                });
+                selectDest.value = a.caisseId || '';
+            }
+
+            if (a.typeAmende === 'financier') {
+                document.getElementById('edit-amende-valeur-montant').value = a.valeur;
+                document.getElementById('edit-amende-valeur-nature').value = '';
+            } else {
+                document.getElementById('edit-amende-valeur-montant').value = '';
+                document.getElementById('edit-amende-valeur-nature').value = a.valeur;
+            }
+
+            // Sélectionner l'icône dans le picker
+            const targetSpan = document.querySelector(`#edit-amende-icon-picker span[data-icon="${a.icone || '⚠️'}"]`) || document.querySelector(`#edit-amende-icon-picker span`);
+            selectEditAmendeIcon(targetSpan, a.icone || '⚠️');
+
+            toggleEditAmendeValeur();
+            document.getElementById('amende-edit-modal').classList.add('active');
+        };
+
+        window.fermerModalModifierAmende = function () {
+            document.getElementById('amende-edit-modal').classList.remove('active');
+        };
+
+        window.toggleEditAmendeValeur = function () {
+            const type = document.getElementById('edit-amende-type').value;
+            const isFinancier = type === 'financier';
+            document.getElementById('edit-amende-valeur-montant-group').style.display = isFinancier ? 'block' : 'none';
+            document.getElementById('edit-amende-valeur-nature-group').style.display = isFinancier ? 'none' : 'block';
+            document.getElementById('edit-amende-caisse-destination-group').style.display = isFinancier ? 'block' : 'none';
+        };
+
+        window.selectEditAmendeIcon = function (el, icon) {
+            document.getElementById('edit-amende-icone').value = icon;
+            document.querySelectorAll('#edit-amende-icon-picker span').forEach(s => s.style.borderColor = 'transparent');
+            if (el) el.style.borderColor = '#d4af37';
+        };
+
+        window.sauvegarderModificationAmende = function () {
+            const id = Number(document.getElementById('edit-amende-id').value);
+            const libelle = document.getElementById('edit-amende-libelle').value.trim();
+            const type = document.getElementById('edit-amende-type').value;
+            const icone = document.getElementById('edit-amende-icone').value || '⚠️';
+
+            let valeur;
+            let caisseId = null;
+
+            if (type === 'financier') {
+                valeur = Number(document.getElementById('edit-amende-valeur-montant').value);
+                caisseId = document.getElementById('edit-amende-caisse-destination').value;
+                if (isNaN(valeur) || valeur < 0) return alert("Saisissez un montant valide.");
+                if (!caisseId) return alert("Sélectionnez une caisse de destination.");
+            } else {
+                valeur = document.getElementById('edit-amende-valeur-nature').value.trim();
+                if (!valeur) return alert("Saisissez la valeur en nature.");
+            }
+
+            if (!libelle) return alert("Le libellé ne peut pas être vide.");
+
+            const idx = configAmendes.findIndex(item => item.id === id);
+            if (idx === -1) return alert("Infraction introuvable.");
+
+            configAmendes[idx].libelle = libelle;
+            configAmendes[idx].typeAmende = type;
+            configAmendes[idx].valeur = valeur;
+            configAmendes[idx].caisseId = type === 'financier' ? Number(caisseId) : null;
+            configAmendes[idx].icone = icone;
+
+            sauvegarderAmendes();
+            sauvegarder();
+            renderListeAmendes();
+            fermerModalModifierAmende();
+            alert("✓ Infraction modifiée avec succès !");
+        };
+
 
         // ── SAUVEGARDE & RESTAURATION DE SECOURS (JSON LOCAL) ──
         window.telechargerSauvegarde = function () {
