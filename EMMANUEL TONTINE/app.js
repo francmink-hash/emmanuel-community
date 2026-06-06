@@ -21,7 +21,7 @@
 // ─────────────────────────────────────────────
 // 1. DONNÉES PRINCIPALES DE L'ASSOCIATION
 // ─────────────────────────────────────────────
-let associationData = JSON.parse(localStorage.getItem('apbmData')) || {
+let associationData = JSON.parse(localStorage.getItem(getAdminKey('apbmData'))) || {
     nomAsso: '',          // Vide par défaut — l'admin doit le saisir
     explicationAsso: '',  // Explication libre (ex: lignée, famille) sous le nom
     sessionActuelle: 1,
@@ -53,7 +53,7 @@ if (!associationData.reunionsHistorique) associationData.reunionsHistorique = []
 //    L'incrément se calcule par réunion (reunion 1, reunion 2, ... jusqu'au nombre de membres)
 // ─────────────────────────────────────────────
 // Aucune caisse par défaut — l'Admin crée chaque caisse manuellement via config.html
-let configCaisses = JSON.parse(localStorage.getItem('config_caisses')) || [];
+let configCaisses = JSON.parse(localStorage.getItem(getAdminKey('config_caisses'))) || [];
 
 // ─────────────────────────────────────────────
 // 3. MODULE 2 — CONFIGURATION DES AMENDES HYBRIDES
@@ -62,13 +62,13 @@ let configCaisses = JSON.parse(localStorage.getItem('config_caisses')) || [];
 //    valeur : montant (number) si financier, description (string) si nature
 // ─────────────────────────────────────────────
 // Aucune amende par défaut — l'Admin crée chaque infraction manuellement via config.html
-let configAmendes = JSON.parse(localStorage.getItem('config_amendes')) || [];
+let configAmendes = JSON.parse(localStorage.getItem(getAdminKey('config_amendes'))) || [];
 
 // ─────────────────────────────────────────────
 // 4. MODULE 3 — RÈGLEMENT INTÉRIEUR
 //    Texte libre rédigé par l'admin, affiché en lecture seule pour les membres
 // ─────────────────────────────────────────────
-let reglementInterieur = localStorage.getItem('reglement_interieur') ||
+let reglementInterieur = localStorage.getItem(getAdminKey('reglement_interieur')) ||
     "Le règlement intérieur de l'association n'a pas encore été rédigé par l'Administrateur.";
 
 // ─────────────────────────────────────────────
@@ -78,6 +78,17 @@ let reglementInterieur = localStorage.getItem('reglement_interieur') ||
 // l'endpoint local `/api/jsonbin` pour lire/écrire la bin de manière sécurisée.
 const JSONBIN_API = '/api/jsonbin';
 let sharedDataCache = null;
+
+function getCurrentAdminId() {
+    if (typeof auth === 'undefined') return 'default';
+    const currentUser = auth.getCurrentUser();
+    return currentUser ? currentUser.username : 'default';
+}
+
+function getAdminKey(baseKey) {
+    const adminId = getCurrentAdminId();
+    return `${adminId}_${baseKey}`;
+}
 
 function isSyncAdmin() {
     if (typeof auth === 'undefined') return false;
@@ -91,8 +102,8 @@ function buildSharedDataRecord() {
         configCaisses,
         configAmendes,
         reglementInterieur,
-        tontinePaiements: JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [],
-        tontineMur: JSON.parse(localStorage.getItem('TONTINE_MUR')) || []
+        tontinePaiements: JSON.parse(localStorage.getItem(getAdminKey('TONTINE_PAIEMENTS'))) || [],
+        tontineMur: JSON.parse(localStorage.getItem(getAdminKey('TONTINE_MUR'))) || []
     };
 }
 
@@ -133,14 +144,14 @@ async function loadSharedTontineData() {
         // Écrire une copie locale de secours *sauf* si des changements locaux
         // non synchronisés existent (flag JSONBIN_DIRTY). Cela permet à
         // l'admin en mode sync de continuer à travailler hors-ligne.
-        const dirty = !!localStorage.getItem('JSONBIN_DIRTY');
+        const dirty = !!localStorage.getItem(getAdminKey('JSONBIN_DIRTY'));
         if (!dirty) {
-            localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(record.tontinePaiements || getTontinePayments()));
-            localStorage.setItem('TONTINE_MUR', JSON.stringify(record.tontineMur || getTontineMur()));
-            localStorage.setItem('apbmData', JSON.stringify(record.associationData || associationData));
-            localStorage.setItem('config_caisses', JSON.stringify(configCaisses));
-            localStorage.setItem('config_amendes', JSON.stringify(record.configAmendes || configAmendes));
-            if (record.reglementInterieur) localStorage.setItem('reglement_interieur', record.reglementInterieur);
+            localStorage.setItem(getAdminKey('TONTINE_PAIEMENTS'), JSON.stringify(record.tontinePaiements || getTontinePayments()));
+            localStorage.setItem(getAdminKey('TONTINE_MUR'), JSON.stringify(record.tontineMur || getTontineMur()));
+            localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(record.associationData || associationData));
+            localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(configCaisses));
+            localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(record.configAmendes || configAmendes));
+            if (record.reglementInterieur) localStorage.setItem(getAdminKey('reglement_interieur'), record.reglementInterieur);
         }
 
         refreshSharedState();
@@ -157,30 +168,30 @@ async function persistSharedData() {
         sharedDataCache = buildSharedDataRecord();
         await saveSharedTontineData(sharedDataCache);
         // Si succès, effacer les marqueurs de sync pendante
-        localStorage.removeItem('JSONBIN_DIRTY');
-        localStorage.removeItem('hasPendingSync');
+        localStorage.removeItem(getAdminKey('JSONBIN_DIRTY'));
+        localStorage.removeItem(getAdminKey('hasPendingSync'));
     } catch (err) {
         console.warn('Enregistrement JSONBin impossible :', err);
         // Marquer comme dirty / pending pour réessayer plus tard
-        localStorage.setItem('JSONBIN_DIRTY', '1');
-        localStorage.setItem('hasPendingSync', '1');
+        localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
+        localStorage.setItem(getAdminKey('hasPendingSync'), '1');
     }
 }
 
 function getTontinePayments() {
     if (isSyncAdmin() && sharedDataCache?.tontinePaiements) return sharedDataCache.tontinePaiements;
-    return JSON.parse(localStorage.getItem('TONTINE_PAIEMENTS')) || [];
+    return JSON.parse(localStorage.getItem(getAdminKey('TONTINE_PAIEMENTS'))) || [];
 }
 
 function saveTontinePayments(paiements) {
     // Toujours écrire localement (sauvegarde de secours)
-    localStorage.setItem('TONTINE_PAIEMENTS', JSON.stringify(paiements));
+    localStorage.setItem(getAdminKey('TONTINE_PAIEMENTS'), JSON.stringify(paiements));
     if (isSyncAdmin()) {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.tontinePaiements = paiements;
         if (!navigator.onLine) {
-            localStorage.setItem('hasPendingSync', '1');
-            localStorage.setItem('JSONBIN_DIRTY', '1');
+            localStorage.setItem(getAdminKey('hasPendingSync'), '1');
+            localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
         }
         persistSharedData();
     }
@@ -188,18 +199,18 @@ function saveTontinePayments(paiements) {
 
 function getTontineMur() {
     if (isSyncAdmin() && sharedDataCache?.tontineMur) return sharedDataCache.tontineMur;
-    return JSON.parse(localStorage.getItem('TONTINE_MUR')) || [];
+    return JSON.parse(localStorage.getItem(getAdminKey('TONTINE_MUR'))) || [];
 }
 
 function saveTontineMur(wallMessages) {
     // Toujours écrire localement (sauvegarde de secours)
-    localStorage.setItem('TONTINE_MUR', JSON.stringify(wallMessages));
+    localStorage.setItem(getAdminKey('TONTINE_MUR'), JSON.stringify(wallMessages));
     if (isSyncAdmin()) {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.tontineMur = wallMessages;
         if (!navigator.onLine) {
-            localStorage.setItem('hasPendingSync', '1');
-            localStorage.setItem('JSONBIN_DIRTY', '1');
+            localStorage.setItem(getAdminKey('hasPendingSync'), '1');
+            localStorage.setItem(getAdminKey('JSONBIN_DIRTY'), '1');
         }
         persistSharedData();
     }
@@ -223,8 +234,8 @@ function refreshSharedState() {
 
 function sauvegarder() {
     if (!isSyncAdmin()) {
-        // Toujours écrire localement
-        localStorage.setItem('apbmData', JSON.stringify(associationData));
+        // Toujours écrire localement avec clé admin-spécifique
+        localStorage.setItem(getAdminKey('apbmData'), JSON.stringify(associationData));
     } else {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.associationData = associationData;
@@ -234,8 +245,8 @@ function sauvegarder() {
 
 function sauvegarderCaisses() {
     if (!isSyncAdmin()) {
-        // Toujours écrire localement
-        localStorage.setItem('config_caisses', JSON.stringify(configCaisses));
+        // Toujours écrire localement avec clé admin-spécifique
+        localStorage.setItem(getAdminKey('config_caisses'), JSON.stringify(configCaisses));
     } else {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.configCaisses = configCaisses;
@@ -245,8 +256,8 @@ function sauvegarderCaisses() {
 
 function sauvegarderAmendes() {
     if (!isSyncAdmin()) {
-        // Toujours écrire localement
-        localStorage.setItem('config_amendes', JSON.stringify(configAmendes));
+        // Toujours écrire localement avec clé admin-spécifique
+        localStorage.setItem(getAdminKey('config_amendes'), JSON.stringify(configAmendes));
     } else {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.configAmendes = configAmendes;
@@ -257,8 +268,8 @@ function sauvegarderAmendes() {
 function sauvegarderReglement(texte) {
     reglementInterieur = texte;
     if (!isSyncAdmin()) {
-        // Toujours écrire localement
-        localStorage.setItem('reglement_interieur', texte);
+        // Toujours écrire localement avec clé admin-spécifique
+        localStorage.setItem(getAdminKey('reglement_interieur'), texte);
     } else {
         sharedDataCache = sharedDataCache || {};
         sharedDataCache.reglementInterieur = texte;
@@ -280,7 +291,7 @@ window.addEventListener('load', () => {
 
 // Réessayer la synchronisation automatique lorsque la connexion revient
 window.addEventListener('online', () => {
-    if (isSyncAdmin() && localStorage.getItem('hasPendingSync')) {
+    if (isSyncAdmin() && localStorage.getItem(getAdminKey('hasPendingSync'))) {
         persistSharedData();
     }
 });
@@ -298,14 +309,14 @@ window.addEventListener('admin-sync-session-opened', async () => {
     }
     
     // Si des changements sont en attente, envoyer
-    if (localStorage.getItem('hasPendingSync')) {
+    if (localStorage.getItem(getAdminKey('hasPendingSync'))) {
         persistSharedData();
     }
 });
 
 // Tentative périodique de synchronisation si des changements locaux sont marqués dirty
 setInterval(() => {
-    if (navigator.onLine && isSyncAdmin() && localStorage.getItem('JSONBIN_DIRTY')) {
+    if (navigator.onLine && isSyncAdmin() && localStorage.getItem(getAdminKey('JSONBIN_DIRTY'))) {
         persistSharedData();
     }
 }, 60 * 1000); // toutes les 60s
