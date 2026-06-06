@@ -18,6 +18,60 @@
  *                 partsChoisies est stocké dans membre.parts[caisseId]
  */
 
+// Migration automatique des données de "default_" vers le préfixe de l'administrateur connecté si vide.
+(function migrateDefaultData() {
+    if (typeof auth !== 'undefined') {
+        const currentUser = auth.getCurrentUser();
+        if (currentUser && currentUser.username && currentUser.username !== 'default') {
+            const adminId = currentUser.username;
+            const keysToMigrate = [
+                'apbmData',
+                'config_caisses',
+                'config_amendes',
+                'reglement_interieur',
+                'TONTINE_PAIEMENTS',
+                'TONTINE_MUR',
+                'JSONBIN_DIRTY',
+                'hasPendingSync'
+            ];
+            
+            keysToMigrate.forEach(baseKey => {
+                const defaultKey = `default_${baseKey}`;
+                const targetKey = `${adminId}_${baseKey}`;
+                const defaultValue = localStorage.getItem(defaultKey);
+                const targetValue = localStorage.getItem(targetKey);
+                
+                if (defaultValue !== null && (targetValue === null || targetValue === '' || targetValue === '[]' || targetValue === '{}')) {
+                    localStorage.setItem(targetKey, defaultValue);
+                    console.log(`Migration: ${defaultKey} -> ${targetKey}`);
+                }
+            });
+
+            const allKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                allKeys.push(localStorage.key(i));
+            }
+            allKeys.forEach(key => {
+                if (key && key.startsWith('default_TONTINE_PV_REUNION_')) {
+                    const suffix = key.substring('default_'.length);
+                    const targetKey = `${adminId}_${suffix}`;
+                    if (localStorage.getItem(targetKey) === null) {
+                        localStorage.setItem(targetKey, localStorage.getItem(key));
+                        console.log(`Migration dynamique PV: ${key} -> ${targetKey}`);
+                    }
+                } else if (key && key.startsWith('default_TONTINE_META_REUNION_')) {
+                    const suffix = key.substring('default_'.length);
+                    const targetKey = `${adminId}_${suffix}`;
+                    if (localStorage.getItem(targetKey) === null) {
+                        localStorage.setItem(targetKey, localStorage.getItem(key));
+                        console.log(`Migration dynamique META: ${key} -> ${targetKey}`);
+                    }
+                }
+            });
+        }
+    }
+})();
+
 // ─────────────────────────────────────────────
 // 1. DONNÉES PRINCIPALES DE L'ASSOCIATION
 // ─────────────────────────────────────────────
@@ -832,10 +886,10 @@ function nouvelleReunion() {
     const previousReunion = associationData.reunionActuelle;
     const previousHost = associationData.lastSessionHost || '[Non renseigné]';
     const previousDate = associationData.lastSessionDate || new Date().toISOString().split('T')[0];
-    const previousPvKey = 'TONTINE_PV_REUNION_' + previousReunion;
+    const previousPvKey = getAdminKey('TONTINE_PV_REUNION_' + previousReunion);
     const previousPv = localStorage.getItem(previousPvKey) || null;
 
-    const previousMetaKey = 'TONTINE_META_REUNION_' + previousReunion;
+    const previousMetaKey = getAdminKey('TONTINE_META_REUNION_' + previousReunion);
     let previousAttendees = [];
     try {
         const meta = JSON.parse(localStorage.getItem(previousMetaKey));
@@ -1128,7 +1182,7 @@ function getTotalGlobal() {
 
 // Mise à jour automatique si les données changent dans un autre onglet
 window.addEventListener('storage', (e) => {
-    if (e.key === 'apbmData') {
+    if (e.key === getAdminKey('apbmData')) {
         try {
             const newData = JSON.parse(e.newValue);
             if (newData) {

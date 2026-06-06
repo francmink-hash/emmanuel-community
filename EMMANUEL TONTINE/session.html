@@ -356,8 +356,8 @@
 
     <footer><small>EMMANUEL_TONTINE — gestion pastorale apaisée.</small></footer>
 
-    <script src="app.js"></script>
     <script src="auth.js"></script>
+    <script src="app.js"></script>
     <script>
         auth.checkAdmin();
         
@@ -405,12 +405,12 @@
         function chargerPV() {
             const currentReunion = associationData.reunionActuelle || 1;
             const currentSession = associationData.sessionActuelle || 1;
-            const pvKey = 'TONTINE_PV_REUNION_' + currentReunion;
+            const pvKey = getAdminKey('TONTINE_PV_REUNION_' + currentReunion);
             const host = associationData.lastSessionHost || '[Non renseigné]';
             const meetingDate = associationData.lastSessionDate ? new Date(associationData.lastSessionDate).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
             
             // Récupérer les membres présents depuis les métadonnées de la réunion
-            const metaKey = 'TONTINE_META_REUNION_' + currentReunion;
+            const metaKey = getAdminKey('TONTINE_META_REUNION_' + currentReunion);
             let presentsStr = '[Renseigner les membres]';
             try {
                 const meta = JSON.parse(localStorage.getItem(metaKey));
@@ -463,7 +463,7 @@
         // ── Enregistrer le PV ──
         function enregistrerPV() {
             const currentReunion = associationData.reunionActuelle || 1;
-            const pvKey = 'TONTINE_PV_REUNION_' + currentReunion;
+            const pvKey = getAdminKey('TONTINE_PV_REUNION_' + currentReunion);
             const htmlContent = document.getElementById('pv-editor').innerHTML;
             localStorage.setItem(pvKey, htmlContent);
             

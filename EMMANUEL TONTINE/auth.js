@@ -10,6 +10,8 @@ const SESSION_KEY = `EMMANUEL_SESSION_${APP_NAME.replace(/ /g, '_')}`;
 const auth = {
     // Initialisation : Créer l'admin par défaut s'il n'existe pas
     init() {
+        // Nettoyage anti-résidu de la session localStorage
+        localStorage.removeItem(SESSION_KEY);
         let users = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         // Recherche insensible à la casse pour éviter les doublons
         const adminExists = users.find(u => u.username.toLowerCase() === 'admin');
@@ -86,7 +88,7 @@ const auth = {
                 msg: "⌛ Votre compte est toujours en attente de validation par l'Administrateur." 
             };
         }
-        localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
         if (user.role === 'Administrateur' && user.syncMode === true) {
             try {
                 window.dispatchEvent(new Event('admin-sync-session-opened'));
@@ -98,7 +100,7 @@ const auth = {
     },
 
     forceLogin(user) {
-        localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
     },
 
     // Récupération de mot de passe
@@ -123,11 +125,11 @@ const auth = {
 
     // Session
     getCurrentUser() {
-        return JSON.parse(localStorage.getItem(SESSION_KEY));
+        return JSON.parse(sessionStorage.getItem(SESSION_KEY));
     },
 
     logout() {
-        localStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem(SESSION_KEY);
         window.location.href = 'login.html';
     },
 
