@@ -33,8 +33,8 @@
         body {
             background: #0a0a0a !important;
             color: rgba(255, 255, 255, 0.85) !important;
-            height: 100vh !important;
-            overflow: hidden !important; /* Zéro Scroll */
+            min-height: 100vh;
+            overflow-x: hidden;
             margin: 0;
             padding: 0;
         }
@@ -146,7 +146,7 @@
         /* Layout Split-View Premium */
         .main-container {
             display: flex;
-            height: calc(100vh - 80px);
+            min-height: calc(100vh - 80px);
             margin-top: 80px;
             gap: 32px;
             padding: 0 32px 32px;
@@ -329,6 +329,67 @@
                 font-size: 0.75rem;
             }
         }
+
+        /* Additional responsive improvements */
+        .main-container {
+            min-height: calc(100vh - 80px);
+            flex-wrap: wrap;
+        }
+
+        .content-area, .conversation-wall {
+            min-height: 0;
+        }
+
+        .message-input-area .input-row {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .message-input-area .input-row button,
+        .message-input-area .input-row #msg-input {
+            min-width: 0;
+        }
+
+        @media (max-width: 900px) {
+            .section-grid {
+                grid-template-columns: 1fr !important;
+                gap: 24px !important;
+            }
+
+            .message-input-area .input-row {
+                flex-direction: column;
+            }
+
+            .message-input-area .input-row button,
+            .message-input-area .input-row #msg-input {
+                width: 100%;
+            }
+
+            .emoji-bar {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .chat-editor-toolbar {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .conversation-wall {
+                height: auto;
+                min-height: 320px;
+            }
+
+            .message-input-area {
+                padding: 12px;
+            }
+
+            .message-input-area .input-row {
+                margin-top: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -408,7 +469,7 @@
                 </section>
 
                 <!-- GRILLE DEUX COLONNES RESPONSIVE : RÈGLEMENT ET COMPTES-RENDUS -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px; align-items: start; width: 100%; margin-top: 2.5rem;">
+                <div class="section-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px; align-items: start; width: 100%; margin-top: 2.5rem;">
                     <!-- BLOC PUBLIC : Règlement intérieur (lecture seule) -->
                     <section class="card" id="section-reglement" style="margin: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 12px;">
