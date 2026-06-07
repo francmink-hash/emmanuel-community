@@ -18,218 +18,2003 @@
             padding: 8px 16px;
             border-radius: 50px;
             font-size: 0.8rem;
-            backdrop-filter: blur(8px);\r
-            border: 1px solid rgba(255, 255, 255, 0.1);\r
-            transition: all 0.3s ease;\r
-            font-family: sans-serif;\r
-        }\r
-\r
-        .btn-retour:hover {\r
-            color: #fff;\r
-            background: rgba(255, 255, 255, 0.1);\r
-            transform: translateX(-3px);\r
-        }\r
-\r
-        /* Styles spécifiques pour l'affichage chiffré des caisses membres */
-        .caisse-active-value {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #fff;
-            margin-top: 5px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            font-family: sans-serif;
         }
-    </style>\r
-</head>\r
-<body>\r
-    \r
-    <a href="index.html" onclick="history.back(); return false;" class="btn-retour">⬅️ Retour</a>\r
-\r
-    <header>\r
-        <h1><span class="asso-name">APBM</span> - EMMANUEL TONTINE 🏠</h1>\r
-        <p>Espace d'entraide, de transparence et de gestion pastorale apaisée.</p>\r
-        <div id="user-welcome-bar" style="margin-top: 10px; font-size: 0.85rem; color: var(--gold);"></div>\r
-    </header>\r
-\r
-    <nav class="menu-grid" id="main-nav">\r
-        <a href="index.html" class="menu-item"><span>🏠</span><span>Dashboard</span></a>\r
-        <a href="membres.html" class="menu-item nav-admin-link"><span>👥</span><span>Membres</span></a>\r
-        <a href="session.html" class="menu-item nav-admin-link"><span>⚖️</span><span>Session</span></a>\r
-        <a href="finances.html" class="menu-item nav-admin-link"><span>💰</span><span>Finances</span></a>\r
-        <a href="config.html" class="menu-item nav-admin-link"><span>🛠️</span><span>Configuration</span></a>\r
-        <button onclick="logout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #ccc; padding: 8px; border-radius: 8px; cursor: pointer; grid-column: span 2; margin-top: 10px;">🔌 Déconnexion</button>\r
-    </nav>\r
-\r
-    <main class="dashboard">\r
-        \r
-        <section class="card">\r
-            <h2>📝 Dernières Résolutions & PV Officiel</h2>\r
-            <div id="public-pv-container" class="markdown-body" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; max-height: 250px; overflow-y: auto; font-size: 0.9rem;">\r
-                <p style="color: var(--muted);">Aucun procès-verbal publié pour le moment.</p>\r\n            </div>\r\n        </section>\r
-\r
-        \r
-        <section class="card" id="section-adherent-caisses" style="display: none;">\r
-            <h2>📊 Mes Caisses & Situations Personnelles</h2>\r
-            <p><small>Consultez vos montants validés par l'administration.</small></p>\r
-            <div class="menu-grid" style="margin-top: 15px;">\r
-                <div class="menu-item" style="cursor: default;">\r
-                    <span>💰 Caisse Tontine</span>\r
-                    <span id="txt-caisse-tontine" class="caisse-active-value">0 FCFA</span>\r
-                </div>\r
-                <div class="menu-item" style="cursor: default;">\r
-                    <span>⚠️ Reliquat / Dettes</span>\r
-                    <span id="txt-caisse-dette" class="caisse-active-value" style="color: #e74c3c;">0 FCFA</span>\r
-                </div>\r
-                <div class="menu-item" style="cursor: default;">\r
-                    <span>⚡ Discipline / Amendes</span>\r
-                    <span id="txt-caisse-sanction" class="caisse-active-value" style="color: #f1c40f;">0 FCFA</span>\r
-                </div>\r
-                <div class="menu-item" style="cursor: default;">\r
-                    <span>🛡️ Caisse Secours</span>\r
-                    <span id="txt-caisse-secours" class="caisse-active-value">0 FCFA</span>\r
-                </div>\r
-            </div>\r
-        </section>\r
-\r
-        \r
-        <section class="card" id="section-admin-tower" style="display: none;">\r
-            <h2 style="color: var(--gold);">🎛️ Tour de Contrôle Super Admin</h2>\r
-            <p>Accès rapide aux modules de gestion globale de la séance.</p>\r
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">\r
-                <a href="session.html" class="btn-add" style="text-align: center; text-decoration: none; background: var(--gold); color: #000; font-weight: bold; padding: 12px; border-radius: 8px;">⚖️ Ouvrir la Séance</a>\r
-                <a href="finances.html" class="btn-add" style="text-align: center; text-decoration: none; background: #2ecc71; color: #fff; font-weight: bold; padding: 12px; border-radius: 8px;">💰 Clôture Financière</a>\r
-            </div>\r
-        </section>\r
-    </main>\r
-\r
-    \r
-    <div id="chat-sidebar" class="chat-sidebar">\r
-        <div id="chat-resizer" class="chat-resizer"></div>\r
-        <div class="chat-header">\r
-            <h3>💬 Mur de l'Association</h3>\r
-        </div>\r
-        <div id="chat-messages" class="chat-messages"></div>\r
-        <div class="chat-input-container">\r
-            <input type="text" id="chat-input" placeholder="Écrire un message..." />\r
-            <button onclick="sendChatMessage()">Envoyer</button>\r
-        </div>\r
-    </div>\r
-\r
-    <footer><small>EMMANUEL_TONTINE — Solidarité chrétienne.</small></footer>\r
-\r
-    <script src="auth.js"></script>\r
-    <script src="app.js"></script>\r
-    <script>\r
-        function logout() {\r
-            localStorage.removeItem('currentUser');\r
-            localStorage.removeItem('userRole');\r
-            localStorage.removeItem('username');\r
-            window.location.href = 'login.html';\r
-        }\r
-\r
-        function initialiserDashboard() {\r
-            appliquerNomAsso();\r
-            \r
-            const currentUser = localStorage.getItem('currentUser') || localStorage.getItem('username') || '';\r
-            const userRole = localStorage.getItem('userRole') || 'membre';\r
-            \r
-            if (!currentUser) {\r
-                window.location.href = 'login.html';\r
-                return;\r
-            }\r
-\r
-            document.getElementById('user-welcome-bar').innerHTML = `👤 Connecté : <strong>${currentUser.toUpperCase()}</strong> (${userRole === 'admin' ? 'Administrateur' : 'Adhérent'})`;\r
-\r
-            const adminLinks = document.querySelectorAll('.nav-admin-link');\r
-            \r
-            if (userRole === 'admin') {\r
-                adminLinks.forEach(el => el.style.display = 'block');\r
-                document.getElementById('section-admin-tower').style.display = 'block';\r
-                document.getElementById('section-adherent-caisses').style.display = 'none';\r
-            } else {\r
-                adminLinks.forEach(el => el.style.display = 'none');\r
-                document.getElementById('section-admin-tower').style.display = 'none';\r
-                document.getElementById('section-adherent-caisses').style.display = 'block';\r
-                \r
-                // Injection des montants réels dans les caisses de l'adhérent connecté\r
-                chargerMontantsCaissesAdherent(currentUser);\r
-            }\r
-\r
-            // Charger le PV\r
-            const currentReunion = (typeof associationData !== 'undefined' && associationData.reunionActuelle) || 1;\r
-            const pvKey = 'TONTINE_PV_REUNION_' + currentReunion;\r
-            const localPv = localStorage.getItem(pvKey) || localStorage.getItem('TONTINE_PV_REUNION_1');\r
-            if (localPv) {\r
-                document.getElementById('public-pv-container').innerHTML = localPv;\r
-            }\r
-\r
-            // Relancer ton code existant pour le chat redimensionnable\r
-            if (typeof initChatResizer === 'function') initChatResizer();\r
-        }\r
-\r
-        // RECTIFICATION CHIRURGICALE : Recherche les données et remplit les caisses\r
-        function chargerMontantsCaissesAdherent(username) {\r
-            let membresData = [];\r
-            \r
-            if (typeof associationData !== 'undefined' && associationData.membres) {\r
-                membresData = associationData.membres;\r
-            } else {\r
-                const storedData = localStorage.getItem('associationData');\r
-                if (storedData) {\r
-                    try {\r
-                        membresData = JSON.parse(storedData).membres || [];\r
-                    } catch(e) {\r
-                        console.error(e);\r
-                    }\r
-                }\r
-            }\r
-\r
-            const userUpper = username.toUpperCase();\r
-            const monProfil = membresData.find(m => {\r
-                const nomM = (m.nom || m.id || '').toUpperCase();\r
-                return nomM === userUpper || userUpper.includes(nomM) || nomM.includes(userUpper);\r
-            });\r
-\r
-            if (monProfil) {\r
-                // Extraction des vraies valeurs financières de ton app\r
-                const tontine = monProfil.cotisations || monProfil.totalCotise || 0;\r
-                const dettes = monProfil.dettes || monProfil.reliquat || monProfil.totalDettes || 0;\r
-                const amende = monProfil.sanctions || monProfil.penalites || 0;\r
-                const secours = monProfil.secours || 0;\r
-\r
-                // Remplacement immédiat des textes pour éviter les caisses vierges\r
-                if(document.getElementById('txt-caisse-tontine')) document.getElementById('txt-caisse-tontine').innerText = tontine + " FCFA";\r
-                if(document.getElementById('txt-caisse-dette')) document.getElementById('txt-caisse-dette').innerText = dettes + " FCFA";\r
-                if(document.getElementById('txt-caisse-sanction')) document.getElementById('txt-caisse-sanction').innerText = amende + " FCFA";\r
-                if(document.getElementById('txt-caisse-secours')) document.getElementById('txt-caisse-secours').innerText = secours + " FCFA";\r
-            }\r
-        }\r
-\r
-        /**\r
-         * Initialise le séparateur redimensionnable pour le chat communautaire.\r
-         */\r
-        function initChatResizer() {\r
-            const resizer = document.getElementById('chat-resizer');\r
-            const sidebar = document.getElementById('chat-sidebar');\r
-            if (!resizer || !sidebar) return;\r
-            let startX = 0, startW = 0;\r
-            const move = (e) => {\r
-                const w = startW + (e.clientX - startX);\r
-                if (w >= 280 && w <= 600) sidebar.style.width = `${w}px`;\r
-            };\r
-            const up = () => {\r
-                document.removeEventListener('mousemove', move);\r
-                document.removeEventListener('mouseup', up);\r
-                resizer.classList.remove('dragging');\r
-            };\r
-            resizer.addEventListener('mousedown', (e) => {\r
-                startX = e.clientX;\r
-                startW = sidebar.offsetWidth;\r
-                resizer.classList.add('dragging');\r
-                document.addEventListener('mousemove', move);\r
-                document.addEventListener('mouseup', up);\r
-            });\r
-        }\r
-\r
-        window.onload = initialiserDashboard;\r
-    </script>\r
-</body>\r
+
+        .btn-retour:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-3px);
+        }
+
+        body {
+            background: #0a0a0a !important;
+            color: rgba(255, 255, 255, 0.85) !important;
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Styles pour l'éditeur de chat riche */
+        #msg-input[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: rgba(255, 255, 255, 0.25);
+        }
+        .chat-editor-toolbar .toolbar-btn:hover {
+            background: rgba(255,255,255,0.08) !important;
+            border-radius: 4px;
+        }
+
+        /* Rendu du PV / Comptes-rendus */
+        .pv-content-styled table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.02);
+            font-size: 0.85rem;
+        }
+        .pv-content-styled th, .pv-content-styled td {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .pv-content-styled th {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold-primary);
+        }
+        .pv-content-styled ul, .pv-content-styled ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        .pv-content-styled li {
+            margin-bottom: 5px;
+        }
+
+        /* Style Premium & Très Lisible pour le Règlement Intérieur et les Comptes-Rendus */
+        #reglement-display, #reports-list {
+            font-size: 1.15rem !important;
+            line-height: 1.95 !important;
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            letter-spacing: 0.3px;
+        }
+        #reglement-display p, #reports-list p {
+            margin-bottom: 1.2rem;
+        }
+        #reglement-display h1, #reglement-display h2, #reglement-display h3,
+        #reports-list h1, #reports-list h2, #reports-list h3 {
+            color: #d4af37;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+        #reglement-display h1, #reports-list h1 { 
+            font-size: 1.6rem; 
+            border-bottom: 1px solid rgba(212,175,55,0.2); 
+            padding-bottom: 8px; 
+        }
+        #reglement-display h2, #reports-list h2 { font-size: 1.4rem; }
+        #reglement-display h3, #reports-list h3 { font-size: 1.2rem; }
+        #reglement-display ul, #reglement-display ol,
+        #reports-list ul, #reports-list ol {
+            padding-left: 24px;
+            margin: 1.2rem 0;
+        }
+        #reglement-display li, #reports-list li {
+            margin-bottom: 0.6rem;
+            line-height: 1.85;
+        }
+        #reglement-display strong, #reports-list strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Grille Responsive pour l'État des Cotisations (Max 2 colonnes) */
+        .cotisations-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        @media (min-width: 768px) {
+            .cotisations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Adoucissement des éléments */
+        header { 
+            padding: 4rem 2rem 2rem; 
+            text-align: center;
+        }
+
+        .card, .summary-card, .menu-item {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(10px);
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .menu-item:hover {
+            background: rgba(212, 175, 55, 0.1) !important;
+            border-color: rgba(212, 175, 55, 0.3) !important;
+        }
+
+        /* Layout Split-View Premium */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            margin-top: 80px;
+            gap: 32px;
+            padding: 0 32px 32px;
+        }
+
+        /* Mur de Conversation (Gauche) */
+        .conversation-wall {
+            width: 350px;
+            min-width: 280px;
+            max-width: 600px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Séparateur Élargissable Premium */
+        .chat-resizer {
+            width: 6px;
+            cursor: col-resize;
+            margin: 0 -19px 0 -19px;
+            position: relative;
+            z-index: 10;
+            display: block;
+            transition: background 0.2s, width 0.2s;
+            border-radius: 3px;
+        }
+        .chat-resizer:hover, .chat-resizer.dragging {
+            background: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+        }
+        @media (max-width: 1024px) {
+            .chat-resizer {
+                display: none;
+            }
+            .conversation-wall {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 100% !important;
+            }
+        }
+
+        .wall-header {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .messages-list {
+            flex: 1;
+            overflow-y: auto; /* Seul élément scrollable */
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) transparent;
+        }
+
+        .message-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border-left: 3px solid var(--gold-primary);
+        }
+
+        .message-meta {
+            font-size: 0.7rem;
+            color: var(--gold-primary);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .message-input-area {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .input-row { display: flex; gap: 10px; }
+        .input-row input { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 10px; border-radius: 5px; }
+        
+        .emoji-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+        .emoji-bar span { cursor: pointer; transition: 0.2s; }
+        .emoji-bar span:hover { transform: scale(1.3); }
+
+        /* Dashboard (Droite) */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .personal-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%) !important;
+            border: 1px solid rgba(212, 175, 55, 0.2) !important;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #141414;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .modal h3 { color: var(--gold-primary); margin-top: 0; }
+        
+        .btn-pay {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-right: 10px;
+        }
+        .btn-pay:hover { background: var(--gold-primary); color: black; }
+
+        @media (max-width: 1024px) {
+            body {
+                height: auto !important;
+                overflow: auto !important;
+            }
+            .main-container {
+                flex-direction: column;
+                height: auto;
+                margin-top: 100px;
+                padding: 0 16px 24px;
+                gap: 24px;
+            }
+            .conversation-wall {
+                flex: none;
+                height: 400px;
+                width: 100%;
+            }
+            .btn-retour {
+                position: absolute;
+                top: 15px;
+            }
+        }
+        @media (max-width: 600px) {
+            .main-container {
+                margin-top: 110px;
+            }
+            .btn-retour {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Additional responsive improvements */
+        .main-container {
+            min-height: calc(100vh - 80px);
+            flex-wrap: wrap;
+        }
+
+        .content-area, .conversation-wall {
+            min-height: 0;
+        }
+
+        .message-input-area .input-row {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .message-input-area .input-row button,
+        .message-input-area .input-row #msg-input {
+            min-width: 0;
+        }
+
+        @media (max-width: 900px) {
+            .section-grid {
+                grid-template-columns: 1fr !important;
+                gap: 24px !important;
+            }
+
+            .message-input-area .input-row {
+                flex-direction: column;
+            }
+
+            .message-input-area .input-row button,
+            .message-input-area .input-row #msg-input {
+                width: 100%;
+            }
+
+            .emoji-bar {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .chat-editor-toolbar {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .conversation-wall {
+                height: auto;
+                min-height: 320px;
+            }
+
+            .message-input-area {
+                padding: 12px;
+            }
+
+            .message-input-area .input-row {
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" onclick="history.back(); return false;" class="btn-retour">↩ Retour à l'accueil</a>
+    <button onclick="auth.logout()" class="btn-retour" style="left:auto; right:20px;">🚪 Déconnexion</button>
+
+    <div class="main-container">
+        <!-- MUR DE CONVERSATION (GAUCHE) -->
+        <aside class="conversation-wall" id="chat-sidebar">
+            <div class="wall-header">
+                <span>💬 Mur Communautaire</span>
+                <span id="online-tag" style="color:var(--gold-primary); font-size:0.7rem">● Direct</span>
+                <span id="sync-status" style="display:none; color:#2ecc71; font-size:0.7rem; font-weight:700; letter-spacing:0.3px; white-space:nowrap; margin-left:10px;">🔄 Mode synchronisé</span>
+            </div>
+            <div class="messages-list" id="wall-messages">
+                <!-- Messages injectés ici -->
+            </div>
+            <div class="message-input-area" style="padding: 10px 15px;">
+                <!-- Word-style Compact Toolbar for Chat -->
+                <div class="chat-editor-toolbar" style="display: flex; gap: 4px; padding: 4px 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-bottom: none; border-radius: 6px 6px 0 0; align-items: center;">
+                    <button class="toolbar-btn" onclick="execChatCmd('bold')" title="Gras" style="background: transparent; border: none; color: #fff; cursor: pointer; padding: 2px 6px; font-weight: bold; font-size: 0.8rem; outline: none;">B</button>
+                    <button class="toolbar-btn" onclick="execChatCmd('italic')" title="Italique" style="background: transparent; border: none; color: #fff; cursor: pointer; padding: 2px 6px; font-style: italic; font-size: 0.8rem; outline: none;">I</button>
+                    <button class="toolbar-btn" onclick="execChatCmd('underline')" title="Souligné" style="background: transparent; border: none; color: #fff; cursor: pointer; padding: 2px 6px; text-decoration: underline; font-size: 0.8rem; outline: none;">U</button>
+                    <span style="color: rgba(255,255,255,0.15); margin: 0 4px; font-size: 0.8rem;">|</span>
+                    <button class="toolbar-btn" onclick="execChatCmd('foreColor', '#d4af37')" title="Texte Or" style="background: transparent; border: none; color: #d4af37; cursor: pointer; padding: 2px 4px; font-size: 0.9rem; outline: none;">■</button>
+                    <button class="toolbar-btn" onclick="execChatCmd('foreColor', '#2ecc71')" title="Texte Vert" style="background: transparent; border: none; color: #2ecc71; cursor: pointer; padding: 2px 4px; font-size: 0.9rem; outline: none;">■</button>
+                    <button class="toolbar-btn" onclick="execChatCmd('foreColor', '#e74c3c')" title="Texte Rouge" style="background: transparent; border: none; color: #e74c3c; cursor: pointer; padding: 2px 4px; font-size: 0.9rem; outline: none;">■</button>
+                    <button class="toolbar-btn" onclick="execChatCmd('foreColor', '#ffffff')" title="Blanc" style="background: transparent; border: none; color: #ffffff; cursor: pointer; padding: 2px 4px; font-size: 0.9rem; outline: none;">■</button>
+                    <button class="toolbar-btn" onclick="execChatCmd('removeFormat')" title="Effacer format" style="background: transparent; border: none; color: #aaa; cursor: pointer; padding: 2px 6px; font-size: 0.8rem; margin-left: auto; outline: none;">⌫</button>
+                </div>
+                <div class="input-row" style="display: flex; gap: 0; margin-top: 0;">
+                    <button class="btn-pay" onclick="openPaymentModal()" title="Déclarer un paiement" style="border-radius: 0 0 0 8px !important; margin: 0; border: 1px solid rgba(255,255,255,0.1); border-right: none;">💰 Paiement</button>
+                    <div id="msg-input" contenteditable="true" placeholder="Écrire un message..." style="flex: 1; background: #000; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 0; min-height: 40px; max-height: 100px; overflow-y: auto; text-align: left; outline: none; font-size: 0.9rem;"></div>
+                    <button onclick="postMessage()" style="width:auto; padding:0 15px; background:var(--gold-primary); color:black; border: 1px solid var(--gold-primary); border-radius: 0 0 8px 0; cursor:pointer; font-weight: bold;">OK</button>
+                </div>
+                <div class="emoji-bar" style="margin-top: 6px;">
+                    <span onclick="addEmoji('🤝')">🤝</span>
+                    <span onclick="addEmoji('🙏')">🙏</span>
+                    <span onclick="addEmoji('💎')">💎</span>
+                    <span onclick="addEmoji('✨')">✨</span>
+                    <span onclick="addEmoji('⚠️')">⚠️</span>
+                    <span onclick="addEmoji('📢')">📢</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Séparateur Élargissable Premium -->
+        <div class="chat-resizer" id="chat-resizer"></div>
+
+        <!-- DASHBOARD & INFOS (DROITE) -->
+        <main class="content-area">
+            <header>
+                <h1><span class="asso-name">APBM</span> 🌳</h1>
+                <p id="asso-explication-display" style="font-size: 1.1rem; color: #d4af37; margin: 4px 0 10px 0; font-style: italic; font-weight: 500;"></p>
+                <p><strong>Que l'amour fraternel nous guide.</strong></p>
+            </header>
+
+            <!-- ESPACE PERSONNEL (POUR LES MEMBRES) -->
+            <section id="personal-space" class="hidden"></section>
+
+            <!-- NAVIGATION ADMIN (CACHÉE POUR LAMBDA) -->
+            <nav id="admin-nav" class="menu-grid hidden">
+                <a href="membres.html" class="menu-item"><span>👥</span><span>Membres</span></a>
+                <a href="session.html" class="menu-item"><span>⚖️</span><span>Session</span></a>
+                <a href="finances.html" class="menu-item"><span>💰</span><span>Finances</span></a>
+                <a href="config.html" class="menu-item"><span>🛠️</span><span>Configuration</span></a>
+                <a href="#" onclick="openPreviewModal(); return false;" class="menu-item"><span>👁️</span><span>Aperçu Adhérent</span></a>
+            </nav>
+
+            <div class="dashboard">
+                <!-- BLOC PUBLIC : Caisses dynamiques -->
+                <section class="card">
+                    <h2>📆 Tableau de bord global</h2>
+                    <p><strong>Santé financière de l'association — Session <span id="sess-num"></span></strong></p>
+                    <!-- Les cartes de caisses sont injectées dynamiquement par JS -->
+                    <div class="summary-grid" id="caisses-dashboard"></div>
+                </section>
+
+                <!-- GRILLE DEUX COLONNES RESPONSIVE : RÈGLEMENT ET COMPTES-RENDUS -->
+                <div class="section-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px; align-items: start; width: 100%; margin-top: 2.5rem;">
+                    <!-- BLOC PUBLIC : Règlement intérieur (lecture seule) -->
+                    <section class="card" id="section-reglement" style="margin: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 12px;">
+                            <h2 style="margin: 0;">📜 Règlement Intérieur</h2>
+                            <div style="position: relative; display: flex; align-items: center; gap: 8px;">
+                                <input type="text" id="search-reglement" placeholder="🔍 Rechercher..." oninput="rechercherDansReglement()" style="margin-top: 0; padding: 6px 14px; font-size: 0.82rem; border-radius: 20px; width: 180px; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.25); color: #fff; outline: none; transition: all 0.3s ease;">
+                                <span id="search-results-count" style="font-size: 0.72rem; color: #d4af37; font-weight: bold; white-space: nowrap;"></span>
+                            </div>
+                        </div>
+                        <div id="reglement-display" style="white-space: pre-wrap;">
+                            <!-- Injecté par JS -->
+                        </div>
+                    </section>
+
+                    <!-- BLOC PUBLIC : Rapports & Comptes-rendus -->
+                    <section class="card" style="margin: 0;">
+                        <h2>📝 Rapports & Comptes-rendus</h2>
+                        <p><strong>Dernières nouvelles de la communauté.</strong></p>
+                        <div id="reports-list" style="margin-top:1rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1rem">
+                            <!-- Contenu injecté par JS -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <footer><small>EMMANUEL_TONTINE — application de gestion pastorale.</small></footer>
+        </main>
+    </div>
+
+    <!-- MODAL DE PAIEMENT -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <h3>📢 Déclaration de Paiement</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.5rem">
+                Remplissez les informations de votre reçu pour validation par l'Admin.
+            </p>
+            <div class="form-group">
+                <label>Opérateur</label>
+                <div style="display:flex; gap:20px; margin-top:5px; margin-bottom:10px;">
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="p-operator" value="Orange Money" checked> 🍊 Orange</label>
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="p-operator" value="MTN MoMo"> 🟡 MTN</label>
+                </div>
+                <!-- Numéros de paiement admin -->
+                <div style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; display:flex; flex-direction:column; gap:6px; font-size:0.8rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#e67e22; font-weight:bold;">🍊 Orange Money :</span>
+                        <strong style="color:#fff; font-family:monospace; font-size:0.9rem; letter-spacing:0.5px;">656 44 84 39</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#f1c40f; font-weight:bold;">🟡 MTN MoMo :</span>
+                        <strong style="color:#fff; font-family:monospace; font-size:0.9rem; letter-spacing:0.5px;">678 35 68 44</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Référence Transaction</label>
+                <input type="text" id="p-ref" placeholder="Ex: MP260428.1830.D80697">
+            </div>
+            <div class="form-group" style="display:flex; gap:10px; margin-bottom: 5px;">
+                <div style="flex:1">
+                    <label>Montant (FCFA)</label>
+                    <input type="number" id="p-amount" placeholder="5000">
+                </div>
+                <div style="flex:1">
+                    <label>Motif de cotisation</label>
+                    <select id="p-motif" onchange="addSelectedCaisse(this.value)" style="width: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px; border-radius: 6px; cursor: pointer;"></select>
+                </div>
+            </div>
+            <div id="selected-caisses-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:15px; margin-top:5px; min-height: 25px;"></div>
+            <div id="p-error" style="color:#ff4d4d; font-size:0.8rem; margin:10px 0;"></div>
+            <button class="btn" onclick="submitPayment()" style="width:100%; padding:12px; background:var(--gold-primary); color:black; border:none; border-radius:8px; font-weight:bold; cursor:pointer">Enregistrer le paiement</button>
+            <button onclick="closePaymentModal()" style="width:100%; margin-top:10px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8rem">Annuler</button>
+        </div>
+    </div>
+
+    <!-- MODAL D'HISTORIQUE DE CAISSE -->
+    <div id="caisse-history-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; width: 90%;">
+            <h3 id="hist-caisse-nom" style="color: var(--gold-primary); margin-top: 0; display: flex; align-items: center; gap: 8px;">📊 Historique Caisse</h3>
+            <p id="hist-caisse-sub" style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem;"></p>
+            
+            <div style="max-height: 300px; overflow-y: auto; scrollbar-width: thin; margin-bottom: 1.5rem;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: var(--gold-primary);">
+                            <th style="padding: 10px 8px;">Date</th>
+                            <th style="padding: 10px 8px;">Membre</th>
+                            <th style="padding: 10px 8px;">Période</th>
+                            <th style="padding: 10px 8px; text-align: right;">Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hist-caisse-records">
+                        <!-- Rempli par JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <button class="btn" onclick="closeCaisseHistoryModal()" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">Fermer</button>
+        </div>
+    </div>
+
+    <!-- MODAL APERÇU ADHÉRENT -->
+    <div id="preview-member-modal" class="modal">
+        <div class="modal-content">
+            <h3>👁️ Aperçu Espace Adhérent</h3>
+            <p style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-bottom:1.5rem">
+                Sélectionnez un adhérent pour visualiser son espace personnel en mode lecture seule.
+            </p>
+            <div class="form-group">
+                <label style="display:block; margin-bottom:8px; font-size:0.85rem; color:rgba(255,255,255,0.7)">Choisir un adhérent</label>
+                <select id="preview-member-select" style="width: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px; border-radius: 6px; cursor: pointer;">
+                    <!-- Rempli dynamiquement -->
+                </select>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn" onclick="startMemberPreview()" style="flex:1; padding:12px; background:var(--gold-primary); color:black; border:none; border-radius:8px; font-weight:bold; cursor:pointer">Visualiser</button>
+                <button class="btn" onclick="closePreviewModal()" style="flex:1; padding:12px; background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:8px; font-weight:bold; cursor:pointer">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // ============================================================
+        // VERROUILLAGE SESSION
+        // ============================================================
+        auth.checkAccess();
+        const user = auth.getCurrentUser();
+
+        let isPreviewMode = false;
+        let previewMemberName = '';
+
+        // ============================================================
+        // PILIER 2 — DASHBOARD PUBLIC (LECTURE SEULE)
+        // Caisses dynamiques + règlement + rapport de session
+        // ============================================================
+        appliquerNomAsso();
+        document.getElementById('sess-num').innerText = associationData.sessionActuelle;
+        updateSyncIndicator();
+
+        function updateSyncIndicator() {
+            const badge = document.getElementById('sync-status');
+            if (!badge) return;
+            badge.style.display = isSyncAdmin() ? 'inline-flex' : 'none';
+        }
+
+        // Injecter les caisses dynamiquement dans le dashboard global
+        function renderDashboardCaisses() {
+            const grid = document.getElementById('caisses-dashboard');
+            if (!grid) return;
+            if (!configCaisses.length) {
+                grid.innerHTML = '<p style="color:rgba(255,255,255,0.5)">Aucune caisse configurée.</p>';
+                return;
+            }
+            
+            const currentUser = auth.getCurrentUser();
+            const isAdmin = currentUser && currentUser.role === 'Administrateur';
+
+            grid.innerHTML = configCaisses.map(c => {
+                const total = getTotalCaisse(c.id);
+                const montantSession = c.type === 'parts'
+                    ? formatAmount(c.valeurPart) + ' / part'
+                    : formatAmount(calculerCotisationCaisse(c.id));
+                const noteCompta = c.exclureCompta 
+                    ? '<br><small style="color:#e67e22; font-size:0.75rem; font-weight:bold; font-style:italic;">🚫 Hors compta globale (hôte)</small>' 
+                    : '';
+                
+                if (isAdmin) {
+                    return '<div class="summary-card" onclick="ouvrirHistoriqueCaisse(\'' + c.id + '\')" style="cursor:pointer; transition: all 0.2s ease-in-out;" onmouseover="this.style.borderColor=\'rgba(212,175,55,0.5)\'; this.style.transform=\'translateY(-2px)\'; this.style.background=\'rgba(255,255,255,0.06)\';" onmouseout="this.style.borderColor=\'rgba(255,255,255,0.05)\'; this.style.transform=\'translateY(0)\'; this.style.background=\'rgba(255,255,255,0.03)\';">' +
+                        '<strong style="display:flex; justify-content:space-between; align-items:center;"><span>' + (c.icone || '🏦') + ' ' + c.nom + '</span> <span style="font-size:0.8rem; opacity:0.6;">🔍 Voir</span></strong>' +
+                        '<div style="color:#d4af37; font-size:1.1rem">' + formatAmount(total) + '</div>' +
+                        '<small style="color:rgba(255,255,255,0.4)">Cotisation : ' + montantSession + '</small>' +
+                        noteCompta +
+                    '</div>';
+                } else {
+                    return '<div class="summary-card" style="transition: all 0.2s ease-in-out; border: 1px solid rgba(255, 255, 255, 0.05);">' +
+                        '<strong>' + (c.icone || '🏦') + ' ' + c.nom + '</strong>' +
+                        '<div style="color:#d4af37; font-size:1.1rem">' + formatAmount(total) + '</div>' +
+                        '<small style="color:rgba(255,255,255,0.4)">Cotisation : ' + montantSession + '</small>' +
+                        noteCompta +
+                    '</div>';
+                }
+            }).join('');
+        }
+        renderDashboardCaisses();
+
+        function ouvrirHistoriqueCaisse(caisseId) {
+            const caisse = configCaisses.find(c => c.id.toString() === caisseId.toString());
+            if (!caisse) return;
+
+            document.getElementById('hist-caisse-nom').innerHTML = `${caisse.icone || '🏦'} Historique : ${caisse.nom}`;
+            
+            // Collecter tous les paiements ("regle") pour cette caisse
+            const records = [];
+            associationData.membres.forEach(m => {
+                (m.operations || []).forEach(op => {
+                    if (op.destination && op.destination.toString() === caisseId.toString() && op.statut === 'regle') {
+                        records.push({
+                            membre: m.nom,
+                            date: op.dateReglement ? new Date(op.dateReglement) : new Date(op.date),
+                            motif: op.motif,
+                            montant: Number(op.montant) || 0
+                        });
+                    }
+                });
+            });
+
+            // Trier par date décroissante
+            records.sort((a, b) => b.date - a.date);
+
+            const totalCaisse = records.reduce((sum, r) => sum + r.montant, 0);
+            document.getElementById('hist-caisse-sub').innerHTML = `Total accumulé : <strong style="color:#2ecc71;">${formatAmount(totalCaisse)}</strong> (${records.length} versements enregistrés)`;
+
+            const tbody = document.getElementById('hist-caisse-records');
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:rgba(255,255,255,0.4); padding:20px;">Aucun versement n'a encore été enregistré pour cette caisse.</td></tr>`;
+            } else {
+                tbody.innerHTML = records.map(r => `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.85);">
+                        <td style="padding: 10px 8px;">${r.date.toLocaleDateString('fr-FR')}</td>
+                        <td style="padding: 10px 8px; font-weight: bold; color: #d4af37;">${r.membre}</td>
+                        <td style="padding: 10px 8px; font-size:0.8rem; color:rgba(255,255,255,0.6);">${r.motif}</td>
+                        <td style="padding: 10px 8px; text-align: right; font-weight: bold; color: #2ecc71;">${formatAmount(r.montant)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('caisse-history-modal').style.display = 'flex';
+        }
+
+        function closeCaisseHistoryModal() {
+            document.getElementById('caisse-history-modal').style.display = 'none';
+        }
+
+        // Règlement intérieur — lecture seule pour tous
+        const reglEl = document.getElementById('reglement-display');
+        if (reglEl) {
+            reglEl.innerHTML = reglementInterieur;
+            // Ajuster le style pour le rendu HTML (listes, etc.)
+            reglEl.style.whiteSpace = 'normal';
+        }
+
+        /**
+         * Normalise une chaîne de caractères pour une recherche insensible aux variations.
+         * Supprime les accents, convertit en minuscules, simplifie les consonnes doubles,
+         * applique une phonétique rudimentaire et gère les pluriels de base (s/x finaux).
+         * 
+         * @param {string} str - La chaîne d'entrée à normaliser.
+         * @returns {string} La chaîne nettoyée et normalisée.
+         */
+        function normalizeForSearch(str) {
+            if (!str) return "";
+            // 1. Supprimer les accents
+            let s = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            // 2. Mettre en minuscule
+            s = s.toLowerCase();
+            // 3. Remplacer les consonnes doubles par des consonnes simples (ex: tt -> t, nn -> n, cc -> c...)
+            s = s.replace(/([a-z])\1+/g, '$1');
+            // 4. Phonétique simple (ex: ph -> f)
+            s = s.replace(/ph/g, 'f');
+            // 5. Remplacer ç par s, c devant e,i,y par s, c devant a,o,u par k, c en fin de mot par k
+            s = s.replace(/ç/g, 's').replace(/c(?=[eiy])/g, 's').replace(/c(?=[aou])/g, 'k').replace(/c$/g, 'k');
+            // 6. Supprimer les s et x à la fin de chaque mot de plus de 3 lettres (pluriels simples)
+            s = s.split(/\s+/).map(w => {
+                if (w.length > 3 && (w.endsWith('s') || w.endsWith('x'))) {
+                    return w.slice(0, -1);
+                }
+                return w;
+            }).join(' ');
+            return s.trim();
+        }
+
+        /**
+         * Effectue une recherche en temps réel ultra-dynamique et phonétique dans le règlement intérieur.
+         * Filtre les sections du document (rubriques et sous-titres) et n'affiche que celles correspondantes.
+         * Surligne également les mots trouvés grâce à la normalisation.
+         * 
+         * @returns {void}
+         */
+        window.rechercherDansReglement = function() {
+            const query = document.getElementById('search-reglement').value.trim();
+            const countEl = document.getElementById('search-results-count');
+            const targetEl = document.getElementById('reglement-display');
+            if (!targetEl) return;
+
+            // Restaurer le texte d'origine si recherche vide
+            if (!query) {
+                targetEl.innerHTML = reglementInterieur;
+                countEl.textContent = '';
+                return;
+            }
+
+            // Normaliser la requête
+            const normQuery = normalizeForSearch(query);
+            const queryWords = normQuery.split(/\s+/).filter(w => w.length > 0);
+
+            if (queryWords.length === 0) {
+                targetEl.innerHTML = reglementInterieur;
+                countEl.textContent = '';
+                return;
+            }
+
+            // Parser le HTML du règlement en sections
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(reglementInterieur, 'text/html');
+            const body = doc.body;
+
+            const sections = [];
+            let currentSection = { heading: null, contentNodes: [] };
+
+            Array.from(body.childNodes).forEach(node => {
+                const isHeading = node.nodeType === 1 && (
+                    ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.nodeName) ||
+                    (node.nodeName === 'P' && node.querySelector('strong') && node.textContent.trim() === node.querySelector('strong').textContent.trim())
+                );
+
+                if (isHeading) {
+                    if (currentSection.contentNodes.length > 0 || currentSection.heading) {
+                        sections.push(currentSection);
+                    }
+                    currentSection = { heading: node, contentNodes: [] };
+                } else {
+                    currentSection.contentNodes.push(node);
+                }
+            });
+            if (currentSection.contentNodes.length > 0 || currentSection.heading) {
+                sections.push(currentSection);
+            }
+
+            // Filtrer les sections qui contiennent tous les mots de la recherche
+            const matchingSections = sections.filter(sec => {
+                const headingText = sec.heading ? sec.heading.textContent : '';
+                const contentText = sec.contentNodes.map(n => n.textContent).join(' ');
+                const fullText = headingText + ' ' + contentText;
+                const normFullText = normalizeForSearch(fullText);
+
+                return queryWords.every(word => normFullText.includes(word));
+            });
+
+            // Vider le conteneur principal
+            targetEl.innerHTML = '';
+            let matchCount = 0;
+
+            if (matchingSections.length === 0) {
+                countEl.textContent = 'Aucun résultat';
+                targetEl.innerHTML = '<div style="color:rgba(255,255,255,0.35); text-align:center; padding:1.5rem 0;">Aucune rubrique ne correspond à votre recherche.</div>';
+                return;
+            }
+
+            /**
+             * Parcourt récursivement les nœuds du DOM pour surligner les correspondances de recherche.
+             * 
+             * @param {Node} node - Le nœud DOM courant à inspecter.
+             * @param {string[]} queryWords - Tableau des mots de recherche normalisés.
+             * @returns {void}
+             */
+            function highlightMatch(node, queryWords) {
+                if (node.nodeType === 3) { // Nœud de texte
+                    const text = node.nodeValue;
+                    const wordsAndSpaces = text.split(/(\b|\s+)/);
+                    let hasMatch = false;
+                    const newHtml = wordsAndSpaces.map(part => {
+                        const normPart = normalizeForSearch(part);
+                        const matchesAny = queryWords.some(qw => normPart === qw || (qw.length > 3 && normPart.startsWith(qw)));
+                        if (matchesAny && part.trim().length > 0) {
+                            hasMatch = true;
+                            matchCount++;
+                            return '<mark style="background:#d4af37; color:#000; font-weight:bold; padding:2px 4px; border-radius:4px; box-shadow:0 0 5px rgba(212,175,55,0.5);">' + part + '</mark>';
+                        }
+                        return part;
+                    }).join('');
+
+                    if (hasMatch) {
+                        const span = document.createElement('span');
+                        span.innerHTML = newHtml;
+                        node.parentNode.replaceChild(span, node);
+                    }
+                } else if (node.nodeType === 1 && node.childNodes && !['SCRIPT', 'STYLE', 'MARK'].includes(node.nodeName)) {
+                    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+                        highlightMatch(node.childNodes[i], queryWords);
+                    }
+                }
+            }
+
+            // Reconstruire le HTML avec les sections correspondantes surlignées
+            matchingSections.forEach(sec => {
+                const sectionContainer = document.createElement('div');
+                sectionContainer.style.marginBottom = '25px';
+                sectionContainer.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+                sectionContainer.style.paddingBottom = '15px';
+
+                if (sec.heading) {
+                    const clonedHeading = sec.heading.cloneNode(true);
+                    highlightMatch(clonedHeading, queryWords);
+                    sectionContainer.appendChild(clonedHeading);
+                }
+
+                sec.contentNodes.forEach(node => {
+                    const clonedNode = node.cloneNode(true);
+                    highlightMatch(clonedNode, queryWords);
+                    sectionContainer.appendChild(clonedNode);
+                });
+
+                targetEl.appendChild(sectionContainer);
+            });
+
+            countEl.textContent = matchCount + ' ' + (matchCount > 1 ? 'résultats' : 'résultat');
+            const firstMark = targetEl.querySelector('mark');
+            if (firstMark) {
+                firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        };
+
+        // Rapport de session / PV dynamique
+        function renderSessionReports() {
+            const container = document.getElementById('reports-list');
+            if (!container) return;
+            
+            const reunions = associationData.reunionsHistorique || [];
+            const currentSession = associationData.sessionActuelle || 1;
+            const currentReunion = associationData.reunionActuelle || 1;
+            
+            // Helper robust pour extraire et formater les noms de membres présents en MAJUSCULES
+            const formatAttendees = (attendees) => {
+                if (!attendees) return '';
+                if (typeof attendees === 'string') {
+                    try {
+                        const parsed = JSON.parse(attendees);
+                        return formatAttendees(parsed);
+                    } catch (e) {
+                        return attendees.toUpperCase();
+                    }
+                }
+                if (Array.isArray(attendees)) {
+                    return attendees.map(item => {
+                        if (!item) return '';
+                        if (typeof item === 'string') return item.toUpperCase();
+                        if (typeof item === 'object') {
+                            return (item.name || item.nom || item.username || item.id || '').toUpperCase();
+                        }
+                        return String(item).toUpperCase();
+                    }).filter(Boolean).join(', ');
+                }
+                if (typeof attendees === 'object') {
+                    if (attendees.name || attendees.nom || attendees.username || attendees.id) {
+                        return (attendees.name || attendees.nom || attendees.username || attendees.id).toUpperCase();
+                    }
+                    return Object.keys(attendees).filter(k => attendees[k] === true || attendees[k] === 'true' || attendees[k] === 1).map(k => k.toUpperCase()).join(', ');
+                }
+                return String(attendees).toUpperCase();
+            };
+
+            // Afficher d'abord le PV de la Réunion en Cours
+            const pvCurrentKey = 'TONTINE_PV_REUNION_' + currentReunion;
+            const pvCurrent = localStorage.getItem(pvCurrentKey);
+            
+            const metaCurrentKey = 'TONTINE_META_REUNION_' + currentReunion;
+            let metaCurrentHtml = '';
+            try {
+                const meta = JSON.parse(localStorage.getItem(metaCurrentKey));
+                if (meta && (meta.host || meta.attendees)) {
+                    const hostName = typeof meta.host === 'object' ? (meta.host.name || meta.host.nom || meta.host.username || '') : (meta.host || '');
+                    const attendeesFormatted = formatAttendees(meta.attendees);
+                    metaCurrentHtml = `
+                        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.2); padding:12px; border-radius:8px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="font-size:0.9rem;"><strong style="color:var(--gold-primary);">🏠 Membre d'Accueil / Reçu chez :</strong> ${hostName}</div>
+                            <div style="font-size:0.9rem;"><strong style="color:var(--gold-primary);">👥 Membres Présents :</strong> <span style="color:rgba(255,255,255,0.8);">${attendeesFormatted}</span></div>
+                        </div>
+                    `;
+                }
+            } catch(e) {}
+            
+            let html = '';
+            
+            if (pvCurrent) {
+                html += `
+                    <div class="report-item" style="margin-bottom:1.5rem; background:rgba(212,175,55,0.05); padding:15px; border-radius:10px; border:1px solid rgba(212,175,55,0.3)">
+                        <span style="color:var(--gold-primary); font-weight:bold; display:block; margin-bottom:12px; border-bottom:1px solid rgba(212,175,55,0.2); padding-bottom:6px; font-size: 0.85rem; letter-spacing: 1px;">📝 EN DIRECT : PROCÈS-VERBAL — Réunion #${currentReunion}</span>
+                        ${metaCurrentHtml}
+                        <div class="pv-content-styled">
+                            ${pvCurrent}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Afficher l'historique des réunions mensuelles (du plus récent au plus ancien)
+            const reversedReunions = [...reunions].reverse();
+            
+            if (reversedReunions.length === 0) {
+                html += `
+                    <div class="report-item" style="margin-bottom:1rem; color:rgba(255,255,255,0.5)">
+                        Aucune réunion mensuelle enregistrée pour le moment.
+                    </div>
+                `;
+            } else {
+                reversedReunions.forEach(r => {
+                    const formattedDate = r.date ? new Date(r.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '[Date non renseignée]';
+                    
+                    let metaHtml = '';
+                    if (r.host || r.attendees) {
+                        const hostName = typeof r.host === 'object' ? (r.host.name || r.host.nom || r.host.username || '') : (r.host || '');
+                        const attendeesFormatted = formatAttendees(r.attendees);
+                        metaHtml = `
+                        <div style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:6px; margin-top:12px; margin-bottom:12px; display:flex; flex-direction:column; gap:5px;">
+                            <div style="font-size:0.85rem;"><strong style="color:var(--gold-primary);">🏠 Membre d'Accueil / Reçu chez :</strong> ${hostName}</div>
+                            <div style="font-size:0.85rem;"><strong style="color:var(--gold-primary);">👥 Membres Présents :</strong> <span style="color:rgba(255,255,255,0.7);">${attendeesFormatted}</span></div>
+                        </div>`;
+                    }
+
+                    if (r.pv) {
+                        html += `
+                            <div class="report-item" style="margin-bottom:1.5rem; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; border:1px solid rgba(212,175,55,0.15)">
+                                <span style="color:var(--gold-primary); font-weight:bold; display:block; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px; font-size: 0.85rem; letter-spacing: 1px;">📜 PROCÈS-VERBAL — Réunion Mensuelle #${r.reunionId} (Session #${r.sessionId})</span>
+                                <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-bottom:12px;">
+                                    📅 ${formattedDate}
+                                </div>
+                                ${metaHtml}
+                                <div class="pv-content-styled">
+                                    ${r.pv}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="report-item" style="margin-bottom:1rem; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05)">
+                                <span style="color:var(--gold-primary); font-weight:bold; font-size:0.85rem;">Réunion Mensuelle #${r.reunionId} (Session #${r.sessionId})</span>
+                                <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-top:4px;">
+                                    📅 ${formattedDate}
+                                </div>
+                                ${metaHtml}
+                                <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-top:8px; font-style:italic;">
+                                    Aucun procès-verbal rédigé pour cette réunion.
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            container.innerHTML = html;
+        }
+        renderSessionReports();
+
+        // ============================================================
+        // GESTION DES DROITS PAR RÔLE
+        // ============================================================
+        if (user) {
+            if (user.role === 'Administrateur') {
+                document.getElementById('admin-nav').classList.remove('hidden');
+                const adminPanel = document.createElement('div');
+                adminPanel.className = 'card';
+                adminPanel.style.marginTop = '2rem';
+                adminPanel.innerHTML =
+                    '<h3>⚙️ Gestion des Comptes (Admin)</h3>' +
+                    '<div id="admin-user-list" style="margin-top:1rem"></div>';
+                document.querySelector('.dashboard').appendChild(adminPanel);
+                renderAdminList();
+            } else {
+                showPersonalSpace(user.username);
+            }
+        }
+
+        // ============================================================
+        // PILIER 1 — ESPACE PERSONNEL MEMBRE
+        // Affiche uniquement les données du membre connecté.
+        // Pour les caisses à parts : sélecteur interactif (le seul endroit
+        // où le membre peut agir — choisir son engagement).
+        // ============================================================
+        /**
+         * Calcule les totaux attendus et payés pour une caisse spécifique d'un membre.
+         * @param {Object} m - Membre.
+         * @param {Object} c - Caisse.
+         * @param {Array} ops - Liste des opérations du membre.
+         * @param {Array} reunions - Réunions de la session.
+         * @param {number} sId - ID de la session en cours.
+         * @returns {{expected: number, paid: number}}
+         */
+        function getCaisseTotals(m, c, ops, reunions, sId) {
+            const nbParts = getPartsMembreCaisse(m, c.id);
+            const baseExp = c.type === 'parts' ? nbParts * c.valeurPart : calculerCotisationCaisse(c.id);
+            const cotExpected = c.periodicite === 'mensuelle' ? baseExp * reunions.length : baseExp;
+            const cotPaid = ops.filter(op => op.destination && op.destination.toString() === c.id.toString() && op.statut === 'regle' && !op.isPenalty && op.session === sId).reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+            const amPaid = ops.filter(op => op.destination && op.destination.toString() === c.id.toString() && op.statut === 'regle' && op.isPenalty).reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+            const amUnpaid = ops.filter(op => op.destination && op.destination.toString() === c.id.toString() && op.statut === 'du' && op.isPenalty).reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+            return {
+                expected: cotExpected + amPaid + amUnpaid,
+                paid: cotPaid + amPaid
+            };
+        }
+
+        /**
+         * Calcule les cotisations comptables réglées et la dette financière pour un membre.
+         * @param {Object} membre - L'objet membre de l'association.
+         * @returns {{cotisationsRegleesComptables: number, detteFinanciereCalculated: number}}
+         */
+        function calculerComptabiliteMembre(membre) {
+            const currentSessionId = associationData.sessionActuelle || 1;
+            const ops = membre.operations || [];
+            const pastReunions = (associationData.reunionsHistorique || []).filter(r => r.sessionId === currentSessionId).map(r => r.reunionId);
+            const allSessionReunions = Array.from(new Set([...pastReunions, associationData.reunionActuelle || 1]));
+
+            let totalExpected = 0, totalPaid = 0, unpaidAmGlobal = 0, paidAmGlobal = 0;
+
+            configCaisses.forEach(c => {
+                if (c.exclureCompta) return;
+                const res = getCaisseTotals(membre, c, ops, allSessionReunions, currentSessionId);
+                totalExpected += res.expected;
+                totalPaid += res.paid;
+            });
+
+            ops.forEach(op => {
+                const isCCompta = configCaisses.some(c => !c.exclureCompta && c.id.toString() === op.destination?.toString());
+                if (!op.isPenalty || isCCompta || op.typeAmende === 'nature' || op.destination === 'nature') return;
+                if (op.statut === 'du') unpaidAmGlobal += Number(op.montant) || 0;
+                if (op.statut === 'regle') paidAmGlobal += Number(op.montant) || 0;
+            });
+
+            return {
+                cotisationsRegleesComptables: totalPaid + paidAmGlobal,
+                detteFinanciereCalculated: Math.max(0, totalExpected - totalPaid) + unpaidAmGlobal
+            };
+        }
+
+        /**
+         * Affiche l'espace personnel complet (dashboard membre) pour l'utilisateur connecté.
+         * Calcule et affiche les cotisations, les caisses spéciales, les engagements par parts,
+         * les déclarations de paiements Mobile Money et l'historique des opérations du mois.
+         * 
+         * @param {string} username - Le nom d'utilisateur de l'adhérent connecté.
+         * @returns {void}
+         */
+        function showPersonalSpace(username) {
+            const pSpace = document.getElementById('personal-space');
+            const membre = associationData.membres.find(
+                m => m.nom.toLowerCase() === username.toLowerCase()
+            );
+            pSpace.classList.remove('hidden');
+
+            if (!membre) {
+                pSpace.innerHTML =
+                    '<div class="card personal-card">' +
+                        '<h3>Bonjour ' + username + ' ✨</h3>' +
+                        '<p>Vous n\'êtes pas encore lié à une fiche membre par l\'administrateur. ' +
+                        'Contactez le Pasteur pour synchroniser votre compte.</p>' +
+                    '</div>';
+                return;
+            }
+
+            const ops = membre.operations || [];
+            const { cotisationsRegleesComptables, detteFinanciereCalculated } = calculerComptabiliteMembre(membre);
+
+            /**
+             * Génère une description textuelle complète des règles d'une caisse pour l'infobulle.
+             * 
+             * @param {Object} c - L'objet caisse de configuration.
+             * @returns {string} La description générée.
+             */
+            function getCaisseTooltip(c) {
+                const typeLabel = c.type === 'parts' ? 'Par parts' : c.type === 'evolutive' ? 'Évolutive' : 'Fixe';
+                const periodLabel = c.periodicite === 'mensuelle' ? 'mensuelle (exigible à chaque réunion)' : 'par session (une seule fois par session)';
+                const comptaLabel = c.exclureCompta ? 'spéciale (hors comptabilité officielle)' : 'officielle (comptabilisée pour l\'association)';
+                
+                let tooltipDesc = `Caisse ${comptaLabel} de type ${typeLabel}. Périodicité : ${periodLabel}.`;
+                if (c.type === 'parts') {
+                    tooltipDesc += ` Valeur de la part : ${formatAmount(c.valeurPart)}. Choix de parts libre.`;
+                } else if (c.type === 'evolutive') {
+                    tooltipDesc += ` Base : ${formatAmount(c.base)} (+ ${formatAmount(c.increment)} par réunion de la session).`;
+                } else {
+                    tooltipDesc += ` Cotisation : ${formatAmount(c.cotisation)}.`;
+                }
+                return tooltipDesc;
+            }
+
+            // Vérifier s'il y a le moindre retard sur les caisses (montant attendu > montant payé)
+            let aDesRetardsCaisse = false;
+            configCaisses.forEach(c => {
+                const isMensuelle = c.periodicite === 'mensuelle';
+                const nbParts = getPartsMembreCaisse(membre, c.id);
+                const expected = c.type === 'parts'
+                    ? nbParts * c.valeurPart
+                    : calculerCotisationCaisse(c.id);
+
+                const paid = ops
+                    .filter(op => {
+                        const matchDest = op.destination && op.destination.toString() === c.id.toString();
+                        const matchStatut = op.statut === 'regle';
+                        const matchSession = op.session === associationData.sessionActuelle;
+                        if (isMensuelle) {
+                            return matchDest && matchStatut && matchSession && op.reunion === associationData.reunionActuelle;
+                        } else {
+                            return matchDest && matchStatut && matchSession;
+                        }
+                    })
+                    .reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+
+                if (paid < expected) {
+                    aDesRetardsCaisse = true;
+                }
+            });
+
+            // Vérifier s'il y a des dettes d'opérations non réglées (statut === 'du')
+            const aDesDettesOps = ops.some(op => op.statut === 'du');
+            const estEntierementAjour = !aDesRetardsCaisse && !aDesDettesOps;
+
+            // ── Sélecteurs de parts pour les caisses incrémentables ──
+            // Seule action autorisée pour le membre lambda : choisir ses parts
+            const caissesPartsHtml = configCaisses
+                .filter(c => c.type === 'parts')
+                .map(c => {
+                    const nbParts = getPartsMembreCaisse(membre, c.id);
+                    const montantCalc = calculerCotisationCaisse(c.id, nbParts);
+                    const tooltipText = getCaisseTooltip(c);
+                    const disabledAttr = isPreviewMode ? 'disabled' : '';
+                    const selectStyle = isPreviewMode 
+                        ? 'background:#1a1a1a; border:1px solid rgba(212,175,55,0.15); color:rgba(212,175,55,0.5); padding:6px 10px; border-radius:6px; cursor:not-allowed;'
+                        : 'background:#1a1a1a; border:1px solid rgba(212,175,55,0.4); color:#d4af37; padding:6px 10px; border-radius:6px; cursor:pointer;';
+                    
+                    return '<div style="display:flex; align-items:center; gap:12px; padding:10px 0; ' +
+                               'border-bottom:1px solid rgba(255,255,255,0.05)" title="' + tooltipText + '">' +
+                        '<span style="flex:1; font-size:0.9rem; cursor:help;">ℹ️ 🔢 <strong>' + c.nom + '</strong>' +
+                            ' <small style="color:rgba(255,255,255,0.4)">(' + formatAmount(c.valeurPart) + '/part)</small></span>' +
+                        '<select id="parts-select-' + c.id + '" ' + disabledAttr + ' ' +
+                            (isPreviewMode ? '' : 'onchange="changerParts(\'' + membre.id + '\',' + c.id + ',this.value)" ') +
+                            'style="' + selectStyle + '">' +
+                            [1,2,3,4,5,6,7,8,9,10].map(n =>
+                                '<option value="' + n + '"' + (n === nbParts ? ' selected' : '') + '>' +
+                                n + ' part' + (n > 1 ? 's' : '') + '</option>'
+                            ).join('') +
+                        '</select>' +
+                        '<span id="parts-total-' + c.id + '" ' +
+                            'style="min-width:100px; text-align:right; color:#2ecc71; font-weight:bold">' +
+                            formatAmount(montantCalc) +
+                        '</span>' +
+                    '</div>';
+                }).join('');
+
+            // ── Liste des opérations du mois en cours uniquement (réglées/payées) ──
+            const currentSessionIdForOps = associationData.sessionActuelle || 1;
+            const currentReunionIdForOps = associationData.reunionActuelle || 1;
+            const activeMeetingDateStr = associationData.lastSessionDate || new Date().toISOString().split('T')[0];
+            const activeMeetingDate = new Date(activeMeetingDateStr);
+            const activeMeetingMonth = activeMeetingDate.getMonth();
+            const activeMeetingYear = activeMeetingDate.getFullYear();
+
+            const filteredOps = ops.filter(op => {
+                // Uniquement les opérations réglées (payées)
+                if (op.statut !== 'regle') return false;
+
+                // 1. Si tagguée avec la réunion et la session en cours
+                if (op.session !== undefined && op.reunion !== undefined) {
+                    return Number(op.session) === Number(currentSessionIdForOps) && Number(op.reunion) === Number(currentReunionIdForOps);
+                }
+
+                // 2. Si le motif contient la réunion active
+                if (op.motif.includes(' — Réunion ' + currentReunionIdForOps)) {
+                    return true;
+                }
+
+                // 3. Si la date de l'opération est dans le même mois et la même année que la réunion active
+                if (op.date) {
+                    const opDate = new Date(op.date);
+                    if (!isNaN(opDate.getTime())) {
+                        return opDate.getMonth() === activeMeetingMonth && opDate.getFullYear() === activeMeetingYear;
+                    }
+                }
+
+                return false;
+            });
+
+            // Grouper les opérations par caisse / rubrique pour éviter les doublons
+            const uniqueFilteredOpsMap = new Map();
+            filteredOps.forEach(op => {
+                const isCaisse = configCaisses.some(c => c.id.toString() === op.destination?.toString());
+                const key = isCaisse ? `caisse_${op.destination}` : `amende_${op.motif}`;
+
+                if (uniqueFilteredOpsMap.has(key)) {
+                    const existing = uniqueFilteredOpsMap.get(key);
+                    existing.montant = (Number(existing.montant) || 0) + (Number(op.montant) || 0);
+                } else {
+                    uniqueFilteredOpsMap.set(key, { ...op });
+                }
+            });
+
+            const uniqueFilteredOps = Array.from(uniqueFilteredOpsMap.values());
+
+            const opsHtml = uniqueFilteredOps.length
+                ? uniqueFilteredOps.map(op => {
+                    const isNature = op.typeAmende === 'nature';
+                    
+                    // Nettoyer le motif pour un rendu ultra-propre
+                    const caisse = configCaisses.find(c => c.id.toString() === op.destination?.toString());
+                    let displayMotif = op.motif;
+                    if (caisse) {
+                        displayMotif = caisse.nom;
+                    } else if (op.motif.includes(' (Réglé en Matériel/Nature)')) {
+                        displayMotif = op.motif.replace(' (Réglé en Matériel/Nature)', '');
+                    }
+
+                    const valAff = isNature
+                        ? '📦 ' + op.valeurNature
+                        : (op.montant > 0 ? formatAmount(op.montant) : '—');
+                    const isDue = op.statut === 'du';
+                    const borderCol = isDue ? 'rgba(231,76,60,0.2)' : 'rgba(46,204,113,0.2)';
+                    const bgCol = isDue ? 'rgba(231,76,60,0.04)' : 'rgba(46,204,113,0.04)';
+                    const txtCol = isDue ? '#e74c3c' : '#2ecc71';
+                    
+                    return '<div style="background:' + bgCol + '; border:1px solid ' + borderCol + '; padding:10px 12px; border-radius:10px; display:flex; flex-direction:column; justify-content:space-between; gap:6px; min-height:85px; text-align:left; transition:all 0.2s;">' +
+                        '<div style="font-weight:bold; color:#fff; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + displayMotif + '">' + displayMotif + '</div>' +
+                        '<div style="font-size:0.95rem; font-weight:800; color:' + txtCol + '; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + valAff + '">' + valAff + '</div>' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.7rem; border-top:1px solid rgba(255,255,255,0.04); padding-top:4px; margin-top:2px;">' +
+                            '<span style="color:rgba(255,255,255,0.35);">' + (isDue ? 'Dû' : 'Réglé') + '</span>' +
+                            '<span style="background:' + (isDue ? 'rgba(231,76,60,0.12)' : 'rgba(46,204,113,0.12)') + '; color:' + txtCol + '; padding:1px 6px; border-radius:4px; font-weight:bold; font-size:0.65rem;">' + (isDue ? '⏳ Dû' : '✅ OK') + '</span>' +
+                        '</div>' +
+                    '</div>';
+                }).join('')
+                : '<div style="grid-column: 1 / -1; color:rgba(255,255,255,0.35); text-align:center; padding:1.5rem 0;">Aucune opération réglée ce mois-ci.</div>';
+
+            // ── Historique des déclarations de paiement mobile du mois ──
+            const allMobilePaiements = getTontinePayments();
+            
+            // Filtrer par membre ET par mois de la réunion active
+            const memberMobilePaiements = allMobilePaiements.filter(p => {
+                if (p.user !== membre.nom) return false;
+                
+                // Extraire le mois et l'année de la déclaration (date format "DD/MM/YYYY")
+                if (!p.date) return false;
+                const parts = p.date.split('/');
+                if (parts.length !== 3) return false;
+                
+                const pMonth = parseInt(parts[1], 10) - 1; // 0-indexed
+                const pYear = parseInt(parts[2], 10);
+                
+                return pMonth === activeMeetingMonth && pYear === activeMeetingYear;
+            });
+
+            // Générer le HTML premium pour les paiements mobiles
+            const mobilePaymentsHtml = memberMobilePaiements.length
+                ? memberMobilePaiements.map(p => {
+                    const isMtn = p.operator && p.operator.toLowerCase().includes('mtn');
+                    const badgeBg = p.status === 'validated' ? 'rgba(46,204,113,0.12)' : 'rgba(230,126,34,0.12)';
+                    const badgeTxt = p.status === 'validated' ? '#2ecc71' : '#e67e22';
+                    const statusLabel = p.status === 'validated' ? '✅ Validé' : '⏳ Validation en attente';
+                    
+                    const operatorBg = isMtn ? 'rgba(241,196,15,0.08)' : 'rgba(230,126,34,0.08)';
+                    const operatorBorder = isMtn ? 'rgba(241,196,15,0.2)' : 'rgba(230,126,34,0.2)';
+                    const operatorColor = isMtn ? '#f1c40f' : '#e67e22';
+                    const operatorLogo = isMtn ? '🟡 MTN MoMo' : '🍊 Orange Money';
+
+                    return '<div style="background:' + operatorBg + '; border:1px solid ' + operatorBorder + '; padding:14px 16px; border-radius:12px; display:flex; flex-direction:column; gap:10px; text-align:left; transition:all 0.2s;">' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+                            '<span style="font-weight:bold; color:' + operatorColor + '; font-size:0.9rem;">' + operatorLogo + '</span>' +
+                            '<span style="background:' + badgeBg + '; color:' + badgeTxt + '; padding:2px 8px; border-radius:6px; font-weight:bold; font-size:0.7rem;">' + statusLabel + '</span>' +
+                        '</div>' +
+                        '<div style="font-size:1.4rem; font-weight:800; color:#fff;">' + formatAmount(p.amount) + '</div>' +
+                        '<div style="font-size:0.75rem; color:rgba(255,255,255,0.4); border-top:1px solid rgba(255,255,255,0.04); padding-top:8px; margin-top:4px; display:flex; flex-direction:column; gap:3px;">' +
+                            '<span>Référence : <strong style="color:rgba(255,255,255,0.85); font-family:monospace; font-size:0.8rem;">' + p.reference + '</strong></span>' +
+                            '<span>Date : ' + p.date + '</span>' +
+                        '</div>' +
+                    '</div>';
+                }).join('')
+                : '<div style="grid-column: 1 / -1; color:rgba(255,255,255,0.35); text-align:center; padding:1.5rem 0; font-size:0.85rem; background:rgba(255,255,255,0.01); border:1px dashed rgba(255,255,255,0.05); border-radius:10px;">Aucun paiement mobile déclaré ce mois-ci.</div>';
+
+            // ── Historique mensuel des cotisations (Session en cours) ──
+            const currentSessionId = associationData.sessionActuelle;
+            
+            // 1. Réunions passées validées de la session
+            const pastReunions = (associationData.reunionsHistorique || [])
+                .filter(r => r.sessionId === currentSessionId)
+                .map(r => ({
+                    reunionId: r.reunionId,
+                    date: r.date,
+                    host: r.host,
+                    isPast: true
+                }));
+                
+            // 2. Réunion actuelle en cours
+            const activeReunion = {
+                reunionId: associationData.reunionActuelle,
+                date: associationData.lastSessionDate || new Date().toISOString().split('T')[0],
+                host: associationData.lastSessionHost || 'Non défini',
+                isPast: false
+            };
+
+            // Fusionner et ordonner (du plus récent au plus ancien)
+            const allReunions = [...pastReunions, activeReunion];
+            allReunions.sort((a, b) => b.reunionId - a.reunionId);
+
+            const statusHtml = allReunions.map(r => {
+                const dateObj = new Date(r.date);
+                const monthName = isNaN(dateObj.getTime())
+                    ? 'Date non définie'
+                    : dateObj.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+                const dateStr = isNaN(dateObj.getTime())
+                    ? 'Non définie'
+                    : dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                const badgeReunion = r.isPast
+                    ? '<span class="badge done" style="background:rgba(46,204,113,0.15); color:#2ecc71; border: 1px solid rgba(46,204,113,0.3); font-size:0.9rem; padding:3px 10px;">✅ Validée</span>'
+                    : '<span class="badge due" style="background:rgba(212,175,55,0.15); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); font-size:0.9rem; padding:3px 10px;">⚡ En cours</span>';
+
+                // Pour chaque caisse configurée, déterminer l'état
+                const caissesStatus = configCaisses.map(c => {
+                    const isMensuelle = c.periodicite === 'mensuelle';
+                    const nbParts = getPartsMembreCaisse(membre, c.id);
+                    let expected = c.type === 'parts'
+                        ? nbParts * c.valeurPart
+                        : calculerCotisationCaisse(c.id);
+
+                    let paid = 0;
+                    if (isMensuelle) {
+                        paid = ops
+                            .filter(op => {
+                                const matchDest = op.destination && op.destination.toString() === c.id.toString();
+                                const matchStatut = op.statut === 'regle';
+                                const matchSession = op.session === currentSessionId;
+                                const matchReunion = op.reunion === r.reunionId;
+                                return matchDest && matchStatut && matchSession && matchReunion && !op.isPenalty;
+                            })
+                            .reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+                    } else {
+                        // Caisse de session : payée si versement sur cette session
+                        const sessionOp = ops.find(op => op.destination && op.destination.toString() === c.id.toString() && op.session === currentSessionId && !op.isPenalty);
+                        if (sessionOp && sessionOp.statut === 'regle') {
+                            const opReunion = sessionOp.reunion || associationData.reunionActuelle;
+                            if (opReunion === r.reunionId) {
+                                paid = Number(sessionOp.montant) || 0;
+                            } else if (!r.isPast && !sessionOp.reunion) {
+                                paid = Number(sessionOp.montant) || 0;
+                            }
+                        }
+                    }
+
+                    // Prise en compte des amendes en argent rattachées à cette caisse pour cette réunion
+                    const amPaid = ops.filter(op => op.destination && op.destination.toString() === c.id.toString() && op.statut === 'regle' && op.isPenalty && op.session === currentSessionId && op.reunion === r.reunionId).reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+                    const amUnpaid = ops.filter(op => op.destination && op.destination.toString() === c.id.toString() && op.statut === 'du' && op.isPenalty && op.session === currentSessionId && op.reunion === r.reunionId).reduce((sum, op) => sum + (Number(op.montant) || 0), 0);
+
+                    expected += amPaid + amUnpaid;
+                    paid += amPaid;
+
+                    let statusText = '';
+                    let statusColor = '#2ecc71';
+                    let badgeMarkup = '';
+
+                    if (isMensuelle) {
+                        const restant = Math.max(0, expected - paid);
+                        if (restant > 0) {
+                            statusText = 'Reste : ' + formatAmount(restant);
+                            statusColor = '#e74c3c'; // ROUGE
+                            badgeMarkup = '<span class="badge due" style="background:rgba(231,76,60,0.1); color:#e74c3c; font-size:0.85rem; padding:3px 8px;">⏳ Reste</span>';
+                        } else {
+                            statusText = 'Payé (' + formatAmount(paid) + ')';
+                            statusColor = '#2ecc71'; // VERT
+                            badgeMarkup = '<span class="badge done" style="background:rgba(46,204,113,0.1); color:#2ecc71; font-size:0.85rem; padding:3px 8px;">✅ OK</span>';
+                        }
+                    } else {
+                        // Session caisse
+                        if (paid === 0) {
+                            if (r.isPast) {
+                                statusText = 'Non payé à cette réunion';
+                                statusColor = 'rgba(255,255,255,0.3)';
+                                badgeMarkup = '<span class="badge" style="background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); font-size:0.85rem; padding:3px 8px;">—</span>';
+                            } else {
+                                statusText = 'Reste : ' + formatAmount(expected);
+                                statusColor = '#e74c3c'; // ROUGE
+                                badgeMarkup = '<span class="badge due" style="background:rgba(231,76,60,0.1); color:#e74c3c; font-size:0.85rem; padding:3px 8px;">❌ Non cotisé</span>';
+                            }
+                        } else {
+                            statusText = 'Cotisé (' + formatAmount(paid) + ')';
+                            statusColor = '#2ecc71'; // VERT
+                            badgeMarkup = '<span class="badge done" style="background:rgba(46,204,113,0.1); color:#2ecc71; font-size:0.85rem; padding:3px 8px;">✅ OK</span>';
+                        }
+                    }
+
+                    const typeTag = isMensuelle ? '🔄 Mensuelle' : '📅 Session';
+                    const tooltipText = getCaisseTooltip(c);
+
+                    return '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.03);" title="' + tooltipText + '">' +
+                        '<div style="text-align:left;">' +
+                            '<span style="font-size:1.15rem; font-weight:bold; color:rgba(255,255,255,0.95); cursor:help;">ℹ️ ' + c.nom + ' <small style="color:rgba(255,255,255,0.35); font-weight:normal;">(' + typeTag + ')</small></span>' +
+                            '<span style="font-size:0.95rem; color:rgba(255,255,255,0.4); display:block;">Attendu : ' + formatAmount(expected) + '</span>' +
+                        '</div>' +
+                        '<div style="display:flex; align-items:center; gap:10px;">' +
+                            '<span style="font-size:1.1rem; font-weight:bold; color:' + statusColor + ';">' + statusText + '</span>' +
+                            badgeMarkup +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+
+                return '<div style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:10px; padding:15px; margin-bottom:12px; transition: all 0.2s;">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">' +
+                        '<div style="text-align:left;">' +
+                            '<strong style="color:var(--gold-primary); font-size:1.25rem; text-transform:capitalize;">📅 ' + monthName + '</strong>' +
+                            '<small style="color:rgba(255,255,255,0.4); font-size:0.95rem; display:block;">Réunion ' + r.reunionId + ' • Date : ' + dateStr + ' • Hôte : ' + r.host + '</small>' +
+                        '</div>' +
+                        badgeReunion +
+                    '</div>' +
+                    '<div>' + caissesStatus + '</div>' +
+                '</div>';
+            }).join('');
+
+            const dateStr = associationData.lastSessionDate || new Date().toISOString().split('T')[0];
+            const dateObj = new Date(dateStr);
+            const currentMonth = dateObj.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+            const capitalizedMonth = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
+            const rankLabel = (associationData.reunionActuelle || 1) === 1 ? '1ère Réunion' : `${associationData.reunionActuelle || 1}ème Réunion`;
+
+            let caissesNonComptablesHtml = '';
+            const caissesNonComptables = configCaisses.filter(c => c.exclureCompta);
+            if (caissesNonComptables.length > 0) {
+                const itemsHtml = caissesNonComptables.map(c => {
+                    const isMensuelle = c.periodicite === 'mensuelle';
+                    
+                    // Réunions passées + active de la session
+                    const pastReunionsList = (associationData.reunionsHistorique || []).filter(r => r.sessionId === currentSessionId).map(r => r.reunionId);
+                    const allSessionReunionsList = Array.from(new Set([...pastReunionsList, associationData.reunionActuelle || 1]));
+                    
+                    const resCaisse = getCaisseTotals(membre, c, ops, allSessionReunionsList, currentSessionId);
+                    const totalExpected = resCaisse.expected;
+                    const totalCumuleRegle = resCaisse.paid;
+                    const totalCumuleDu = Math.max(0, totalExpected - totalCumuleRegle);
+                    
+                    const typeTag = isMensuelle ? '🔄 Mensuelle' : '📅 Session';
+                    const typeLabel = c.type === 'parts' ? 'Par parts' : c.type === 'evolutive' ? 'Évolutive' : 'Fixe';
+                    const tooltipText = getCaisseTooltip(c);
+
+                    return '<div style="background:rgba(255, 255, 255, 0.02); border:1px solid rgba(255, 255, 255, 0.04); padding:16px; border-radius:12px; display:flex; flex-direction:column; gap:8px;" title="' + tooltipText + '">' +
+                                '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+                                    '<span style="font-weight:bold; color:#fff; font-size:1.05rem; cursor:help;">ℹ️ ' + c.nom + ' <span style="color:#e67e22; font-size:0.65rem; font-weight:bold; background:rgba(230,126,34,0.15); padding:2px 6px; border-radius:4px; margin-left:5px;">🚫 Hors Compta</span></span>' +
+                                    '<span style="font-size:0.75rem; color:var(--muted);">' + typeTag + ' • ' + typeLabel + '</span>' +
+                                '</div>' +
+                                '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; border-top:1px solid rgba(255,255,255,0.03); padding-top:8px;">' +
+                                    '<div>' +
+                                        '<span style="display:block; font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Cumul Réglé</span>' +
+                                        '<span style="color:#2ecc71; font-weight:bold; font-size:1.15rem;">' + formatAmount(totalCumuleRegle) + '</span>' +
+                                    '</div>' +
+                                    '<div>' +
+                                        '<span style="display:block; font-size:0.7rem; color:var(--muted); text-transform:uppercase; text-align:right;">Cumul Dû</span>' +
+                                        '<span style="color:#e74c3c; font-weight:bold; font-size:1.15rem; display:block; text-align:right;">' + formatAmount(totalCumuleDu) + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                }).join('');
+
+                caissesNonComptablesHtml = 
+                    '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.06); margin: 2.5rem 0;">' +
+                    '<div style="margin-bottom:2.5rem">' +
+                        '<h4 style="margin-bottom:1.5rem; color:#e67e22; text-align:left; font-size: 1.8rem; border-bottom:1px solid rgba(230,126,34,0.15); padding-bottom:12px;">💼 Suivi &amp; Cumul des Caisses Spéciales <small style="color:rgba(255,255,255,0.4); font-weight:normal; font-size:0.9rem;">(Tontine, Présence, etc. - Hors Compta Asso)</small></h4>' +
+                        '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:15px;">' +
+                            itemsHtml +
+                        '</div>' +
+                    '</div>';
+            }
+
+            // ── Rubrique des Pénalités & Amendes ──
+            const penalties = ops.filter(op => 
+                op.isPenalty || 
+                (op.typeAmende && (op.destination === 'nature' || op.destination === 'amendes' || !configCaisses.some(c => c.id.toString() === op.destination?.toString())))
+            );
+
+            let currentMonthPenaltiesHtml = '';
+            let reportedPenaltiesHtml = '';
+
+            penalties.forEach(op => {
+                const opDate = new Date(op.date);
+                const isCurrentMonth = !isNaN(opDate.getTime()) && 
+                    opDate.getMonth() === activeMeetingMonth && 
+                    opDate.getFullYear() === activeMeetingYear;
+
+                const isNature = op.typeAmende === 'nature' || op.destination === 'nature';
+                const valAff = isNature ? '📦 ' + op.valeurNature : formatAmount(op.montant);
+                const isDue = op.statut === 'du';
+                
+                const borderCol = isDue ? 'rgba(231,76,60,0.2)' : 'rgba(46,204,113,0.2)';
+                const bgCol = isDue ? 'rgba(231,76,60,0.04)' : 'rgba(46,204,113,0.04)';
+                const txtCol = isDue ? '#e74c3c' : '#2ecc71';
+                const statusBadge = isDue 
+                    ? '<span style="background:rgba(231,76,60,0.12); color:#e74c3c; padding:2px 8px; border-radius:6px; font-weight:bold; font-size:0.7rem;">⏳ En retard</span>'
+                    : '<span style="background:rgba(46,204,113,0.12); color:#2ecc71; padding:2px 8px; border-radius:6px; font-weight:bold; font-size:0.7rem;">✅ Réglé</span>';
+
+                const cardHtml = '<div style="background:' + bgCol + '; border:1px solid ' + borderCol + '; padding:14px 16px; border-radius:12px; display:flex; flex-direction:column; gap:10px; text-align:left; transition:all 0.2s;">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+                        '<span style="font-weight:bold; color:#fff; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="' + op.motif + '">' + op.motif + '</span>' +
+                        statusBadge +
+                    '</div>' +
+                    '<div style="font-size:1.3rem; font-weight:800; color:' + txtCol + ';">' + valAff + '</div>' +
+                    '<div style="font-size:0.75rem; color:rgba(255,255,255,0.4); border-top:1px solid rgba(255,255,255,0.04); padding-top:8px; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">' +
+                        '<span>Type : ' + (isNature ? 'En Nature' : 'Financier') + '</span>' +
+                        '<span>Date : ' + opDate.toLocaleDateString('fr-FR') + '</span>' +
+                    '</div>' +
+                '</div>';
+
+                if (isCurrentMonth) {
+                    currentMonthPenaltiesHtml += cardHtml;
+                } else if (isDue) {
+                    reportedPenaltiesHtml += cardHtml;
+                }
+            });
+
+            if (!currentMonthPenaltiesHtml) {
+                currentMonthPenaltiesHtml = '<div style="grid-column: 1 / -1; color:rgba(255,255,255,0.35); text-align:center; padding:1.5rem 0; font-size:0.85rem; background:rgba(255,255,255,0.01); border:1px dashed rgba(255,255,255,0.05); border-radius:10px;">Aucune amende émise ce mois-ci.</div>';
+            }
+
+            let penaltiesSectionHtml = '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.06); margin: 2.5rem 0;">' +
+                '<div style="margin-bottom:2.5rem">' +
+                    '<h4 style="margin-bottom:1.5rem; color:#e74c3c; text-align:left; font-size: 1.8rem; border-bottom:1px solid rgba(231,76,60,0.15); padding-bottom:12px;">🚨 Suivi de mes Pénalités &amp; Amendes</h4>' +
+                    
+                    // AMENDES DU MOIS EN COURS
+                    '<div style="margin-bottom:1.5rem;">' +
+                        '<h5 style="color:rgba(255,255,255,0.7); font-size:0.95rem; margin-bottom:10px; text-align:left; font-weight:600;">Infractions du mois (' + capitalizedMonth + ')</h5>' +
+                        '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:15px;">' +
+                            currentMonthPenaltiesHtml +
+                        '</div>' +
+                    '</div>';
+
+            if (reportedPenaltiesHtml) {
+                penaltiesSectionHtml += '<div style="margin-top:2rem; background:rgba(231,76,60,0.02); border:1px solid rgba(231,76,60,0.1); padding:20px; border-radius:12px;">' +
+                    '<h5 style="color:#e74c3c; font-size:0.95rem; margin-top:0; margin-bottom:12px; text-align:left; font-weight:bold; display:flex; align-items:center; gap:8px;">⚠️ REPORTÉ : Amendes des mois précédents non réglées</h5>' +
+                    '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:15px;">' +
+                        reportedPenaltiesHtml +
+                    '</div>' +
+                '</div>';
+            }
+
+            penaltiesSectionHtml += '</div>';
+
+            let previewBannerHtml = '';
+            if (isPreviewMode) {
+                previewBannerHtml = 
+                    '<div style="background:rgba(212,175,55,0.1); border:1px solid var(--gold-primary); padding:15px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">' +
+                        '<div style="display:flex; align-items:center; gap:10px; text-align:left;">' +
+                            '<span style="font-size:1.5rem;">👁️</span>' +
+                            '<div>' +
+                                '<strong style="color:var(--gold-primary); display:block; font-size:1rem;">MODE APERÇU (Lecture Seule)</strong>' +
+                                '<small style="color:rgba(255,255,255,0.6);">Vous visualisez l\'espace de <strong>' + membre.nom + '</strong> tel qu\'il le voit.</small>' +
+                            '</div>' +
+                        '</div>' +
+                        '<button onclick="stopMemberPreview()" style="background:var(--gold-primary); color:black; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.8rem; font-family:sans-serif; transition:0.2s;">Retour Admin</button>' +
+                    '</div>';
+            }
+
+            pSpace.innerHTML = previewBannerHtml +
+                '<div class="card personal-card">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem">' +
+                        '<h3 style="color:var(--gold-primary)">💎 Mon Espace : ' + membre.nom + '</h3>' +
+                        '<span class="badge ' + (estEntierementAjour ? 'done' : 'due') + '">' +
+                            (estEntierementAjour ? 'À jour' : 'Dettes en cours') +
+                        '</span>' +
+                    '</div>' +
+
+                    // Résumé financier
+                    '<div class="summary-grid" style="margin-bottom:2.5rem">' +
+                        '<div class="summary-card"><strong>Cotisation réglée</strong>' +
+                            '<div style="color:#2ecc71">' + formatAmount(cotisationsRegleesComptables) + '</div></div>' +
+                        '<div class="summary-card"><strong>Dette financière</strong>' +
+                            '<div style="color:#e74c3c">' + formatAmount(detteFinanciereCalculated) + '</div></div>' +
+                        '<div class="summary-card"><strong>Session</strong>' +
+                            '<div>Session ' + associationData.sessionActuelle + '</div></div>' +
+                        '<div class="summary-card"><strong>Mois de la réunion</strong>' +
+                            '<div>' + rankLabel + ' (' + capitalizedMonth + ')</div></div>' +
+                    '</div>' +
+
+                    '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.06); margin: 2.5rem 0;">' +
+
+                    // 📊 État de mes cotisations (Session en cours)
+                    '<div style="margin-bottom:2.5rem; background:rgba(0,0,0,0.15); padding:24px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">' +
+                        '<h4 style="margin-bottom:1.8rem; color:#d4af37; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:12px; text-align:left; font-size: 1.8rem;">📊 État de mes cotisations (Session #' + associationData.sessionActuelle + ')</h4>' +
+                        '<div class="cotisations-grid">' +
+                            statusHtml +
+                        '</div>' +
+                    '</div>' +
+
+                    caissesNonComptablesHtml +
+
+                    penaltiesSectionHtml +
+
+                    // Sélecteur de parts (si des caisses à parts existent)
+                    (caissesPartsHtml
+                        ? '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.06); margin: 2.5rem 0;">' +
+                          '<div style="margin-bottom:2.5rem">' +
+                              '<h4 style="margin-bottom:1.5rem; text-align:left;">🔢 Mes engagements par parts ' +
+                                  '<small style="color:rgba(255,255,255,0.4); font-weight:normal">' +
+                                  '(choisissez votre nombre de parts pour chaque caisse)</small></h4>' +
+                              caissesPartsHtml +
+                          '</div>'
+                        : '') +
+
+                    '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.06); margin: 2.5rem 0;">' +
+
+                    // 📱 Mes déclarations Mobile Money
+                    '<div style="margin-bottom:2.5rem">' +
+                        '<h4 style="text-align:left; margin-bottom:1.5rem;">📱 Mes Paiements Mobiles Déclarés <small style="color:rgba(255,255,255,0.4); font-weight:normal">(Orange Money / MTN MoMo)</small></h4>' +
+                        '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:15px; margin-top:0.8rem;">' +
+                            mobilePaymentsHtml +
+                        '</div>' +
+                    '</div>' +
+
+                    '<hr style="border:none; border-top:1px solid rgba(255,255,255,0.06); margin: 2.5rem 0;">' +
+
+                    // Historique des opérations
+                    '<h4 style="text-align:left; margin-bottom:1.5rem;">Mes opérations <small style="color:rgba(255,255,255,0.4); font-weight:normal">' +
+                        '(lecture seule)</small></h4>' +
+                    '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:10px; max-height:280px; overflow-y:auto; padding-right:5px; margin-top:0.8rem;">' +
+                        opsHtml +
+                    '</div>' +
+                '</div>';
+        }
+
+        // Appelé quand le membre change son nombre de parts
+        window.changerParts = function(membreId, caisseId, nbParts) {
+            setPartsMembreCaisse(membreId, caisseId, Number(nbParts));
+            // Mettre à jour l'affichage du total en temps réel
+            const totalEl = document.getElementById('parts-total-' + caisseId);
+            if (totalEl) {
+                totalEl.textContent = formatAmount(calculerCotisationCaisse(caisseId, Number(nbParts)));
+            }
+        };
+
+        // ============================================================
+        // PILIER 3 — MUR DE CONVERSATION
+        // ============================================================
+        let wallMessages = getTontineMur();
+
+        function renderWall() {
+            const container = document.getElementById('wall-messages');
+            // Ordre chronologique : plus vieux en haut, plus récents en bas
+            container.innerHTML = wallMessages.map(m =>
+                '<div class="message-item">' +
+                    '<span class="message-meta">👤 ' + m.user + ' • ' + m.date + '</span>' +
+                    '<div>' + m.text + '</div>' +
+                '</div>'
+            ).join('') ||
+            '<div style="color:rgba(255,255,255,0.35); font-size:0.85rem; text-align:center; padding:1rem">' +
+                'Aucun message pour l\'instant.' +
+            '</div>';
+            
+            // Scroll automatique vers le bas (WhatsApp style)
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        function execChatCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('msg-input').focus();
+        }
+
+        function postMessage() {
+            const input = document.getElementById('msg-input');
+            const text = input.innerHTML.trim();
+            if (!text || text === '<br>') return;
+            wallMessages.push({
+                user: user.username,
+                text: text,
+                date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            });
+            if (wallMessages.length > 50) wallMessages.shift();
+            saveTontineMur(wallMessages);
+            input.innerHTML = '';
+            renderWall();
+        }
+
+        function addEmoji(emoji) {
+            const input = document.getElementById('msg-input');
+            input.innerHTML += emoji;
+            input.focus();
+            
+            // Move cursor to end of contenteditable
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(input);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        // ============================================================
+        // SYSTÈME DE DÉCLARATION DE PAIEMENT
+        // ============================================================
+        // Variables et fonctions pour le multichoix de caisses
+        let selectedCaisses = [];
+
+        window.addSelectedCaisse = function(caisseNom) {
+            if (!caisseNom) return;
+            if (!selectedCaisses.includes(caisseNom)) {
+                selectedCaisses.push(caisseNom);
+                renderSelectedCaisses();
+            }
+            // Réinitialiser la liste déroulante sur le placeholder neutre
+            document.getElementById('p-motif').value = "";
+        };
+
+        window.removeSelectedCaisse = function(index) {
+            selectedCaisses.splice(index, 1);
+            renderSelectedCaisses();
+        };
+
+        function renderSelectedCaisses() {
+            const container = document.getElementById('selected-caisses-list');
+            if (!container) return;
+            container.innerHTML = selectedCaisses.map((c, index) => 
+                `<span style="background:rgba(212,175,55,0.15); color:#d4af37; border: 1px solid rgba(212,175,55,0.3); padding:4px 12px; border-radius:15px; font-size:0.85rem; display:flex; align-items:center; gap:8px;">` +
+                    `<span>${c}</span>` +
+                    `<span onclick="removeSelectedCaisse(${index})" style="cursor:pointer; color:#e74c3c; font-weight:bold; font-size:1.1rem; line-height:1;">×</span>` +
+                `</span>`
+            ).join('');
+        }
+
+        function openPaymentModal() {
+            selectedCaisses = [];
+            renderSelectedCaisses();
+            const selectEl = document.getElementById('p-motif');
+            if (selectEl) {
+                selectEl.innerHTML = '<option value="" disabled selected style="color:rgba(255,255,255,0.4)">Caisse au choix</option>' +
+                    configCaisses.map(c => 
+                        `<option value="${c.nom}">${c.nom}</option>`
+                    ).join('');
+            }
+            document.getElementById('payment-modal').style.display = 'flex';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').style.display = 'none';
+            document.getElementById('p-error').innerText = '';
+            selectedCaisses = [];
+            renderSelectedCaisses();
+        }
+
+        function submitPayment() {
+            const operator = document.querySelector('input[name="p-operator"]:checked').value;
+            const ref = document.getElementById('p-ref').value.trim();
+            const amount = document.getElementById('p-amount').value;
+            const errorEl = document.getElementById('p-error');
+
+            if (!ref || !amount || selectedCaisses.length === 0) {
+                if (selectedCaisses.length === 0) {
+                    errorEl.innerText = "Veuillez choisir au moins une caisse dans la liste.";
+                } else {
+                    errorEl.innerText = "Tous les champs sont requis.";
+                }
+                return;
+            }
+
+            // REGEX CAMEROUN STANDARDS
+            const orangeRegex = /^[A-Z]{2}\d{6}\.\d{4}\.[A-Z]\d{5}$/;
+            const mtnRegex = /^\d{11}$/;
+
+            let isValid = false;
+            if (operator === "Orange Money") {
+                isValid = orangeRegex.test(ref);
+            } else {
+                isValid = mtnRegex.test(ref);
+            }
+
+            if (!isValid) {
+                errorEl.innerText = "La référence n'est pas bonne.";
+                return;
+            }
+
+            const motif = selectedCaisses.join(', ');
+
+            // 1. Enregistrement en attente
+            const paiements = getTontinePayments();
+            const newPaiement = {
+                id: Date.now(),
+                user: user.username,
+                operator: operator,
+                reference: ref,
+                amount: Number(amount),
+                motif: motif,
+                status: 'pending',
+                date: new Date().toLocaleDateString('fr-FR')
+            };
+            paiements.push(newPaiement);
+            saveTontinePayments(paiements);
+
+            // 2. Notification Publique sur le Mur
+            let wallMessages = getTontineMur();
+            wallMessages.push({
+                user: 'SYSTÈME',
+                text: '⚠️ Transaction initiée : **' + user.username + '** a soumis une transaction pour validation (ID: ' + ref + ').',
+                date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            });
+            saveTontineMur(wallMessages);
+            renderWall(); // Déclenche l'auto-scroll déjà présent dans renderWall
+
+            errorEl.style.color = "#2ecc71";
+            errorEl.innerText = "Enregistrement en attente de validation admin.";
+            
+            setTimeout(() => {
+                closePaymentModal();
+                // Reset fields
+                document.getElementById('p-ref').value = '';
+                document.getElementById('p-amount').value = '';
+                errorEl.style.color = "#ff4d4d";
+            }, 1500);
+        }
+
+        document.getElementById('msg-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                postMessage();
+            }
+        });
+
+        renderWall();
+        setInterval(() => {
+            wallMessages = getTontineMur();
+            renderWall();
+        }, 5000);
+
+        // ============================================================
+        // OUTILS ADMIN — Gestion des comptes
+        // ============================================================
+        function renderAdminList() {
+            const list = document.getElementById('admin-user-list');
+            if (!list) return;
+            const users = auth.getAllUsers();
+            if (!users.length) {
+                list.innerHTML = '<p>Aucun utilisateur inscrit.</p>';
+                return;
+            }
+            list.innerHTML = '';
+            users.forEach(u => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; ' +
+                    'padding:10px; border-bottom:1px solid rgba(255,255,255,0.05)';
+                row.innerHTML =
+                    '<span>👤 ' + u.username + '</span>' +
+                    '<div>' +
+                        '<button onclick="adminReset(\'' + u.username + '\')" ' +
+                            'style="background:#444; border:none; color:white; padding:5px 10px; ' +
+                                   'border-radius:4px; cursor:pointer; margin-right:5px">Reset Pass</button>' +
+                        '<button onclick="adminDelete(\'' + u.username + '\')" ' +
+                            'style="background:#d63031; border:none; color:white; padding:5px 10px; ' +
+                                   'border-radius:4px; cursor:pointer">Supprimer</button>' +
+                    '</div>';
+                list.appendChild(row);
+            });
+        }
+
+        /**
+         * Ouvre la boîte de dialogue d'aperçu adhérent et remplit le sélecteur avec les membres actifs.
+         * @returns {void}
+         */
+        window.openPreviewModal = function() {
+            const select = document.getElementById('preview-member-select');
+            if (!select) return;
+
+            select.innerHTML = (associationData.membres || [])
+                .map(m => `<option value="${m.nom}">${m.nom}</option>`)
+                .join('') || '<option value="" disabled>Aucun membre disponible</option>';
+
+            const modal = document.getElementById('preview-member-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        };
+
+        /**
+         * Ferme la boîte de dialogue d'aperçu adhérent.
+         * @returns {void}
+         */
+        window.closePreviewModal = function() {
+            const modal = document.getElementById('preview-member-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        /**
+         * Démarre l'aperçu de l'espace personnel d'un adhérent sélectionné en masquant le reste.
+         * @returns {void}
+         */
+        window.startMemberPreview = function() {
+            const select = document.getElementById('preview-member-select');
+            if (!select || !select.value) return;
+
+            isPreviewMode = true;
+            previewMemberName = select.value;
+            window.closePreviewModal();
+
+            const adminNav = document.getElementById('admin-nav');
+            if (adminNav) adminNav.classList.add('hidden');
+
+            const dashboard = document.querySelector('.dashboard');
+            if (dashboard) dashboard.style.display = 'none';
+
+            showPersonalSpace(previewMemberName);
+        };
+
+        /**
+         * Arrête l'aperçu adhérent et réaffiche le tableau de bord d'administration global.
+         * @returns {void}
+         */
+        window.stopMemberPreview = function() {
+            isPreviewMode = false;
+            previewMemberName = '';
+
+            const pSpace = document.getElementById('personal-space');
+            if (pSpace) pSpace.classList.add('hidden');
+
+            const adminNav = document.getElementById('admin-nav');
+            if (adminNav) adminNav.classList.remove('hidden');
+
+            const dashboard = document.querySelector('.dashboard');
+            if (dashboard) dashboard.style.display = 'block';
+        };
+
+        window.adminReset = (uname) => {
+            const newPass = prompt('Nouveau mot de passe pour ' + uname);
+            if (newPass) { auth.updateUserPassword(uname, newPass); alert('Mis à jour !'); }
+        };
+        window.adminDelete = (uname) => {
+            if (confirm('Supprimer ' + uname + ' ?')) { auth.deleteUser(uname); renderAdminList(); }
+        };
+
+        /**
+         * Initialise le séparateur redimensionnable pour le chat communautaire.
+         * @returns {void}
+         */
+        function initChatResizer() {
+            const resizer = document.getElementById('chat-resizer');
+            const sidebar = document.getElementById('chat-sidebar');
+            if (!resizer || !sidebar) return;
+            let startX = 0, startW = 0;
+            const move = (e) => {
+                const w = startW + (e.clientX - startX);
+                if (w >= 280 && w <= 600) sidebar.style.width = `${w}px`;
+            };
+            const up = () => {
+                document.removeEventListener('mousemove', move);
+                document.removeEventListener('mouseup', up);
+                resizer.classList.remove('dragging');
+            };
+            resizer.addEventListener('mousedown', (e) => {
+                startX = e.clientX;
+                startW = sidebar.offsetWidth;
+                resizer.classList.add('dragging');
+                document.addEventListener('mousemove', move);
+                document.addEventListener('mouseup', up);
+            });
+        }
+        initChatResizer();
+    </script>
+</body>
 </html>
